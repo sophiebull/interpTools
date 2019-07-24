@@ -1,0 +1,10 @@
+Package: sophTools
+Type: Package
+Title: Tools for Soph's Thesis
+Version: 0.1.0
+Author: Sophie Castel
+Maintainer: The package maintainer <stmcastel@gmail.com>
+Description: This package contains functions for generating time series, simulating gaps, interpolation using a variety of methods, and computing and evaluating performance metrics.
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1.9000
