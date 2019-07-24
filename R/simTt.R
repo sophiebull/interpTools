@@ -5,22 +5,38 @@
 #                             exponent in some region (+/- freqRes) around a randomly selected number 0<m<1
 # class(ampMod) == logical; Whether to include amplitude modulation or not.  Amplitude is randomly sampled -n/10 < a < n/10
 
-simTt <- function(n=1000, numFreq = 20, freqRes = NULL#, ampMod = FALSE
+simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
                   ){
-  stopifnot(n%%1 == 0, n > 0, numFreq%%1 == 0, numFreq > 0, freqRes > 0#,#is.logical(ampMod)
+  
+  stopifnot(n%%1 == 0, n > 0, numFreq%%2 == 0, numFreq > 0, (is.null(bandwidth) || (bandwidth >= 1 && (numFreq <= 1/(10^-bandwidth))))#, is.logical(ampMod)
             )
   
   Tt_list <- list()
   t <- 0:(n-1)
   
-  m <- runif(numFreq/2,0+1^(-freqRes),1-1^(-freqRes))
+  if(!is.null(bandwidth)){ # specified
+  # choose random midpoints
+    repeat{
+      m <- runif(numFreq/2,0+((10^-bandwidth)/2),1-((10^-bandwidth)/2))
+      m <- m[order(m, decreasing = FALSE)]
+      check <- abs(diff(m)) >= 10^-bandwidth
+      if(!(FALSE %in% check)){
+        break
+      }
+  } ### BE CAREFUL WITH REPEAT, THIS WILL ENDLESSLY RUN IF BANDWIDTH AND NUMFREQ ARE NOT COMPATIBLE
   
-  if(!is.null(freqRes)){ # specified
-    m <- runif(1,0+2^(-freqRes),1-2^(-freqRes))
-    freq <- runif(numFreq, m-2^(-freqRes), m+2^(-freqRes))
+  # create non-overlapping frequency bands around m with specified bandwidth
+  bands <- c(m-((10^-bandwidth)/2),m+((10^-bandwidth)/2))
+  bands <- bands[order(bands, decreasing = FALSE)]
+  
+  freq <- numeric(numFreq)
+  
+  for(i in 1:(numFreq/2)){
+    freq[((2*i)-1):(2*i)] <- sample(seq(bands[(2*i)-1],bands[2*i],length.out=1/(10^-bandwidth)), size = 2, replace = FALSE)
   } 
+  }
   
-  else if(is.null(freqRes)){ # unspecified
+  else if(is.null(bandwidth)){ # unspecified
     freq <- runif(numFreq,0,1) 
   }
   
