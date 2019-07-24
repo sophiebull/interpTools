@@ -17,6 +17,7 @@ simWt <- function(n=1000,p=0,q=0){
         break
       }
     }
+    
     if(q>0){
       ma <- c(sample(seq(0,1,length.out=1000),q))
       model <- list(order = c(p,0,q), ar = ar, ma = ma)
