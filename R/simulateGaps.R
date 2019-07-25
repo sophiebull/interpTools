@@ -1,9 +1,10 @@
-#### simulateGaps.R ####
-### Function to simulate the gappy data for a single dataset and store in a list
-### class(data) == numeric; Original time series 
-### class(prop_vec) == numeric; Vector of proportion missings
-### class(gap_vec) == numeric; Vector of gap widths
-### K = number of gappy series to simulate for each gap width and proportion missing specification
+#' Simulate Gappy Data
+#' 
+#' Function to simulate the gappy data for a single dataset and store in a list. Function requires gaps.R
+#' @param data The original time series vector
+#' @param prop_vec Vector of missingness proportions
+#' @param gap_vec Vector of gap lengths
+#' @param K Number of gappy series to simulate for each gap width and proportion missing specification
 
 simulateGaps <- function(data, prop_vec, gap_vec, K){
   

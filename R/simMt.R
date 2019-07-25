@@ -1,8 +1,8 @@
-#### simMt.R ####
-# function for simulating M_t; the mean component of X_t 
-# class(trendType) == character, the type of trend component to include (polynomial, exponential, piecewise, etc.)  
-# class(numTrend) == numeric, the number of trends to include. Value represents the maximum degree to assign to the last trend piece
-# Note that all lower order trends are included. 
+#' Simulate M_t
+#' Function to simulate M_t: the mean component of X_t. 
+#' @param n The length of the output series
+#' @param numTrend The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.
+#' @param trendType The type of trends to include
 
 simMt <- function(n = 1000, numTrend = 0, trendType = "polynomial"){
   

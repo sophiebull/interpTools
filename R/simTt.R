@@ -1,9 +1,9 @@
-#### simTt.R ####
-# Function to simulate T_t: the trend component of X_t
-# class(numFreq) == numeric; How many different frequencies to include (sinusoids)
-# class(freqRes) == numeric; How closely to separate the frequencies. Value is assigned as a negative
-#                             exponent in some region (+/- freqRes) around a randomly selected number 0<m<1
-# class(ampMod) == logical; Whether to include amplitude modulation or not.  Amplitude is randomly sampled -n/10 < a < n/10
+#' Simulate T_t
+#' 
+#' Function to simulate T_t: the trend component of X_t.
+#' @param n The length of the output series
+#' @param bandwidth Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If unspecified, freq =  runif(numFreq,0,1)
+#' @param numFreq The number of sinusoids to generate
 
 simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
                   ){

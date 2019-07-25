@@ -1,7 +1,29 @@
-#### parInterpolate ####
-### Function to perform interpolation on the gappy series in parallel using user-specified methods and datasets
-### class(gappyTS) == numeric; Gappy time series vector
-### class(methods) == numeric; vector of IDs for selected interpolation methods (1:18 for all)
+#' Parallel Interpolation 
+#' 
+#' Function to perform interpolation on gappy series in parallel using user-specified interpolation methods.
+#' INTERPOLATION METHOD IDS
+#' 1 - Nearest Neighbor
+#' 2 - Linear Interpolation
+#' 3 - Natural Cubic Spline
+#' 4 - FMM Cubic Spline
+#' 5 - Hermite Cubic Spline
+#' 6 - Stineman Interpolation
+#' 7 - Kalman - ARIMA
+#' 8 - Kalman - StructTS
+#' 9 - Last Observation Carried Forward
+#' 10 - Next Observation Carried Backward
+#' 11 - Simple Moving Average
+#' 12 - Linear Weighted Moving Average
+#' 13 - Exponential Weighted Moving Average
+#' 14 - Replace with Mean
+#' 15 - Replace with Median
+#' 16 - Replace with Mode
+#' 17 - Replace with Random
+#' 18 - Hybrid Wiener 
+#' 
+#' @param gappyTS A gappy time series vector
+#' @param methods vector of IDs for selected interpolation methods, M
+#' 
 
 parInterpolate <- function(gappyTS, methods){ 
   

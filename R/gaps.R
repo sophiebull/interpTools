@@ -1,9 +1,9 @@
-#### gaps.R ####
-
-# Function to create MCAR data but with gaps at specified widths
-# x = time series
-# prop_missing = percentage of observations to remove, p 
-# gap_width = length of the gap, g 
+#' Generate Gaps in a Vector
+#' 
+#' Function to generate gaps of a specified length constrained by proportion of missingness. Meant to be paired with simulateGaps.R
+#' @param x The complete vector from which to remove values
+#' @param prop_missing Proportion of observations to remove, P
+#' @param gap_width Length of gap (how many successive observations to remove), G
 
 gaps <- function(x, prop_missing, gap_width){
   

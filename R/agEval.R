@@ -1,9 +1,10 @@
-#### evaluate.R ####
-# Function to 'condense' the performance matrices across k simulations
-# class(pmats) == list; performance matrices calculated from performance.R
-# class(task) == character; how to aggregate the data; mean, histogram, etc.
+#' Aggregate the Performance Matrices of Multiple Interpolations
+#' 
+#' Function to 'condense' the performance matrices of the interpolations from each method (M) across K simulations in each (P,G) missingness specification 
+#' @param pmats The performance matrices (result of performance.R)
+#' @param task Type of aggregation (mean, quantile distribution, etc.)
 
-evaluate <- function(pmats, task){
+agEval <- function(pmats, task){
   
   D <- length(pmats)
   M <- length(pmats[[1]])

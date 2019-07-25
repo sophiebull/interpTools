@@ -1,8 +1,10 @@
-#### simWt.R ####
-# Function to simulate W_t: the noise component of X_t
-# class(p) == numeric; The AR order
-# class(q) == numeric; The MA order
-# class(n) == numeric; The length of the noise series
+#' Simulate W_t
+#' 
+#' Function to simulate W_t: the noise component of X_t. Defaults to white noise. 
+#' @param n The length of the output series
+#' @param p The AR order
+#' @param q The MA order
+
 simWt <- function(n=1000,p=0,q=0){
   stopifnot(p>=0,q>=0,n>=0,n%%1==0)
   

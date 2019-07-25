@@ -1,23 +1,26 @@
-#### eval_performance.R ####
-# Function to define and store performance criteria
-# maximize: 1= yes, 0 = no
-# R = 1
-# R^2 = 1
-# abs_differences = 0
-# MBE = 0
-# ME = 0
-# MAE = 0
-# MRE = 0
-# MARE = 0
-# MAPE = 0
-# SSE = 0 
-# MSE = 0
-# RMS = 0 
-# NMSE = 0
-# RE = 1
-# RMSE = 0
-# NRMSD = 0
-# RMSS = 0
+#' Evaluate Interpolation Performance of a Single Time Series
+#' 
+#' Function to define and store performance criteria for the comparison of a single interpolated series with its original.
+#' Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:
+#' # R = 1
+#' R^2 = 1
+#' abs_differences = 0
+#' MBE = 0
+#' ME = 0
+#' MAE = 0
+#' MRE = 0
+#' MARE = 0
+#' MAPE = 0
+#' SSE = 0 
+#' MSE = 0
+#' RMS = 0 
+#' NMSE = 0
+#' RE = 1
+#' RMSE = 0
+#' NRMSD = 0
+#' RMSS = 0
+#' @param x The original time series vector
+#' @param X The interpolated time series vector
 
 #best <- data.frame(criterion = criteria, maximize = c(1,1,rep(0,11),1,rep(0,3))) # 1 = yes, 0 = no
 
