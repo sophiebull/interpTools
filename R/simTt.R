@@ -8,9 +8,13 @@
 simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
                   ){
   
-  stopifnot(n%%1 == 0, n > 0, numFreq%%2 == 0, numFreq > 0, (is.null(bandwidth) || (bandwidth >= 1 && (numFreq <= 1/(10^-bandwidth))))#, is.logical(ampMod)
-            )
+  #stopifnot(n%%1 == 0, n > 0, numFreq%%2 == 0, numFreq > 0, (is.null(bandwidth) || (bandwidth >= 1 && (numFreq <= 1/(10^-bandwidth))))#, is.logical(ampMod)
+  #          )
   
+  if( any(numFreq < 0 | numFreq%%2 != 0 | numFreq%%1 != 0) ) stop('Please specify an even integer for numFreq')
+  if( !(is.null(bandwidth)) &&  bandwidth>=1 && numFreq > 1/(10^-bandwidth) ) stop('Bandwidth must be at least -log10(1/numFreq)')
+  if( !(is.numeric(n)) || n%%1 != 0) stop ('n must be a positive integer')
+
   Tt_list <- list()
   t <- 0:(n-1)
   
@@ -55,5 +59,6 @@ simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
   
   Tt_list$fn <- Tt_fn
   Tt_list$value <- Tt
+  Tt_list$freq <- freq
   return(Tt_list)
 }
