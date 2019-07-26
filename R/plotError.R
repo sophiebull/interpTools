@@ -1,6 +1,6 @@
 #' Plot Interpolation Error
 #' 
-#' Function to visualize the error between the original time series and the average (across k simulations) interpolated time series under particular missingness scenarios.
+#' Function to generate a nested list of plots to visualize the error between the original time series and the average (across k simulations) interpolated time series under particular missingness scenarios.
 #' 
 #' @param OriginalData A list containing the original time series
 #' @param IntData A list containing the interpolated time series
@@ -9,7 +9,7 @@
 #' @param g A vector of 'gap length' of interest
 #' @param m A vector of interpolation methods of interest.
 
-plotError <- function(OriginalData,IntData,d,p,g,m){
+plotError <- function(OriginalData,IntData,crossSec,d,p,g,m){
 
 algorithm_names <- c("Nearest Neighbor",
                      "Linear Interpolation", 
@@ -42,6 +42,8 @@ plotList <- lapply(plotList <- vector(mode = 'list', D),function(x)
     lapply(plotList <- vector(mode = 'list', P),function(x) 
       x<-vector(mode='list',G))))
 
+avInt <- plotList
+
 # Initializing names
 gap_list_names <- numeric(G)
 prop_list_names <- numeric(P)
@@ -53,13 +55,13 @@ for(vd in 1:D){
     for(vp in 1:P){
       for(vg in 1:G){
         
-        avInt <- rowMeans(sapply(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]],unlist))
+        avInt[[vd]][[vm]][[vp]][[vg]]<- rowMeans(sapply(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]],unlist))
         
         plotList[[vd]][[vm]][[vp]][[vg]] <- ggplot() +  
-          geom_ribbon(aes(ymin = (as.numeric(avInt)), ymax = (as.numeric(OriginalData[[d[vd]]])), x = 0:(length(avInt)-1)), fill = "mistyrose2") +
+          geom_ribbon(aes(ymin = as.numeric(avInt[[vd]][[vm]][[vp]][[vg]]), ymax = as.numeric(OriginalData[[d[vd]]]), x = 0:(length(avInt[[vd]][[vm]][[vp]][[vg]])-1)), fill = "mistyrose2") +
           
           geom_line(aes(x = 0:(length(OriginalData[[d[vd]]])-1), y = as.numeric(OriginalData[[d[vd]]])), color = "lightpink3") +  
-          geom_line(aes(x = 0:(length(avInt)-1), y = as.numeric(avInt)), color = "lightblue3") + 
+          geom_line(aes(x = 0:(length(avInt[[vd]][[vm]][[vp]][[vg]])-1), y = as.numeric(avInt[[vd]][[vm]][[vp]][[vg]])), color = "lightblue3") + 
           
           ggtitle(paste("D",d[vd],": Original v.s. Interpolated Data"), subtitle = paste(algorithm_names[m[vm]],", p=",prop_vec[p[vp]],", g=",gap_vec[g[vg]],"\n","averaged across",length(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]]),"simulations"))+
           
@@ -69,19 +71,25 @@ for(vd in 1:D){
           
           theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust=0.5))
         
-        gap_list_names[vg] <- names(IntData[[1]][[1]][[1]])[g[vg]] 
+        gap_list_names[vg] <- names(IntData[[1]][[1]][[1]])[g[vg]]
       }
       names(plotList[[vd]][[vm]][[vp]]) <- gap_list_names
+      names(avInt[[vd]][[vm]][[vp]]) <- gap_list_names
       prop_list_names[vp] <- names(IntData[[1]][[1]])[p[vp]]
     }
     names(plotList[[vd]][[vm]]) <- prop_list_names
-    method_list_names <- names(IntData[[1]])[m[vm]]
+    names(avInt[[vd]][[vm]]) <- prop_list_names
+    method_list_names[vm] <- names(IntData[[1]])[m[vm]]
   }
   names(plotList[[vd]]) <- method_list_names
-  data_list_names <- names(IntData)[d[vd]]
+  names(avInt[[vd]]) <- method_list_names
+  data_list_names[vd] <- names(IntData)[d[vd]]
 }
 names(plotList) <- data_list_names
+names(avInt) <- data_list_names
 
 #do.call(grid.arrange,plotList)  
-return(plotList)
-}  
+return(avInt)
+
+}
+
