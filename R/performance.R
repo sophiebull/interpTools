@@ -5,6 +5,24 @@
 #' @param IntData A list object of dimension DxMxPxGxKxN of interpolated time series (output of parInterpolate.R)
 #' 
 performance <- function(OriginalData,IntData){
+  algorithm_names <- c("Nearest.Neighbor",
+                       "Linear.Interpolation", 
+                       "Natural.Cubic.Spline",
+                       "FMM Cubic.Spline", 
+                       "Hermite.Cubic.Spline",
+                       "Stineman.Interpolation",
+                       "Kalman.ARIMA",
+                       "Kalman.StructTS",
+                       "Last.Observation.Carried.Forward",
+                       "Next.Observation.Carried.Backward", 
+                       "Simple.Moving.Average", 
+                       "Linear.Weighted.Moving.Average",
+                       "Exponential.Weighted.Moving.Average",
+                       "Replace.with.Mean",
+                       "Replace.with.Median", 
+                       "Replace.with.Mode",
+                       "Replace.with.Random",
+                       "Hybrid.Wiener.Interpolator")
   
   D <- length(IntData)
   M <- length(IntData[[1]])

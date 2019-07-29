@@ -9,7 +9,7 @@ performance(OriginalData, IntData)
 \arguments{
 \item{OriginalData}{A list object of dimension Dxn of original (complete) time series}
 
-\item{IntData}{A list object of dimension DxMxPxGxKxN of interpolated time series}
+\item{IntData}{A list object of dimension DxMxPxGxKxN of interpolated time series (output of parInterpolate.R)}
 }
 \description{
 Function to calculate the performance metrics between lists of original and interpolated series.

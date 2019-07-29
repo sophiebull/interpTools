@@ -4,7 +4,26 @@
 #' @param pmats The performance matrices (result of performance.R)
 #' @param task Type of aggregation (mean, quantile distribution, etc.)
 
-agEval <- function(pmats, task){
+agEval <- function(pmats){
+  
+  algorithm_names <- c("Nearest.Neighbor",
+                       "Linear.Interpolation", 
+                       "Natural.Cubic.Spline",
+                       "FMM Cubic.Spline", 
+                       "Hermite.Cubic.Spline",
+                       "Stineman.Interpolation",
+                       "Kalman.ARIMA",
+                       "Kalman.StructTS",
+                       "Last.Observation.Carried.Forward",
+                       "Next.Observation.Carried.Backward", 
+                       "Simple.Moving.Average", 
+                       "Linear.Weighted.Moving.Average",
+                       "Exponential.Weighted.Moving.Average",
+                       "Replace.with.Mean",
+                       "Replace.with.Median", 
+                       "Replace.with.Mode",
+                       "Replace.with.Random",
+                       "Hybrid.Wiener.Interpolator")
   
   D <- length(pmats)
   M <- length(pmats[[1]])
@@ -32,27 +51,25 @@ agEval <- function(pmats, task){
         for(m in 1:M){
           method_names[m] <- algorithm_names[methods[m]]
           
-          if(task == "mean"){
-            # compute the mean of the performance criteria in each (d,m,p,g) specification across all k pairs of (x,X) and store results
-            # in a list of data frames
+            # compute the mean and distribution of the performance criteria in each (d,m,p,g) specification across all k pairs of (x,X) and 
+            # store results in a list of data frames
+          
             Evaluation[[d]][[p]][[g]][[m]] <- data.frame(
               
               mean = rowMeans(sapply(pmats[[d]][[m]][[p]][[g]],unlist)),
               sd = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,sd),
+              q0 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["0%",],
+              q25 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["25%",],
+              q50 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["50%",],
+              q75 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["75%",],
+              q100 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["100%",],
               
               gap_width = c(rep(gap_vec[g], 17)),
               prop_missing = c(rep(prop_vec[p],17)),
               dataset = c(rep(dataset[d],17)), 
               method = rep(algorithm_names[methods[m]],17) 
             )  
-          }
-          
-          else if(task == "hist"){
-            # generate a histogram of each performance criteria in each (d,m,p,g) specification across all k pairs of (x,X) and store results
-            # in a list of plots
-            par(mfrow = c(4,5))
-            Evaluation [[d]][[p]][[g]][[m]] <- apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,hist)
-          }
+      
           
         }
         names(Evaluation[[d]][[p]][[g]]) <- method_names 

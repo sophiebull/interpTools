@@ -4,7 +4,7 @@
 \alias{agEval}
 \title{Aggregate the Performance Matrices of Multiple Interpolations}
 \usage{
-agEval(pmats, task)
+agEval(pmats)
 }
 \arguments{
 \item{pmats}{The performance matrices (result of performance.R)}

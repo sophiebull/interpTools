@@ -7,28 +7,29 @@
 #' @param d A vector of datasets of interest
 #' @param p A vector of 'proportion missings' of interest
 #' @param g A vector of 'gap length' of interest
-#' @param m A vector of interpolation methods of interest.
+#' @param m A vector of interpolation methods of interest
+#' @param outputPlotList A logical variable; TRUE outputs a list of plots to be called, FALSE outputs a list of numeric vectors corresponding to each plot
 
-plotError <- function(OriginalData,IntData,crossSec,d,p,g,m){
+plotError <- function(OriginalData,IntData,d,p,g,m, outputPlotList = TRUE){
 
-algorithm_names <- c("Nearest Neighbor",
-                     "Linear Interpolation", 
-                     "Natural Cubic Spline",
-                     "FMM Cubic Spline", 
-                     "Hermite Cubic Spline",
-                     "Stineman Interpolation",
-                     "Kalman - ARIMA",
-                     "Kalman - StructTS",
-                     "Last Observation Carried Forward",
-                     "Next Observation Carried Backward", 
-                     "Simple Moving Average", 
-                     "Linear Weighted Moving Average",
-                     "Exponential Weighted Moving Average",
-                     "Replace with Mean",
-                     "Replace with Median", 
-                     "Replace with Mode",
-                     "Replace with Random",
-                     "Hybrid Wiener Interpolator")
+algorithm_names <- c("Nearest.Neighbor",
+                     "Linear.Interpolation", 
+                     "Natural.Cubic.Spline",
+                     "FMM Cubic.Spline", 
+                     "Hermite.Cubic.Spline",
+                     "Stineman.Interpolation",
+                     "Kalman.ARIMA",
+                     "Kalman.StructTS",
+                     "Last.Observation.Carried.Forward",
+                     "Next.Observation.Carried.Backward", 
+                     "Simple.Moving.Average", 
+                     "Linear.Weighted.Moving.Average",
+                     "Exponential.Weighted.Moving.Average",
+                     "Replace.with.Mean",
+                     "Replace.with.Median", 
+                     "Replace.with.Mode",
+                     "Replace.with.Random",
+                     "Hybrid.Wiener.Interpolator")
 
 
 D <- length(d)
@@ -63,11 +64,11 @@ for(vd in 1:D){
           geom_line(aes(x = 0:(length(OriginalData[[d[vd]]])-1), y = as.numeric(OriginalData[[d[vd]]])), color = "lightpink3") +  
           geom_line(aes(x = 0:(length(avInt[[vd]][[vm]][[vp]][[vg]])-1), y = as.numeric(avInt[[vd]][[vm]][[vp]][[vg]])), color = "lightblue3") + 
           
-          ggtitle(paste("D",d[vd],": Original v.s. Interpolated Data"), subtitle = paste(algorithm_names[m[vm]],", p=",prop_vec[p[vp]],", g=",gap_vec[g[vg]],"\n","averaged across",length(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]]),"simulations"))+
+          ggtitle(paste("D",d[vd],": Original v.s. Interpolated Data"), subtitle = paste(algorithm_names[methods[m[vm]]],", p=",prop_vec[p[vp]],", g=",gap_vec[g[vg]],"\n","averaged across",length(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]]),"simulations"))+
           
           labs(x = "time", 
                y = "value",
-               label = "Legend Text")+ 
+               label = "Legend Text") + 
           
           theme(plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust=0.5))
         
@@ -88,8 +89,12 @@ for(vd in 1:D){
 names(plotList) <- data_list_names
 names(avInt) <- data_list_names
 
-#do.call(grid.arrange,plotList)  
-return(avInt)
+if(outputPlotList){
+  return(plotList)
+}
+else if(!(outputPlotList)){
+  return(avInt)
+}
 
 }
 

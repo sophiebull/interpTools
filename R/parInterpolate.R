@@ -26,6 +26,87 @@
 #' 
 
 parInterpolate <- function(gappyTS, methods){ 
+  ## DEFINING INTERPOLATION ALGORITHMS
+  nearestNeighbor <- function(x) {
+    stopifnot(is.ts(x)) 
+    
+    findNearestNeighbors <- function(x, i) {
+      leftValid <- FALSE
+      rightValid <- FALSE 
+      numItLeft <- 1
+      numItRight <- 1
+      while (!leftValid) {
+        leftNeighbor <- x[i - numItLeft]
+        if (!is.na(leftNeighbor)) {
+          leftValid <- TRUE
+          leftNeighbor <- i - numItLeft
+        }
+        numItLeft <- numItLeft + 1
+      }
+      while (!rightValid) {
+        rightNeighbor <- x[i + numItRight]
+        if (!is.na(rightNeighbor)) {
+          rightValid <- TRUE
+          rightNeighbor <- i + numItRight
+        }
+        numItRight <- numItRight + 1
+      }
+      return(c(leftNeighbor, rightNeighbor))
+    }
+    
+    for (i in 1:length(x)) {
+      if (is.na(x[i])) {
+        nearestNeighborsIndices <- findNearestNeighbors(x, i)
+        a <- nearestNeighborsIndices[1]
+        b <- nearestNeighborsIndices[2]
+        if (i < ((a + b) / 2)) {
+          x[i] <- x[a]
+        } else {
+          x[i] <- x[b]
+        }
+      }
+    }
+    return(x)
+  }
+  
+  algorithm_names <- c("Nearest.Neighbor",
+                       "Linear.Interpolation", 
+                       "Natural.Cubic.Spline",
+                       "FMM Cubic.Spline", 
+                       "Hermite.Cubic.Spline",
+                       "Stineman.Interpolation",
+                       "Kalman.ARIMA",
+                       "Kalman.StructTS",
+                       "Last.Observation.Carried.Forward",
+                       "Next.Observation.Carried.Backward", 
+                       "Simple.Moving.Average", 
+                       "Linear.Weighted.Moving.Average",
+                       "Exponential.Weighted.Moving.Average",
+                       "Replace.with.Mean",
+                       "Replace.with.Median", 
+                       "Replace.with.Mode",
+                       "Replace.with.Random",
+                       "Hybrid.Wiener.Interpolator")
+  algorithm_calls <- c("nearestNeighbor(", 
+                       "na.approx(", 
+                       "na.spline(method = 'natural', object = ",
+                       "na.spline(method = 'fmm', object = ", 
+                       "na.spline(method = 'monoH.FC', object = ", 
+                       "na_interpolation(option = 'stine', x = ", 
+                       "na_kalman(model = 'auto.arima', x = ", 
+                       "na_kalman(model = 'StructTS', x = ",
+                       "imputeTS::na.locf(option = 'locf', x = ", 
+                       "imputeTS::na.locf(option = 'nocb', x = ", 
+                       "na_ma(weighting = 'simple', x = ",
+                       "na_ma(weighting = 'linear', x = ", 
+                       "na_ma(weighting = 'exponential', x = ",
+                       "na_mean(option = 'mean', x = ", 
+                       "na_mean(option = 'median', x = ",
+                       "na_mean(option = 'mode', x = ", 
+                       "na_random(",
+                       "interpolate(gap = which(is.na(x) == TRUE), progress = FALSE, z = ")
+  
+  algorithms <- data.frame(algorithm_names, algorithm_calls)
   
   #Creating a list object to store interpolated series
   int_series <- lapply(int_series <- vector(mode = 'list',length(methods)),function(x)
