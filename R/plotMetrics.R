@@ -1,3 +1,14 @@
+#' Plot Grid of Performance Metrics
+#' 
+#' Function to generate a grid of plots for visualizing a selection of performance metrics.
+#' 
+#' @param agEval A list containing the aggregated performance metrics (result of agEval.R)
+#' @param d A vector of datasets of interest (must be a subset of agEval)
+#' @param p A vector of 'proportion missings' of interest (must be a subset of agEval)
+#' @param g A vector of 'gap length' of interest (must be a subset of agEval)
+#' @param m A vector of interpolation methods of interest (must be a subset of agEval)
+#' @param metrics A character vector of performance metrics of interest
+
 plotMetrics <- function(agEval,d,p,m,g,metrics = c("MSE","MAPE","abs_differences")){
 
 D <- length(d)
