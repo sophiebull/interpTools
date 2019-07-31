@@ -8,9 +8,9 @@
 #' @param p A vector of 'proportion missings' of interest
 #' @param g A vector of 'gap length' of interest
 #' @param m A vector of interpolation methods of interest
-#' @param outputPlotList A logical variable; TRUE outputs a list of plots to be called, FALSE outputs a list of numeric vectors corresponding to each plot
+#' @param output A character variable; "plot" outputs a list of plots to be called, "numeric" outputs a list of numeric vectors corresponding to each plot
 
-plotError <- function(OriginalData,IntData,d,p,g,m, outputPlotList = TRUE){
+plotError <- function(OriginalData,IntData,d,p,g,m, output = "plot"){
 
   require(ggplot2)
   
@@ -105,10 +105,10 @@ for(vd in 1:D){
 names(plotList) <- data_list_names
 names(avInt) <- data_list_names
 
-if(outputPlotList){
+if(output == "plot"){
   return(plotList)
 }
-else if(!(outputPlotList)){
+else if(output == "numeric"){
   return(avInt)
 }
 
