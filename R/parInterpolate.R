@@ -25,7 +25,10 @@
 #' @param methods vector of IDs for selected interpolation methods, M
 #' 
 
-parInterpolate <- function(gappyTS, methods){ 
+parInterpolate <- function(gappyTS, methods){
+  # CALLING REQUIRED LIBRARIES
+  require(c(multitaper,tsinterp,imputeTS,zoo,forecast,MASS,snow,parallel))
+
   ## DEFINING INTERPOLATION ALGORITHMS
   nearestNeighbor <- function(x) {
     stopifnot(is.ts(x)) 
