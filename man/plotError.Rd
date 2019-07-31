@@ -4,7 +4,7 @@
 \alias{plotError}
 \title{Plot Interpolation Error}
 \usage{
-plotError(OriginalData, IntData, d, p, g, m, outputPlotList = TRUE)
+plotError(OriginalData, IntData, d, p, g, m, output = "plot")
 }
 \arguments{
 \item{OriginalData}{A list containing the original time series}
@@ -19,7 +19,7 @@ plotError(OriginalData, IntData, d, p, g, m, outputPlotList = TRUE)
 
 \item{m}{A vector of interpolation methods of interest}
 
-\item{outputPlotList}{A logical variable; TRUE outputs a list of plots to be called, FALSE outputs a list of numeric vectors corresponding to each plot}
+\item{output}{A character variable; "plot" outputs a list of plots to be called, "numeric" outputs a list of numeric vectors corresponding to each plot}
 }
 \description{
 Function to generate a nested list of plots to visualize the error between the original time series and the average (across k simulations) interpolated time series under particular missingness scenarios.
