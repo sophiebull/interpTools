@@ -1,10 +1,20 @@
-plotMetric <- function(agEval,d,p,m,g,metrics = c("MSE","MAPE","abs_differences")){
+plotMetrics <- function(agEval,d,p,m,g,metrics = c("MSE","MAPE","abs_differences")){
 
 D <- length(d)
 P <- length(p)
 M <- length(m)
 G <- length(g)
 Met <- length(metrics)
+
+criterion <- rownames(agEval[[1]][[1]][[1]][[1]])
+maximize <- c(1,1,rep(0,11),1,rep(0,3)) # 1 = yes, 0 = no
+optimal <- maximize
+optimal[which(optimal == "1")] <- "maximize"
+optimal[which(optimal == "0")] <- "minimize"
+
+best <- data.frame(criterion = criterion, 
+                   maximize = maximize,
+                   optimal = optimal) 
 
 metDF <- lapply(plotList <- vector(mode = 'list', D),function(x)
   lapply(plotList <- vector(mode = 'list', P),function(x) 
@@ -32,13 +42,15 @@ metPlot <- metDF
           
             metDF[[vd]][[vp]][[vg]][[met]] <-   data.frame(mean = mean, sd = sd, method = method, metric = metric)
       
-            metPlot[[vd]][[vp]][[vg]][[met]] <- ggplot(metDF[[vd]][[vp]][[vg]][[met]],aes(x=method,y=mean)) + 
+            metPlot[[vd]][[vp]][[vg]][[met]] <- ggplot(metDF[[vd]][[vp]][[vg]][[met]],aes(x=method,y=mean)) +
+
               geom_col() + 
               geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), width=0.2)+
-              ggtitle(paste("Dataset ",d[vd],":","metric = ",metrics[met]),
-                      subtitle = paste("p=",prop_vec[p[vp]],", g=",gap_vec[g[vg]]))+
+              ggtitle(paste(metrics[met],", optimal = ",best[(criterion == metrics[met]),'optimal'],sep=""),
+                      subtitle = paste("D",d[vd],", p=",prop_vec[p[vp]],", g=",gap_vec[g[vg]],sep=""))+
               labs(y="value")
-            }
+              }
+          
           
           names(metDF[[vd]][[vp]][[vg]]) <- metrics
           names(metPlot[[vd]][[vp]][[vg]]) <- metrics
