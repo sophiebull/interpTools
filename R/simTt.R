@@ -2,12 +2,12 @@
 #' 
 #' Function to simulate T_t: the trend component of X_t.
 #' @param n The length of the output series
-#' @param bandwidth Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If unspecified, freq =  runif(numFreq,0,1)
+#' @param bandwidth Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If specified, bandwidth must be at least -log10(1/numFreq). If unspecified, freq =  runif(numFreq,0,1)
 #' @param numFreq The number of sinusoids to generate
 
 simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
                   ){
-  
+
   #stopifnot(n%%1 == 0, n > 0, numFreq%%2 == 0, numFreq > 0, (is.null(bandwidth) || (bandwidth >= 1 && (numFreq <= 1/(10^-bandwidth))))#, is.logical(ampMod)
   #          )
   
@@ -60,5 +60,6 @@ simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
   Tt_list$fn <- Tt_fn
   Tt_list$value <- Tt
   Tt_list$freq <- freq
+  Tt_list$bandwidth <- bandwidth
   return(Tt_list)
 }
