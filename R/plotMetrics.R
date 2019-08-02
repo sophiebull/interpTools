@@ -11,6 +11,8 @@
 
 plotMetrics <- function(agEval,d,p,m,g,metrics = c("MSE","MAPE","abs_differences")){
 
+  require(ggplot2)
+  
 D <- length(d)
 P <- length(p)
 M <- length(m)
