@@ -6,6 +6,8 @@
 #' @param q The MA order
 
 simWt <- function(n=1000,p=0,q=0){
+  
+  Wt_list <- list()
   stopifnot(p>=0,q>=0,n>=0,n%%1==0)
   
   if(p > 0){
@@ -41,6 +43,8 @@ simWt <- function(n=1000,p=0,q=0){
     }
   }
   
-  Wt = arima.sim(model, n = n)
-  return(Wt)
+  Wt_list$value = arima.sim(model, n = n)
+  Wt_list$p = p
+  Wt_list$q = q
+  return(Wt_list)
 }
