@@ -66,6 +66,7 @@ simMt <- function(n = 1000, numTrend = 0, trendType = "polynomial"){
   Mt_list$fn <- Mt_fn
   Mt_list$value <- Mt
   Mt_list$mu <- mu
+  Mt_list$numTrend <- numTrend
   
   return(Mt_list)
 }
