@@ -11,7 +11,7 @@ simTt(n = 1000, numFreq = 20, bandwidth = NULL)
 
 \item{numFreq}{The number of sinusoids to generate}
 
-\item{bandwidth}{Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If unspecified, freq =  runif(numFreq,0,1)}
+\item{bandwidth}{Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If specified, bandwidth must be at least -log10(1/numFreq). If unspecified, freq =  runif(numFreq,0,1)}
 }
 \description{
 Function to simulate T_t: the trend component of X_t.
