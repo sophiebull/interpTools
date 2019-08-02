@@ -1,4 +1,5 @@
 #' Simulate M_t
+#' 
 #' Function to simulate M_t: the mean component of X_t. 
 #' @param n The length of the output series
 #' @param numTrend The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.
@@ -64,6 +65,7 @@ simMt <- function(n = 1000, numTrend = 0, trendType = "polynomial"){
   
   Mt_list$fn <- Mt_fn
   Mt_list$value <- Mt
+  Mt_list$mu <- mu
   
   return(Mt_list)
 }
