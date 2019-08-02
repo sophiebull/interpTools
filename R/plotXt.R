@@ -9,13 +9,13 @@ plotXt <- function(d){
   require(gridExtra)
   
   t <- 0:(length(simData$Xt[[d]])-1)
-  
+    
   mt <- ggplot()+
     
     geom_line(aes(x=t,y=simData$Mt[[d]]), col = "tomato1") +
     geom_line(aes(x=t,y=simData$Mt_mu[[d]]), col = "tomato1", lty = 2)+
     
-    ggtitle(expression(M[t] == mu[t] + mu), subtitle = paste("polynomial of order",d-1)) + 
+    ggtitle(expression(M[t] == mu[t] + mu), subtitle = paste("polynomial of order",simData$Mt_numTrend[[d]]-1)) + 
     
     labs(x = "time", y = "value")+
     theme_minimal() +
@@ -23,11 +23,11 @@ plotXt <- function(d){
           axis.text.x.bottom = element_blank(),
           plot.margin = unit(c(1,1,0,1),"cm"))
   
-  if(is.null(simData$Tt_bandwidth)){
+  if(is.null(simData$Tt_bandwidth[[d]])){
     bw = "unspecified"
   }
   
-  else if(!(is.null(simData$Tt_bandwidth))){
+  else if(!(is.null(simData$Tt_bandwidth[[d]]))){
     bw = eval(substitute(paste(10^-bandwidth), list(bandwidth = simData$Tt_bandwidth[[d]])))
   }
   
@@ -58,19 +58,21 @@ plotXt <- function(d){
     theme_minimal() +
     theme(axis.title.x = element_blank(), 
           axis.text.x.bottom = element_blank(),
-          plot.margin = unit(c(-1,1,1,1),"cm"))
+          plot.margin = unit(c(0,1,1,1),"cm"))
     
   
   wt <- ggplot()+
     
     geom_line(aes(x=t,y=as.numeric(simData$Wt[[d]])), col = "dodgerblue3") +
     
-    ggtitle(expression(W[t]), subtitle = paste("ARMA(",simData$Wt_p[[d]],",",simData$Wt_q,")",sep="")) + 
+    ggtitle(expression(W[t]), subtitle = paste("ARMA(",simData$Wt_p[[d]],",",simData$Wt_q[[d]],")",sep="")) + 
     
     labs(x = "time", y = "value")+
     theme_minimal()+
     theme(plot.margin = unit(c(0,1,1,1),"cm"))
 
-  grid.arrange(mt,freq,tt,wt, nrow = 4)
   
-}
+    grid.arrange(mt,freq,tt,wt, nrow = 4)
+
+  }
+
