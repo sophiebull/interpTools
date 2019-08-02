@@ -2,8 +2,7 @@
 % Please edit documentation in R/simMt.R
 \name{simMt}
 \alias{simMt}
-\title{Simulate M_t
-Function to simulate M_t: the mean component of X_t.}
+\title{Simulate M_t}
 \usage{
 simMt(n = 1000, numTrend = 0, trendType = "polynomial")
 }
@@ -15,6 +14,5 @@ simMt(n = 1000, numTrend = 0, trendType = "polynomial")
 \item{trendType}{The type of trends to include}
 }
 \description{
-Simulate M_t
 Function to simulate M_t: the mean component of X_t.
 }
