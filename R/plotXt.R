@@ -15,7 +15,7 @@ plotXt <- function(d){
     geom_line(aes(x=t,y=simData$Mt[[d]]), col = "tomato1") +
     geom_line(aes(x=t,y=simData$Mt_mu[[d]]), col = "tomato1", lty = 2)+
     
-    ggtitle(expression(M[t] == mu[t] + mu), subtitle = paste("polynomial of order",simData$Mt_numTrend[[d]]-1)) + 
+    ggtitle(expression(M[t] == mu[t] + mu), subtitle = paste("polynomial of order",simData$Mt_numTrend[[d]])) + 
     
     labs(x = "time", y = "value")+
     theme_minimal() +
