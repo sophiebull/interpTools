@@ -27,7 +27,15 @@
 
 parInterpolate <- function(gappyTS, methods){
   # CALLING REQUIRED LIBRARIES
-  require(c(multitaper,tsinterp,imputeTS,zoo,forecast,MASS,snow,parallel))
+  require(multitaper)
+  require(tsinterp)
+  require(imputeTS)
+  require(zoo)
+  require(forecast)
+  require(MASS)
+  require(snow)
+  require(parallel)
+  
 
   ## DEFINING INTERPOLATION ALGORITHMS
   nearestNeighbor <- function(x) {
