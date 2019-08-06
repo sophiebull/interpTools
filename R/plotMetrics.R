@@ -22,8 +22,8 @@ Met <- length(metrics)
 criterion <- rownames(agEval[[1]][[1]][[1]][[1]])
 maximize <- c(1,1,rep(0,11),1,rep(0,3)) # 1 = yes, 0 = no
 optimal <- maximize
-optimal[which(optimal == "1")] <- "maximize"
-optimal[which(optimal == "0")] <- "minimize"
+optimal[which(optimal == "1")] <- "max"
+optimal[which(optimal == "0")] <- "min"
 
 best <- data.frame(criterion = criterion, 
                    maximize = maximize,
@@ -58,10 +58,18 @@ metPlot <- metDF
             metPlot[[vd]][[vp]][[vg]][[met]] <- ggplot(metDF[[vd]][[vp]][[vg]][[met]],aes(x=method,y=mean)) +
 
               geom_col() + 
+              
+              geom_bar(data=subset(metDF[[vd]][[vp]][[vg]][[met]], 
+                                   eval(parse(text = paste("mean==",best[(criterion==metrics[met]),'optimal'],"(mean)", sep = "")))), 
+                       aes(method, mean),
+                       fill="mistyrose2", stat="identity") + 
+              
               geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), width=0.2)+
+            
               ggtitle(paste(metrics[met],", optimal = ",best[(criterion == metrics[met]),'optimal'],sep=""),
                       subtitle = paste("D",d[vd],", p=",prop_vec[p[vp]],", g=",gap_vec[g[vg]],sep=""))+
-              labs(y="value")
+              labs(y="value", x = "")+ 
+              theme(axis.text.x = element_text(angle = 45, hjust = 1))
               }
           
           
