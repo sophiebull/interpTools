@@ -15,12 +15,28 @@
 
 simXt <- function(D, n=1000, vary = "all", numTrend = 0 , trendType = "polynomial", numFreq = 20, bandwidth = NULL, p=0, q=0, fix){
   
+  # STOPS 
+  
   if(vary == "Wt" && missing(fix)){
     stop("Variable 'fix' must be specified if Wt is to vary.")
   }
   
   stopifnot(is.numeric(D), D>0,
             (vary== "all" || vary == "Mt" || vary == "Tt"|| (vary == "Wt" && !(missing(fix)))))
+  
+  # WARNINGS
+  
+  if(missing(n)){
+    warning("n not specified; defaulting to 1000")
+  }
+  
+  if(missing(bandwidth)){
+    warning("bandwidth not specified; frequencies will be selected randomly from Uniform(a=0,b=1)")
+  }
+  
+  if(missing(trendType)){
+    warning("trendType not specified; defaulting to 'polynomial'")
+  }
   
   t <- 0:(n-1)
   simData <- list()
@@ -30,10 +46,11 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0 , trendType = "polynomia
     if(!(missing(numTrend))){
       warning("numTrend cannot be assigned a constant value if Mt is to vary; value will be replaced with d in 0:(D-1).")
     }
+
     if(missing(numFreq)){
       warning("numFreq not specified; defaulting to 20")
     }
-    
+
     Tt <- simTt(n=n, numFreq=numFreq, bandwidth=bandwidth)
     Wt <- simWt(n=n, p=p, q=q)
     
