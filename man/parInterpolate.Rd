@@ -4,32 +4,67 @@
 \alias{parInterpolate}
 \title{Parallel Interpolation}
 \usage{
-parInterpolate(gappyTS, methods)
+parInterpolate(gappyTS, methods = NULL, FUN_CALL = NULL)
 }
 \arguments{
 \item{gappyTS}{A gappy time series vector}
 
-\item{methods}{vector of IDs for selected interpolation methods, M}
+\item{methods}{vector of IDs for selected interpolation methods, where m = 1,...,M}
+
+\item{FUN_CALL}{User specified interpolation function to be applied to gappyTS. Must be a character string.}
 }
 \description{
-Function to perform interpolation on gappy series in parallel using user-specified interpolation methods.
-INTERPOLATION METHOD IDS
-1 - Nearest Neighbor
-2 - Linear Interpolation
-3 - Natural Cubic Spline
-4 - FMM Cubic Spline
-5 - Hermite Cubic Spline
-6 - Stineman Interpolation
-7 - Kalman - ARIMA
-8 - Kalman - StructTS
-9 - Last Observation Carried Forward
-10 - Next Observation Carried Backward
-11 - Simple Moving Average
-12 - Linear Weighted Moving Average
-13 - Exponential Weighted Moving Average
-14 - Replace with Mean
-15 - Replace with Median
-16 - Replace with Mode
-17 - Replace with Random
-18 - Hybrid Wiener
+Function to perform interpolation on gappy series in parallel using user-specified interpolation methods.\cr\cr
+INTERPOLATION METHOD IDS\cr
+1 - Nearest Neighbor\cr
+2 - Linear Interpolation\cr
+3 - Natural Cubic Spline\cr
+4 - FMM Cubic Spline\cr
+5 - Hermite Cubic Spline\cr
+6 - Stineman Interpolation\cr
+7 - Kalman - ARIMA\cr
+8 - Kalman - StructTS\cr
+9 - Last Observation Carried Forward\cr
+10 - Next Observation Carried Backward\cr
+11 - Simple Moving Average\cr
+12 - Linear Weighted Moving Average\cr
+13 - Exponential Weighted Moving Average\cr
+14 - Replace with Mean\cr
+15 - Replace with Median\cr
+16 - Replace with Mode\cr
+17 - Replace with Random\cr
+18 - Hybrid Wiener \cr
+}
+\examples{
+# Built-in interpolators
+methods <- c(17,5) # Replace with Random, Hermite Cubic Spline
+
+# User-defined functions to pass to FUN_CALL
+## Toy function 1: Convert each value of x to its index position
+plus <- function(x){
+vec <- numeric(length(x))
+
+for(i in 1:length(vec)){
+ vec[i] <- i
+}
+return(vec)
+}
+
+## Toy function 2: Convert each value of x to its negative index position
+minus <- function(x){
+ vec <- numeric(length(x))
+ for(i in 1:length(vec)){
+   vec[i] <- -i
+ }
+ return(vec)
+}
+
+FUN_CALL <- c("plus(","minus(")
+
+IntData <- list()
+
+for(d in 1:length(OriginalData)){
+ IntData[[d]] <- parInterpolate(gappyTS = GappyData[[d]], methods = methods, FUN_CALL = FUN_CALL)
+}
+names(IntData) <- names(OriginalData)
 }
