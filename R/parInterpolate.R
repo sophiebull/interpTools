@@ -1,31 +1,63 @@
 #' Parallel Interpolation 
 #' 
-#' Function to perform interpolation on gappy series in parallel using user-specified interpolation methods.
-#' INTERPOLATION METHOD IDS
-#' 1 - Nearest Neighbor
-#' 2 - Linear Interpolation
-#' 3 - Natural Cubic Spline
-#' 4 - FMM Cubic Spline
-#' 5 - Hermite Cubic Spline
-#' 6 - Stineman Interpolation
-#' 7 - Kalman - ARIMA
-#' 8 - Kalman - StructTS
-#' 9 - Last Observation Carried Forward
-#' 10 - Next Observation Carried Backward
-#' 11 - Simple Moving Average
-#' 12 - Linear Weighted Moving Average
-#' 13 - Exponential Weighted Moving Average
-#' 14 - Replace with Mean
-#' 15 - Replace with Median
-#' 16 - Replace with Mode
-#' 17 - Replace with Random
-#' 18 - Hybrid Wiener 
+#' Function to perform interpolation on gappy series in parallel using user-specified interpolation methods.\cr\cr
+#' INTERPOLATION METHOD IDS\cr
+#' 1 - Nearest Neighbor\cr
+#' 2 - Linear Interpolation\cr
+#' 3 - Natural Cubic Spline\cr
+#' 4 - FMM Cubic Spline\cr
+#' 5 - Hermite Cubic Spline\cr
+#' 6 - Stineman Interpolation\cr
+#' 7 - Kalman - ARIMA\cr
+#' 8 - Kalman - StructTS\cr
+#' 9 - Last Observation Carried Forward\cr
+#' 10 - Next Observation Carried Backward\cr
+#' 11 - Simple Moving Average\cr
+#' 12 - Linear Weighted Moving Average\cr
+#' 13 - Exponential Weighted Moving Average\cr
+#' 14 - Replace with Mean\cr
+#' 15 - Replace with Median\cr
+#' 16 - Replace with Mode\cr
+#' 17 - Replace with Random\cr
+#' 18 - Hybrid Wiener \cr
 #' 
 #' @param gappyTS A gappy time series vector
-#' @param methods vector of IDs for selected interpolation methods, M
-#' 
+#' @param methods vector of IDs for selected interpolation methods, where m = 1,...,M
+#' @param FUN_CALL User specified interpolation function to be applied to gappyTS. Must be a character string.
+#' @examples
+#'# Built-in interpolators
+#'methods <- c(17,5) # Replace with Random, Hermite Cubic Spline
+#'
+#'# User-defined functions to pass to FUN_CALL
+#'## Toy function 1: Convert each value of x to its index position
+#'plus <- function(x){
+#'vec <- numeric(length(x))
+#'for(i in 1:length(vec)){
+#'  vec[i] <- i
+#'}
+#'return(vec)
+#'}
+#'
+#'## Toy function 2: Convert each value of x to its negative index position
+#'minus <- function(x){
+#'  vec <- numeric(length(x))
+#'  for(i in 1:length(vec)){
+#'    vec[i] <- -i
+#'  }
+#'  return(vec)
+#'}
+#'
+#'FUN_CALL <- c("plus(","minus(")
+#'
+#'IntData <- list()
+#'
+#'for(d in 1:length(OriginalData)){
+#'  IntData[[d]] <- parInterpolate(gappyTS = GappyData[[d]], methods = methods, FUN_CALL = FUN_CALL)
+#'}
+#'names(IntData) <- names(OriginalData)
 
-parInterpolate <- function(gappyTS, methods){
+
+parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL){
   # CALLING REQUIRED LIBRARIES
   require(multitaper)
   require(tsinterp)
@@ -36,6 +68,7 @@ parInterpolate <- function(gappyTS, methods){
   require(snow)
   require(parallel)
   
+  stopifnot(!(is.null(methods) && is.null(FUN_CALL)), !(is.null(gappyTS)), is.ts(gappyTS))
 
   ## DEFINING INTERPOLATION ALGORITHMS
   nearestNeighbor <- function(x) {
@@ -120,7 +153,7 @@ parInterpolate <- function(gappyTS, methods){
   algorithms <- data.frame(algorithm_names, algorithm_calls)
   
   #Creating a list object to store interpolated series
-  int_series <- lapply(int_series <- vector(mode = 'list',length(methods)),function(x)
+  int_series <- lapply(int_series <- vector(mode = 'list',(length(methods)+length(FUN_CALL))),function(x)
     lapply(int_series <- vector(mode = 'list', length(gappyTS)),function(x) 
       lapply(int_series <- vector(mode = 'list',length(gappyTS[[1]])),function(x) 
         x<-vector(mode='list',length(gappyTS[[1]][[1]])))))
@@ -129,26 +162,49 @@ parInterpolate <- function(gappyTS, methods){
   # but the irony is that it will take too much time to learn how to do! :) 
   
   method_names <- numeric(length(methods))
+  fun_names <- numeric(length(FUN_CALL))
   
-  for(m in 1:length(methods)){ 
-    method_names[m] <- algorithm_names[methods[m]]
-    
-    if(methods[m] == 18){
-      function_call <- paste(algorithm_calls[methods[m]], "x", ")","[[1]]", sep = "")
-    }
-    else{
-      function_call <- paste(algorithm_calls[methods[m]], "x", ")", sep = "")
-    }
-    
-    int_series[[m]] <- mclapply(gappyTS, function(x){
-      lapply(x, function(x){
-        lapply(x, function(x){
-          eval(parse(text = function_call))}
-        )}
-      )}, 
-      mc.cores = detectCores())
+  if(!(missing(methods))){
+  
+      for(m in 1:length(methods)){ 
+        method_names[m] <- algorithm_names[methods[m]]
+        
+        if(methods[m] == 18){
+          function_call <- paste(algorithm_calls[methods[m]], "x", ")","[[1]]", sep = "")
+        }
+        else{
+          function_call <- paste(algorithm_calls[methods[m]], "x", ")", sep = "")
+        }
+        
+        int_series[[m]] <- mclapply(gappyTS, function(x){
+          lapply(x, function(x){
+            lapply(x, function(x){
+              eval(parse(text = function_call))}
+            )}
+          )}, 
+          mc.cores = detectCores())
+      }
   }
   
-  names(int_series) <- method_names
+  if(!(missing(FUN_CALL))){
+    for(l in 1:length(FUN_CALL)){
+  
+      FUN_call <- paste(FUN_CALL[l],"x",")",sep="")
+      fun_names[l] <- sub("\\(.*", "", FUN_call)
+      
+    int_series[[length(methods)+l]] <- mclapply(gappyTS, function(x){
+      lapply(x, function(x){
+        lapply(x, function(x){
+          eval(parse(text = FUN_call))}
+        )}
+      )},
+    mc.cores = detectCores())
+    }
+  }
+  
+  names(int_series) <- c(method_names,fun_names)
   return(int_series)
 }
+
+
+
