@@ -7,17 +7,16 @@
 #' The z-axis represents the value of the performance metric of interest.
 #' 
 #' @param d A vector of the indexes of the datasets of interest
-#' @param m A vector of the interpolation methods of interest 
+#' @param m A vector of the interpolation methods of interest (maximum of 5)
 #' @param crit A character vector describing the performance metrics of interest
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
 
 plotSurface <- function(d, m, crit, agEval){
   require(plotly)
   require(dplyr)
+  require(RColorBrewer)
   
-  #d <- c(1,3,4)
-  #m <- c(1,4)
-  #crit <- c("MSE","MAPE")
+  stopifnot(length(m)<=5)
   
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
@@ -63,29 +62,51 @@ plotSurface <- function(d, m, crit, agEval){
   plotList <- lapply(plotList <- vector(mode = 'list', C), function(x)
                 x <- vector(mode = 'list', D))
   
-  greyList <- list()
-  col <- greyList
+  palette <- list()
+  colorList <- list(c("#DA5526","#FEBC38"),
+                    c("#B42F32","#DF6747"),
+                    c("#FFECD2","#FCB69F"),
+                    c("#FF9A9E","#FECFEF"),
+                    c("#FEADA6","#F5EFEF"))
+    
+  for(i in 1:length(colorList)){
+    palette[[i]] <- colorRampPalette(colorList[[i]])(P*G)
+  }
 
+  axx <- list(
+    nticks = length(prop_vec),
+    range = c(min(prop_vec),max(prop_vec))
+  )
+  
+  axy <- list(
+    nticks = length(gap_vec),
+    range = c(min(gap_vec),max(gap_vec))
+  )
+  
 for(s in 1:C){
   for(vd in 1:D){
     z <- numeric(M)
     for(vm in 1:(M-1)){
-      z[vm] <- paste("add_surface(x=prop_vec,y=gap_vec,z=z_list[[",s,"]][[",vm,"]][[",vd,"]], colorscale = col[[",vm,"]]) %>% ",sep="")
-      greyList[[vm]] <- z_list[[s]][[vm]][[vd]]/max(z_list[[s]][[vm]][[vd]])
-      col[[vm]] <- matrix(rgb(red=greyList[[vm]],blue=greyList[[vm]],green=greyList[[vm]]), ncol = G, nrow = P)
+      z[vm] <- paste("add_surface(x=prop_vec,y=gap_vec,z=t(z_list[[",s,"]][[",vm,"]][[",vd,"]]), 
+                     colorscale = list(seq(0,1,length.out=P*G), palette[[",vm,"]]), 
+                     name = names(z_list[[1]])[",vm,"]) %>% ",sep="")
     }
-    greyList[[M]] <- z_list[[s]][[M]][[vd]]/max(z_list[[s]][[M]][[vd]])
-    col[[M]] <- matrix(rgb(red=greyList[[M]],blue=greyList[[M]],green=greyList[[M]]), ncol = G, nrow = P)
-      
-    z[M] <- paste("add_surface(x=prop_vec,y=gap_vec,z=z_list[[",s,"]][[",M,"]][[",vd,"]], colorscale = 'Viridis')",sep="")
+    z[M] <- paste("add_surface(x=prop_vec,y=gap_vec,z=t(z_list[[",s,"]][[",M,"]][[",vd,"]]), 
+                  colorscale = list(seq(0,1,length.out=P*G), palette[[",M,"]]),
+                  name = names(z_list[[1]])[",M,"])",sep="")
     
     z <- paste(z, collapse = "")
     
-    plotList[[s]][[vd]] <- eval(parse(text = paste("plot_ly(colorscale = 'Viridis') %>%",
-                                                   "layout(title = names(z_list)[",s,"]) %>%",z,sep="")))
+    plotList[[s]][[vd]] <- eval(parse(text = paste("plot_ly() %>%",
+                                                   "layout(xaxis = axx, yaxis = axy) %>%",
+                                                    z,sep="")))
+    
+    plotList[[s]][[vd]] <- plotList[[s]][[vd]] %>%  layout(title = paste("\n Criterion = ",names(z_list)[s],"\n Dataset = ",vd, sep = ""))
+      
     }
     names(plotList[[s]]) <- data_list_names
   }
 names(plotList) <- crit
 
+return(plotList)
 }

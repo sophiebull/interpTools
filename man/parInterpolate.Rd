@@ -43,7 +43,6 @@ methods <- c(17,5) # Replace with Random, Hermite Cubic Spline
 ## Toy function 1: Convert each value of x to its index position
 plus <- function(x){
 vec <- numeric(length(x))
-
 for(i in 1:length(vec)){
  vec[i] <- i
 }
