@@ -1,6 +1,6 @@
 #' Plot Each Component of Xt
 #' 
-#' A function to create a widget describing each component of the original time series
+#' A function to generate a triptych to visualize each component of the original time series
 #' @param d The index of the original time series of interest
 #' 
 
@@ -34,11 +34,11 @@ plotXt <- function(d){
   freq <- ggplot() + 
     
     geom_point(aes(x = simData$Tt_freq[[d]], y = rep(0,length(simData$Tt_freq[[d]]))), col = "darkgoldenrod1", size = 0.4) + 
-    ggtitle(expression(T[t] == sum(a*sin[i](ft), i == 1,F)),
+    ggtitle(expression(T[t] == sum(a*sin(omega[i]*t), i == 1,Omega)),
             subtitle = paste("F = ", length(simData$Tt_freq[[d]]),", bin width = ", bw, sep="")) + 
     
     labs(x = "frequency", y = "")+
-    xlim(0,1) + 
+    xlim(0,0.5) + 
     ylim(0,0) + 
     theme_minimal()+
     

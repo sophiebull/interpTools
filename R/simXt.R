@@ -1,6 +1,9 @@
 #' Simulate X_t
 #' 
-#' Function to simulate X_t. The component that is selected to vary will hold all required variables constant. For vary = "Mt", only 'numTrend' is subject to vary. For vary = "Tt", only 'numFreq' is subject to vary. For vary = "Wt", order variables 'p' or 'q' are subject to vary depending on the value of 'fix', which must also be specified.
+#' Function to simulate X_t. The component that is selected to vary will hold all required variables constant: \cr\cr
+#' For vary = "Mt", only 'numTrend' is subject to vary. \cr
+#' For vary = "Tt", only 'numFreq' is subject to vary. \cr
+#' For vary = "Wt", order variables 'p' or 'q' are subject to vary depending on the value of 'fix', which must also be specified.
 #' 
 #' @param D The number of datasets to generate.
 #' @param n The desired length of each complete time series.
@@ -12,6 +15,39 @@
 #' @param p If 'fix != p', this is the AR order of the noise component.
 #' @param q If 'fix != q', this is the MA order of the noise component.
 #' @param fix Which order variable in ARMA(p,q) to fix if 'vary = Wt' (must be either "p" or "q").
+#' 
+#' @examples 
+#' # Initializing basic parameters
+#' D = 5
+#' n=1000
+#' t=0:(n-1)
+#' 
+#' # Vary Mt
+#' simData <- simXt(D=D, n=n, vary = "Mt", bandwidth = 3, numFreq = 30, 
+#'                  trendType = "polynomial")
+#' 
+#' # Vary Tt
+#' simData <- simXt(D=D, n=n, vary = "Tt", bandwidth = 3, numTrend = 0, 
+#'                  trendType = "polynomial")
+#' 
+#' # Vary Wt, p fixed
+#' simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
+#'                  numTrend = 0, trendType = "polynomial", p = 0, fix = "p")
+#' 
+#' # Vary Wt, q fixed
+#' simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
+#'                  numTrend = 10, trendType = "polynomial", q = 0, fix = "q")
+#' 
+#' # Creating list object for one of the above variations
+#'sets <- numeric(D)
+#'for(d in 1:(D-1)){
+#'  sets[d] <- paste("D",d,"=simData$Xt[[",d,"]],",sep="")
+#'}
+#'sets[D] <- paste("D",D,"=simData$Xt[[",D,"]]",sep="")
+#'list_call <- paste("list(",paste(sets,collapse=""),")")
+#'
+#'OriginalData = eval(parse(text=list_call))
+#'
 
 simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial", numFreq = 20, bandwidth = NULL, p=0, q=0, fix){
   
@@ -39,7 +75,7 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
   }
   
   t <- 0:(n-1)
-  simData <- list()
+  simList <- list()
   
   if(vary == "Mt"){
   
@@ -56,18 +92,18 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
     
     for(d in 0:(D-1)){
       Mt <- simMt(n=n, numTrend = d, trendType = trendType)
-      simData$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
-      simData$Mt[[(d+1)]] <- Mt$value
-      simData$Mt_mu[[(d+1)]] <- Mt$mu
-      simData$Mt_numTrend[[(d+1)]] <- Mt$numTrend
-      simData$Tt[[(d+1)]] <- Tt$value
-      simData$Wt[[(d+1)]] <- Wt$value
-      simData$Mt_fn[[(d+1)]] <- Mt$fn
-      simData$Tt_fn[[(d+1)]] <- Tt$fn
-      simData$Tt_freq[[(d+1)]] <- Tt$freq
-      simData$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
-      simData$Wt_p[[(d+1)]] <- Wt$p
-      simData$Wt_q[[(d+1)]] <- Wt$q
+      simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
+      simList$Mt[[(d+1)]] <- Mt$value
+      simList$Mt_mu[[(d+1)]] <- Mt$mu
+      simList$Mt_numTrend[[(d+1)]] <- Mt$numTrend
+      simList$Tt[[(d+1)]] <- Tt$value
+      simList$Wt[[(d+1)]] <- Wt$value
+      simList$Mt_fn[[(d+1)]] <- Mt$fn
+      simList$Tt_fn[[(d+1)]] <- Tt$fn
+      simList$Tt_freq[[(d+1)]] <- Tt$freq
+      simList$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
+      simList$Wt_p[[(d+1)]] <- Wt$p
+      simList$Wt_q[[(d+1)]] <- Wt$q
     }
   }
   
@@ -80,24 +116,23 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
       warning("numTrend not specified- defaulting to 0;")
     }
     
-    
     Mt <- simMt(n=n, numTrend = numTrend)
     Wt <- simWt(n=n)
     
     for(d in 0:(D-1)){
       Tt <- simTt(n=n, numFreq = (d+1)*10, bandwidth = bandwidth)
-      simData$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
-      simData$Mt[[(d+1)]] <- Mt$value
-      simData$Mt_mu[[(d+1)]] <- Mt$mu
-      simData$Mt_numTrend[[(d+1)]] <- Mt$numTrend
-      simData$Wt[[(d+1)]] <- Wt$value
-      simData$Tt[[(d+1)]] <- Tt$value
-      simData$Mt_fn[[(d+1)]] <- Mt$fn
-      simData$Tt_fn[[(d+1)]] <- Tt$fn
-      simData$Tt_freq[[(d+1)]] <- Tt$freq
-      simData$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
-      simData$Wt_p[[(d+1)]] <- Wt$p
-      simData$Wt_q[[(d+1)]] <- Wt$q
+      simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
+      simList$Mt[[(d+1)]] <- Mt$value
+      simList$Mt_mu[[(d+1)]] <- Mt$mu
+      simList$Mt_numTrend[[(d+1)]] <- Mt$numTrend
+      simList$Wt[[(d+1)]] <- Wt$value
+      simList$Tt[[(d+1)]] <- Tt$value
+      simList$Mt_fn[[(d+1)]] <- Mt$fn
+      simList$Tt_fn[[(d+1)]] <- Tt$fn
+      simList$Tt_freq[[(d+1)]] <- Tt$freq
+      simList$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
+      simList$Wt_p[[(d+1)]] <- Wt$p
+      simList$Wt_q[[(d+1)]] <- Wt$q
     }
   }
   
@@ -120,18 +155,18 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
       for(d in 0:(D-1)){
         
         Wt <- simWt(n=n,q=q,p=d)
-        simData$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
-        simData$Mt[[(d+1)]] <- Mt$value
-        simData$Mt_mu[[(d+1)]] <- Mt$mu
-        simData$Mt_numTrend[[(d+1)]] <- Mt$numTrend
-        simData$Wt[[(d+1)]] <- Wt$value
-        simData$Tt[[(d+1)]] <- Tt$value
-        simData$Mt_fn[[(d+1)]] <- Mt$fn
-        simData$Tt_fn[[(d+1)]] <- Tt$fn
-        simData$Tt_freq[[(d+1)]] <- Tt$freq
-        simData$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
-        simData$Wt_p[[(d+1)]] <- Wt$p
-        simData$Wt_q[[(d+1)]] <- Wt$q
+        simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
+        simList$Mt[[(d+1)]] <- Mt$value
+        simList$Mt_mu[[(d+1)]] <- Mt$mu
+        simList$Mt_numTrend[[(d+1)]] <- Mt$numTrend
+        simList$Wt[[(d+1)]] <- Wt$value
+        simList$Tt[[(d+1)]] <- Tt$value
+        simList$Mt_fn[[(d+1)]] <- Mt$fn
+        simList$Tt_fn[[(d+1)]] <- Tt$fn
+        simList$Tt_freq[[(d+1)]] <- Tt$freq
+        simList$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
+        simList$Wt_p[[(d+1)]] <- Wt$p
+        simList$Wt_q[[(d+1)]] <- Wt$q
       }
     }
     
@@ -145,18 +180,18 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
       for(d in 0:(D-1)){
         
         Wt <- simWt(n=n,q=d,p=p)
-        simData$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
-        simData$Mt[[(d+1)]] <- Mt$value
-        simData$Mt_mu[[(d+1)]] <- Mt$mu
-        simData$Mt_numTrend[[(d+1)]] <- Mt$numTrend
-        simData$Wt[[(d+1)]] <- Wt$value
-        simData$Tt[[(d+1)]] <- Tt$value
-        simData$Mt_fn[[(d+1)]] <- Mt$fn
-        simData$Tt_fn[[(d+1)]] <- Tt$fn
-        simData$Tt_freq[[(d+1)]] <- Tt$freq
-        simData$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
-        simData$Wt_p[[(d+1)]] <- Wt$p
-        simData$Wt_q[[(d+1)]] <- Wt$q
+        simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
+        simList$Mt[[(d+1)]] <- Mt$value
+        simList$Mt_mu[[(d+1)]] <- Mt$mu
+        simList$Mt_numTrend[[(d+1)]] <- Mt$numTrend
+        simList$Wt[[(d+1)]] <- Wt$value
+        simList$Tt[[(d+1)]] <- Tt$value
+        simList$Mt_fn[[(d+1)]] <- Mt$fn
+        simList$Tt_fn[[(d+1)]] <- Tt$fn
+        simList$Tt_freq[[(d+1)]] <- Tt$freq
+        simList$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
+        simList$Wt_p[[(d+1)]] <- Wt$p
+        simList$Wt_q[[(d+1)]] <- Wt$q
         }
       }
     }
@@ -176,21 +211,21 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
       Tt <- simTt(n=n, numFreq = (d+1)*10, bandwidth = bandwidth)
       Wt <- simWt(n=n, p=p, q=q)
       
-      simData$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
-      simData$Mt[[(d+1)]] <- Mt$value
-      simData$Mt_mu[[(d+1)]] <- Mt$mu
-      simData$Mt_numTrend[[(d+1)]] <- Mt$numTrend
-      simData$Wt[[(d+1)]] <- Wt$value
-      simData$Tt[[(d+1)]] <- Tt$value
-      simData$Mt_fn[[(d+1)]] <- Mt$fn
-      simData$Tt_fn[[(d+1)]] <- Tt$fn
-      simData$Tt_freq[[(d+1)]] <- Tt$freq
-      simData$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
-      simData$Wt_p[[(d+1)]] <- Wt$p
-      simData$Wt_q[[(d+1)]] <- Wt$q
+      simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
+      simList$Mt[[(d+1)]] <- Mt$value
+      simList$Mt_mu[[(d+1)]] <- Mt$mu
+      simList$Mt_numTrend[[(d+1)]] <- Mt$numTrend
+      simList$Wt[[(d+1)]] <- Wt$value
+      simList$Tt[[(d+1)]] <- Tt$value
+      simList$Mt_fn[[(d+1)]] <- Mt$fn
+      simList$Tt_fn[[(d+1)]] <- Tt$fn
+      simList$Tt_freq[[(d+1)]] <- Tt$freq
+      simList$Tt_bandwidth[[(d+1)]] <- Tt$bandwidth
+      simList$Wt_p[[(d+1)]] <- Wt$p
+      simList$Wt_q[[(d+1)]] <- Wt$q
     }
     
   }
   
-  return(simData)
+  return(simList)
 }

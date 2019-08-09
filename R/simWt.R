@@ -43,7 +43,7 @@ simWt <- function(n=1000,p=0,q=0){
     }
   }
   
-  Wt_list$value = arima.sim(model, n = n)
+  Wt_list$value = arima.sim(model, n = n, sd = 1) # fix variance = 1 
   Wt_list$p = p
   Wt_list$q = q
   return(Wt_list)

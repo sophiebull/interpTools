@@ -30,5 +30,41 @@ simXt(D, n = 1000, vary = "all", numTrend = 0,
 \item{fix}{Which order variable in ARMA(p,q) to fix if 'vary = Wt' (must be either "p" or "q").}
 }
 \description{
-Function to simulate X_t. The component that is selected to vary will hold all required variables constant. For vary = "Mt", only 'numTrend' is subject to vary. For vary = "Tt", only 'numFreq' is subject to vary. For vary = "Wt", order variables 'p' or 'q' are subject to vary depending on the value of 'fix', which must also be specified.
+Function to simulate X_t. The component that is selected to vary will hold all required variables constant: \cr\cr
+For vary = "Mt", only 'numTrend' is subject to vary. \cr
+For vary = "Tt", only 'numFreq' is subject to vary. \cr
+For vary = "Wt", order variables 'p' or 'q' are subject to vary depending on the value of 'fix', which must also be specified.
+}
+\examples{
+# Initializing basic parameters
+D = 5
+n=1000
+t=0:(n-1)
+
+# Vary Mt
+simData <- simXt(D=D, n=n, vary = "Mt", bandwidth = 3, numFreq = 30, 
+                 trendType = "polynomial")
+
+# Vary Tt
+simData <- simXt(D=D, n=n, vary = "Tt", bandwidth = 3, numTrend = 0, 
+                 trendType = "polynomial")
+
+# Vary Wt, p fixed
+simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
+                 numTrend = 0, trendType = "polynomial", p = 0, fix = "p")
+
+# Vary Wt, q fixed
+simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
+                 numTrend = 10, trendType = "polynomial", q = 0, fix = "q")
+
+# Creating list object for one of the above variations
+sets <- numeric(D)
+for(d in 1:(D-1)){
+ sets[d] <- paste("D",d,"=simData$Xt[[",d,"]],",sep="")
+}
+sets[D] <- paste("D",D,"=simData$Xt[[",D,"]]",sep="")
+list_call <- paste("list(",paste(sets,collapse=""),")")
+
+OriginalData = eval(parse(text=list_call))
+
 }

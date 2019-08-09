@@ -10,5 +10,5 @@ plotXt(d)
 \item{d}{The index of the original time series of interest}
 }
 \description{
-A function to create a widget describing each component of the original time series
+A function to generate a triptych to visualize each component of the original time series
 }

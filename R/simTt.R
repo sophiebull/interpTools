@@ -17,11 +17,12 @@ simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
   
   Tt_list <- list()
   t <- 0:(n-1)
+  fourierFreq <- 2*pi/n
   
   if(!is.null(bandwidth)){ # specified
   # choose random midpoints
     repeat{
-      m <- runif(numFreq/2,0+((10^-bandwidth)/2),1-((10^-bandwidth)/2))
+      m <- runif(numFreq/2, fourierFreq+((10^-bandwidth)/2), pi-((10^-bandwidth)/2))
       m <- m[order(m, decreasing = FALSE)]
       check <- abs(diff(m)) >= 10^-bandwidth
       if(!(FALSE %in% check)){
@@ -33,25 +34,25 @@ simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
   bands <- c(m-((10^-bandwidth)/2),m+((10^-bandwidth)/2))
   bands <- bands[order(bands, decreasing = FALSE)]
   
-  freq <- numeric(numFreq)
+  w <- numeric(numFreq)
   
   for(i in 1:(numFreq/2)){
-    freq[((2*i)-1):(2*i)] <- sample(seq(bands[(2*i)-1],bands[2*i],length.out=1/(10^-bandwidth)), size = 2, replace = FALSE)
+    w[((2*i)-1):(2*i)] <- sample(seq(bands[(2*i)-1],bands[2*i],length.out=1/(10^-bandwidth)), size = 2, replace = FALSE)
   } 
   }
   
   else if(is.null(bandwidth)){ # unspecified
-    freq <- runif(numFreq,0,1) 
+    w <- runif(numFreq, fourierFreq, pi) 
   }
   
-  Tt <- numeric(length(freq))
+  Tt <- numeric(length(w))
   
   #if(!ampMod){
-    for(f in 1:(length(freq)-1)){
+    for(f in 1:(length(w)-1)){
       a <- sample(-(n/10):(n/10),1)
-      Tt[f] <- paste("(",a,")*sin(",freq[f],"*t)+",sep="")
+      Tt[f] <- paste("(",a,")*sin(",w[f],"*t)+",sep="")
     }
-    Tt[length(freq)] <- paste("(",a,")*sin(",freq[length(freq)],"*t)",sep="")
+    Tt[length(w)] <- paste("(",a,")*sin(",w[length(w)],"*t)",sep="")
   #}
   
   Tt_fn <- paste(Tt,collapse="")  
@@ -59,7 +60,7 @@ simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
   
   Tt_list$fn <- Tt_fn
   Tt_list$value <- Tt
-  Tt_list$freq <- freq
+  Tt_list$freq <- w/(2*pi)
   Tt_list$bandwidth <- bandwidth
   return(Tt_list)
 }

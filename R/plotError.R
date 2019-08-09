@@ -59,27 +59,36 @@ for(vd in 1:D){
     for(vp in 1:P){
       for(vg in 1:G){
         
-        avInt[[vd]][[vm]][[vp]][[vg]]<- rowMeans(sapply(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]],unlist))
+        avInt[[vd]][[vm]][[vp]][[vg]] <- apply(sapply(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]],unlist),1,mean)
         sdInt[[vd]][[vm]][[vp]][[vg]] <- apply(sapply(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]],unlist),1,sd)
         
-        plotList[[vd]][[vm]][[vp]][[vg]] <- ggplot() +  
-          geom_ribbon(aes(ymin = as.numeric(avInt[[vd]][[vm]][[vp]][[vg]]), 
-                          ymax = as.numeric(OriginalData[[d[vd]]]), 
-                          x = 0:(length(avInt[[vd]][[vm]][[vp]][[vg]])-1)), fill = "mistyrose2") +
+        plot <-  ggplot() +  
+          geom_ribbon(aes(ymin = avInt[[vd]][[vm]][[vp]][[vg]],
+                          ymax = OriginalData[[d[vd]]], 
+                          x = 0:(length(avInt[[vd]][[vm]][[vp]][[vg]])-1)), 
+                      fill = "mistyrose2") +
           
           #geom_ribbon(aes(ymin = as.numeric(OriginalData[[d[vd]]]) - sdInt[[vd]][[vm]][[vp]][[vg]], 
           #                ymax = as.numeric(OriginalData[[d[vd]]]) + sdInt[[vd]][[vm]][[vp]][[vg]], 
           #                x = 0:(length(OriginalData[[d[vd]]])-1)), alpha = 0.3) + 
-        
+          
+          # Plotting original data
           geom_line(aes(x = 0:(length(OriginalData[[d[vd]]])-1), 
                         y = as.numeric(OriginalData[[d[vd]]])), 
                     color = "lightpink3", size = 0.5) +  
+          
+          # Plotting interpolated data
           geom_line(aes(x = 0:(length(avInt[[vd]][[vm]][[vp]][[vg]])-1), 
                         y = as.numeric(avInt[[vd]][[vm]][[vp]][[vg]])), 
                     color = "lightblue3", size = 0.5) + 
           
           ggtitle(paste("Dataset ",d[vd],": Original v.s. Interpolated Data"), 
-                  subtitle = paste(algorithm_names[methods[m[vm]]],", p=",prop_vec[p[vp]],", g=",gap_vec[g[vg]],"\n","averaged across",length(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]]),"simulations"))+
+                  subtitle = paste(algorithm_names[methods[m[vm]]],
+                                   ", p=",prop_vec[p[vp]],
+                                   ", g=",gap_vec[g[vg]],
+                                   "\n","averaged across",
+                                   length(IntData[[d[vd]]][[m[vm]]][[p[vp]]][[g[vg]]]),
+                                   "simulations"))+
           
           labs(x = "time", 
                y = "value",
@@ -88,6 +97,8 @@ for(vd in 1:D){
           theme(plot.title = element_text(hjust = 0.5), 
                 plot.subtitle = element_text(hjust=0.5))
         
+        plotList[[vd]][[vm]][[vp]][[vg]] <- plot
+
         gap_list_names[vg] <- names(IntData[[1]][[1]][[1]])[g[vg]]
       }
       names(plotList[[vd]][[vm]][[vp]]) <- gap_list_names

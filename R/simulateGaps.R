@@ -5,6 +5,19 @@
 #' @param prop_vec Vector of missingness proportions
 #' @param gap_vec Vector of gap lengths
 #' @param K Number of gappy series to simulate for each gap width and proportion missing specification
+#' @examples 
+#' prop_vec = c(0.05,0.10,0.15,0.20)
+#' gap_vec = c(1,5,10)
+#' K = 10 # number of gappy series to simulate under each p,g specification
+#'
+#' GappyData <- list()
+#'
+#' for(d in 1:length(OriginalData)){
+#'   GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = K)
+#' }
+#' names(GappyData) <- names(OriginalData)
+
+#'# dimension (d, p, g, k) 
 
 simulateGaps <- function(data, prop_vec, gap_vec, K){
   
