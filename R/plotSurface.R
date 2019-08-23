@@ -41,8 +41,8 @@ plotSurface <- function(d, m, crit, agEval){
       for(vd in 1:D){
         for(p in 1:P){
           for(g in 1:G){
-            critMat[p,g] <- ag[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],"mean"]
-            method_list_names[vm] <- as.character(ag[[d[vd]]][[p]][[g]][[m[vm]]][crit[s], "method"]) 
+            critMat[p,g] <- agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],"mean"]
+            method_list_names[vm] <- as.character(agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s], "method"]) 
           }
         }
         z_list[[s]][[vm]][[vd]] <- critMat
@@ -74,24 +74,24 @@ plotSurface <- function(d, m, crit, agEval){
   }
 
   axx <- list(
-    nticks = length(prop_vec),
-    range = c(min(prop_vec),max(prop_vec))
+    nticks = length(gap_vec),
+    range = c(min(gap_vec),max(gap_vec))
   )
   
   axy <- list(
-    nticks = length(gap_vec),
-    range = c(min(gap_vec),max(gap_vec))
+    nticks = length(prop_vec),
+    range = c(min(prop_vec),max(prop_vec))
   )
   
 for(s in 1:C){
   for(vd in 1:D){
     z <- numeric(M)
     for(vm in 1:(M-1)){
-      z[vm] <- paste("add_surface(x=prop_vec,y=gap_vec,z=t(z_list[[",s,"]][[",vm,"]][[",vd,"]]), 
+      z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",vm,"]][[",vd,"]], 
                      colorscale = list(seq(0,1,length.out=P*G), palette[[",vm,"]]), 
                      name = names(z_list[[1]])[",vm,"]) %>% ",sep="")
     }
-    z[M] <- paste("add_surface(x=prop_vec,y=gap_vec,z=t(z_list[[",s,"]][[",M,"]][[",vd,"]]), 
+    z[M] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",M,"]][[",vd,"]], 
                   colorscale = list(seq(0,1,length.out=P*G), palette[[",M,"]]),
                   name = names(z_list[[1]])[",M,"])",sep="")
     
