@@ -1,6 +1,6 @@
 #' Plot Interpolation Error
 #' 
-#' Function to generate a nested list of plots to visualize the error between the original time series and the average (across k simulations) interpolated time series under particular missingness scenarios.
+#' Function to generate a nested list of plots to visualize the absolute difference between the original time series and the average (across k simulations) interpolated time series under particular missingness scenarios.
 #' 
 #' @param OriginalData A list containing the original time series
 #' @param IntData A list containing the interpolated time series
@@ -10,7 +10,7 @@
 #' @param m A vector of interpolation methods of interest
 #' @param output A character variable; "plot" outputs a list of plots to be called, "numeric" outputs a list of numeric vectors corresponding to each plot
 
-plotError <- function(OriginalData,IntData,d,p,g,m, output = "plot"){
+plotAbsDiff <- function(OriginalData,IntData,d,p,g,m, output = "plot"){
 
   require(ggplot2)
   
@@ -123,6 +123,6 @@ else if(output == "numeric"){
   return(avInt)
 }
 
-
 }
+
 
