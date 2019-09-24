@@ -4,8 +4,9 @@
 \alias{plotMetrics}
 \title{Plot Grid of Performance Metrics}
 \usage{
-plotMetrics(agEval, d, p, m, g, metrics = c("MSE", "MAPE",
-  "abs_differences"))
+plotMetrics(agEval, d = 1:length(agEval), p = 1:length(agEval[[1]]),
+  m = 1:length(agEval[[1]][[1]][[1]]), g = 1:length(agEval[[1]][[1]]),
+  crit)
 }
 \arguments{
 \item{agEval}{A list containing the aggregated performance metrics (result of agEval.R)}
@@ -18,7 +19,7 @@ plotMetrics(agEval, d, p, m, g, metrics = c("MSE", "MAPE",
 
 \item{g}{A vector of 'gap length' of interest (must be a subset of agEval)}
 
-\item{metrics}{A character vector of performance metrics of interest}
+\item{crit}{A character vector of performance metrics of interest}
 }
 \description{
 Function to generate a grid of plots for visualizing a selection of performance metrics.
