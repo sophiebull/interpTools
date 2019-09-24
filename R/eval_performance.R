@@ -1,24 +1,24 @@
 #' Evaluate Interpolation Performance of a Single Time Series
 #' 
 #' Function to define and store performance criteria for the comparison of a single interpolated series with its original.
-#' Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:
-#' # R = 1
-#' R^2 = 1
-#' abs_differences = 0
-#' MBE = 0
-#' ME = 0
-#' MAE = 0
-#' MRE = 0
-#' MARE = 0
-#' MAPE = 0
-#' SSE = 0 
-#' MSE = 0
-#' RMS = 0 
-#' NMSE = 0
-#' RE = 1
-#' RMSE = 0
-#' NRMSD = 0
-#' RMSS = 0
+#' Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:\cr
+#' R = 1\cr
+#' R^2 = 1\cr
+#' abs_differences = 0\cr
+#' MBE = 0\cr
+#' ME = 0\cr
+#' MAE = 0\cr
+#' MRE = 0\cr
+#' MARE = 0\cr
+#' MAPE = 0\cr
+#' SSE = 0 \cr
+#' MSE = 0\cr
+#' RMS = 0 \cr
+#' NMSE = 0\cr
+#' RE = 1\cr
+#' RMSE = 0\cr
+#' NRMSD = 0\cr
+#' RMSS = 0\cr
 #' @param x The original time series vector
 #' @param X The interpolated time series vector
 
