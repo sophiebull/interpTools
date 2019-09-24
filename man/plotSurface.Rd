@@ -4,7 +4,8 @@
 \alias{plotSurface}
 \title{Plot Surface}
 \usage{
-plotSurface(d, m, crit, agEval)
+plotSurface(d = 1:length(agEval), m = 1:length(agEval[[1]][[1]][[1]]),
+  crit, agEval, layer_type = "method")
 }
 \arguments{
 \item{d}{A vector of the indexes of the datasets of interest}
