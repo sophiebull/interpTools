@@ -2,26 +2,34 @@
 #' 
 #' A function to generate a triptych to visualize each component of the original time series
 #' @param d The index of the original time series of interest
-#' 
 
 plotXt <- function(d){
   require(ggplot2)
   require(gridExtra)
   
+
   t <- 0:(length(simData$Xt[[d]])-1)
     
   mt <- ggplot()+
     
-    geom_line(aes(x=t,y=simData$Mt[[d]]), col = "tomato1") +
-    geom_line(aes(x=t,y=simData$Mt_mu[[d]]), col = "tomato1", lty = 2)+
+    ylim(simData$Mt_mu[[d]] - (max(simData$Mt[[d]])*0.5), max(simData$Mt[[d]])*1.5) + 
     
-    ggtitle(expression(M[t] == mu[t] + mu), subtitle = paste("polynomial of order",simData$Mt_numTrend[[d]])) + 
+    geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2) +
+    geom_line(aes(x=t,y=simData$Mt_mu[[d]]), lty = 2, lwd = 0.2)+
     
-    labs(x = "time", y = "value")+
-    theme_minimal() +
+    ggtitle(bquote(m[t] == mu[t] + mu*", polynomial of order"~.(simData$Mt_numTrend[[d]]))) + 
+    
+    annotate("text",x=(length(simData$Mt[[d]])+5),y=simData$Mt_mu[[d]], label = expression(mu))+
+    
+    labs(x = "time", y = "")+
+    theme_light() +
     theme(axis.title.x = element_blank(), 
           axis.text.x.bottom = element_blank(),
-          plot.margin = unit(c(1,1,0,1),"cm"))
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = unit(c(1,0,1,1),"cm"),
+          axis.title.y = element_blank())
   
   if(is.null(simData$Tt_bandwidth[[d]])){
     bw = "unspecified"
@@ -31,48 +39,56 @@ plotXt <- function(d){
     bw = eval(substitute(paste(10^-bandwidth), list(bandwidth = simData$Tt_bandwidth[[d]])))
   }
   
-  freq <- ggplot() + 
-    
-    geom_point(aes(x = simData$Tt_freq[[d]], y = rep(0,length(simData$Tt_freq[[d]]))), col = "darkgoldenrod1", size = 0.4) + 
-    ggtitle(expression(T[t] == sum(a*sin(omega[i]*t), i == 1,Omega)),
-            subtitle = paste("F = ", length(simData$Tt_freq[[d]]),", bin width = ", bw, sep="")) + 
-    
-    labs(x = "frequency", y = "")+
-    xlim(0,0.5) + 
-    ylim(0,0) + 
-    theme_minimal()+
-    
-    theme(axis.text.y.left = element_blank(),
-          axis.title.x = element_blank(),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          plot.margin = unit(c(-2,1,-2,1),"cm")) +
-    
-    coord_fixed(ratio = 0.4)
   
   tt <- ggplot()+
     
-    geom_line(aes(x=t,y=simData$Tt[[d]]), col = "darkgoldenrod1") +
+    geom_line(aes(x=t,y=simData$Tt[[d]]), lwd = 0.2) +
+    ggtitle(bquote(t[t] == sum(b[i]*sin*"("~omega[i]*t*")",i==1,psi)))+
     
-    labs(x = "time", y = "value")+
-    theme_minimal() +
+    labs(x = "time", y = "")+
+    theme_light() +
     theme(axis.title.x = element_blank(), 
           axis.text.x.bottom = element_blank(),
-          plot.margin = unit(c(0,1,1,1),"cm"))
-    
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = unit(c(0,0,1,1),"cm"),
+          axis.title.y = element_blank()) 
+
   
   wt <- ggplot()+
     
-    geom_line(aes(x=t,y=as.numeric(simData$Wt[[d]])), col = "dodgerblue3") +
+    geom_line(aes(x=t,y=as.numeric(simData$Wt[[d]])), lwd = 0.2) +
     
-    ggtitle(expression(W[t]), subtitle = paste("ARMA(",simData$Wt_p[[d]],",",simData$Wt_q[[d]],")",sep="")) + 
+    ggtitle(bquote(xi[t]*"~ ARMA("~.(simData$Wt_p[[d]])*","~.(simData$Wt_q[[d]])*")")) + 
     
-    labs(x = "time", y = "value")+
-    theme_minimal()+
-    theme(plot.margin = unit(c(0,1,1,1),"cm"))
+    labs(x = "time", y = "")+
+    theme_light()+
+    theme(plot.margin = unit(c(0,0,1,1),"cm"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.title.y = element_blank())
 
+  freq <- ggplot() + 
+    
+    geom_point(aes(x = simData$Tt_freq[[d]], y = rep(0,length(simData$Tt_freq[[d]]))), size = 0.4) + 
+    geom_vline(xintercept = simData$Tt_freq[[d]], lwd = 0.05) + 
+    ggtitle(bquote(psi == .(length(simData$Tt_freq[[d]]))*","~'bin width' == .(bw))) +
+    
+    labs(x = bquote(f == omega/(2*pi)), y = "") +
+    xlim(0,0.5) + 
+    ylim(0,0) + 
+    theme_light()+
+    
+    theme(axis.text.y = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.ticks.y = element_blank(),
+          plot.margin = unit(c(0,0,0,1),"cm")) +
+    
+    coord_fixed(ratio = 0.4)
   
-    grid.arrange(mt,freq,tt,wt, nrow = 4)
+    grid.arrange(mt,tt,wt,freq, nrow = 4)
 
   }
 
