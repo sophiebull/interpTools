@@ -11,7 +11,7 @@ simMt <- function(n = 1000, numTrend = 0, trendType = "polynomial"){
   t <- 0:(n-1)
   
   ######### Initializing Mt 
-  mu <- sample(0:n/100,1)
+  mu <- sample((-n/100):(n/100),1)
   mut <- numeric(numTrend)
   
   if(trendType == "polynomial"){
