@@ -49,7 +49,7 @@ simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
   
   #if(!ampMod){
     for(f in 1:(length(w)-1)){
-      a <- sample(-(n/10):(n/10),1)
+      a <- sample(-(n/100):(n/100),1)
       Tt[f] <- paste("(",a,")*sin(",w[f],"*t)+",sep="")
     }
     Tt[length(w)] <- paste("(",a,")*sin(",w[length(w)],"*t)",sep="")
