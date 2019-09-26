@@ -2,8 +2,9 @@
 #' 
 #' A function to generate a triptych to visualize each component of the original time series
 #' @param d The index of the original time series of interest
+#' @param cptwise Logical; whether to display Xt componentwise or not
 
-plotXt <- function(d){
+plotXt <- function(d, cptwise = T){
   require(ggplot2)
   require(gridExtra)
   
@@ -89,8 +90,22 @@ plotXt <- function(d){
     coord_fixed(ratio = 0.4)
   
   
+    xt <- ggplot()+
+    
+    geom_line(aes(x=t,y=simData$Xt[[d]]), lwd = 0.2) +
+    ggtitle(bquote(x[t] == m[t] + t[t] + xi[t]))+
+    
+    labs(x = "time", y = "value")+
+    theme_light() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()) 
   
+  if(cptwise){
     grid.arrange(mt,tt,wt,freq, nrow = 4)
-
+  }
+    
+  else if(!cptwise){
+    xt
+  }
   }
 
