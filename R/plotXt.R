@@ -60,7 +60,7 @@ plotXt <- function(d){
     
     geom_line(aes(x=t,y=as.numeric(simData$Wt[[d]])), lwd = 0.2) +
     
-    ggtitle(bquote(xi[t]*"~ ARMA("~.(simData$Wt_p[[d]])*","~.(simData$Wt_q[[d]])*")")) + 
+    ggtitle(bquote(xi[t]*"~ ARMA("~.(simData$Wt_p[[d]])*","~.(simData$Wt_q[[d]])*"), SNR ="~.(simData$SNR[[d]]))) + 
     
     labs(x = "time", y = "")+
     theme_light()+
@@ -87,6 +87,8 @@ plotXt <- function(d){
           plot.margin = unit(c(0,0,0,1),"cm")) +
     
     coord_fixed(ratio = 0.4)
+  
+  
   
     grid.arrange(mt,tt,wt,freq, nrow = 4)
 
