@@ -13,7 +13,7 @@ plotXt <- function(d, cptwise = T){
     
   mt <- ggplot()+
     
-    ylim(simData$Mt_mu[[d]] - (max(simData$Mt[[d]])*0.5), max(simData$Mt[[d]])*1.5) + 
+    ylim(min(simData$Xt[[d]]), max(simData$Xt[[d]])) + 
     
     geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2) +
     geom_line(aes(x=t,y=simData$Mt_mu[[d]]), lty = 2, lwd = 0.2)+
@@ -93,6 +93,8 @@ plotXt <- function(d, cptwise = T){
     xt <- ggplot()+
     
     geom_line(aes(x=t,y=simData$Xt[[d]]), lwd = 0.2) +
+    geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2, col = "blue")+
+      
     ggtitle(bquote(x[t] == m[t] + t[t] + xi[t]))+
     
     labs(x = "time", y = "value")+
