@@ -5,10 +5,10 @@
 #' @param p The AR order
 #' @param q The MA order
 
-simWt <- function(n=1000,p=0,q=0){
+simWt <- function(n = 1000, p = 0, q = 0, var = 1){
   
   Wt_list <- list()
-  stopifnot(p>=0,q>=0,n>=0,n%%1==0)
+  stopifnot(p >= 0,q >= 0,n >= 0, n %% 1 == 0, var > 0)
   
   if(p > 0){
     repeat{
@@ -43,7 +43,7 @@ simWt <- function(n=1000,p=0,q=0){
     }
   }
   
-  Wt_list$value = arima.sim(model, n = n, sd = 1) # fix variance = 1 
+  Wt_list$value = arima.sim(model, n = n, sd = sqrt(var))
   Wt_list$p = p
   Wt_list$q = q
   return(Wt_list)
