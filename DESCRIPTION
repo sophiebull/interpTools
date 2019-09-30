@@ -8,3 +8,17 @@ Description: This package contains functions for generating time series, simulat
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1.9000
+Depends: multitaper,
+          tsinterp,
+          imputeTS,
+          zoo,
+          forecast,
+          MASS,
+          snow,
+          parallel,
+          ggplot2,
+          gridExtra,
+          e1071,
+          plotly,
+          dplyr,
+          RColorBrewer
