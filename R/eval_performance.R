@@ -1,5 +1,5 @@
 #' Evaluate Interpolation Performance of a Single Time Series
-#' 
+#'  
 #' Function to define and store performance criteria for the comparison of a single interpolated series with its original.
 #' Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:\cr
 #' R = 1\cr

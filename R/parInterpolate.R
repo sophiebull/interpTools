@@ -5,7 +5,7 @@
 #' 1 - Nearest Neighbor\cr
 #' 2 - Linear Interpolation\cr
 #' 3 - Natural Cubic Spline\cr
-#' 4 - FMM Cubic Spline\cr
+#' 4 - FMM Cubic Spline\cr 
 #' 5 - Hermite Cubic Spline\cr
 #' 6 - Stineman Interpolation\cr
 #' 7 - Kalman - ARIMA\cr

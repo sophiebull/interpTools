@@ -6,7 +6,7 @@
 #' @param numFreq The number of sinusoids to generate
 
 simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
-                  ){
+                  ){  
 
   #stopifnot(n%%1 == 0, n > 0, numFreq%%2 == 0, numFreq > 0, (is.null(bandwidth) || (bandwidth >= 1 && (numFreq <= 1/(10^-bandwidth))))#, is.logical(ampMod)
   #          )
@@ -49,7 +49,7 @@ simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
   
   #if(!ampMod){
     for(f in 1:(length(w)-1)){
-      a <- sample(-(n/100):(n/100),1)
+      a <- rnorm(1, mean = 0, sd = n/200) #95% runs from -n/100 to n/100
       Tt[f] <- paste("(",a,")*sin(",w[f],"*t)+",sep="")
     }
     Tt[length(w)] <- paste("(",a,")*sin(",w[length(w)],"*t)",sep="")

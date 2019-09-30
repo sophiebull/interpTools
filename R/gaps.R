@@ -4,7 +4,7 @@
 #' @param x The complete vector from which to remove values
 #' @param prop_missing Proportion of observations to remove, P
 #' @param gap_width Length of gap (how many successive observations to remove), G
-#' @examples 
+#' @examples  
 #' n = 100
 #' 
 #' # Remove prop_missing*n points where the number of consecutive missing

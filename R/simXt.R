@@ -51,7 +51,7 @@
 #'
 
 simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial", numFreq = 20, bandwidth = NULL, p=0, q=0, fix, snr = 1.5){
-  
+   
   # STOPS 
   
   if(vary == "Wt" && missing(fix)){

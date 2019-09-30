@@ -12,7 +12,7 @@ performance <- function(OriginalData,IntData){
                        "Hermite.Cubic.Spline",
                        "Stineman.Interpolation",
                        "Kalman.ARIMA",
-                       "Kalman.StructTS",
+                       "Kalman.StructTS", 
                        "Last.Observation.Carried.Forward",
                        "Next.Observation.Carried.Backward", 
                        "Simple.Moving.Average", 

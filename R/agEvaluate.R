@@ -60,12 +60,13 @@ agEvaluate <- function(pmats){
             Evaluation[[d]][[p]][[g]][[m]] <- data.frame(
               
               mean = rowMeans(sapply(pmats[[d]][[m]][[p]][[g]],unlist)),
-              median = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,median),
               sd = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,sd),
               q0 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["0%",],
+              q2.5 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1, FUN=function(x) quantile(x, probs = c(0.025,0.975)))["2.5%",],
               q25 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["25%",],
-              q50 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["50%",],
+              median = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,median),
               q75 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["75%",],
+              q97.5 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1, FUN=function(x) quantile(x, probs = c(0.025,0.975)))["97.5%",],
               q100 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["100%",],
               skew = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,skewness), 
               

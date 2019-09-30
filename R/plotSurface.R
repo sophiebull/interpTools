@@ -2,7 +2,7 @@
 #' 
 #' Function to generate a surface plot to visualize average changes in the performance metrics of interest
 #' as the proportion of missing data and gap width increase. Metrics are averaged across K simulations in each p,g,d,m specification. \cr
-#' The x-axis represents p, the proportion of missing data.\cr
+#' The x-axis represents p, the proportion of missing data.\cr 
 #' The y-axis represents g, the gap width.\cr
 #' The z-axis represents the value of the performance metric of interest.
 #' 

@@ -1,7 +1,7 @@
 #' Plot Grid of Performance Metrics
 #' 
 #' Function to generate a grid of plots for visualizing a selection of performance metrics.
-#' 
+#'  
 #' @param agEval A list containing the aggregated performance metrics (result of agEval.R)
 #' @param d A vector of datasets of interest (must be a subset of agEval)
 #' @param p A vector of 'proportion missings' of interest (must be a subset of agEval)

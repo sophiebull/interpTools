@@ -1,7 +1,7 @@
 #' Simulate W_t
 #' 
 #' Function to simulate W_t: the noise component of X_t. Defaults to white noise. 
-#' @param n The length of the output series
+#' @param n The length of the output series 
 #' @param p The AR order
 #' @param q The MA order
 

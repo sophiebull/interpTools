@@ -5,7 +5,7 @@
 #' @param cptwise Logical; whether to display Xt componentwise or not
 
 plotXt <- function(d, cptwise = T){
-  require(ggplot2)
+  require(ggplot2) 
   require(gridExtra)
   
 

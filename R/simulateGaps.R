@@ -5,7 +5,7 @@
 #' @param prop_vec Vector of missingness proportions
 #' @param gap_vec Vector of gap lengths
 #' @param K Number of gappy series to simulate for each gap width and proportion missing specification
-#' @examples 
+#' @examples  
 #' prop_vec = c(0.05,0.10,0.15,0.20)
 #' gap_vec = c(1,5,10)
 #' K = 10 # number of gappy series to simulate under each p,g specification

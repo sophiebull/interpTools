@@ -7,7 +7,7 @@
 #' @param d A vector of datasets of interest
 #' @param p A vector of 'proportion missings' of interest
 #' @param g A vector of 'gap length' of interest
-#' @param m A vector of interpolation methods of interest
+#' @param m A vector of interpolation methods of interest 
 #' @param output A character variable; "plot" outputs a list of plots to be called, "numeric" outputs a list of numeric vectors corresponding to each plot
 
 plotError <- function(OriginalData,IntData,d,p,g,m, output = "plot"){

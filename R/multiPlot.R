@@ -5,7 +5,7 @@
 # crossSec = d, where Each plot is a different dataset, aggregate everything else.
 # If any p,g,m,d is a vector (length>1) then do multiple plots under each value of that vector. 
 
-multiPlot <- function(avIntList, crossSec = NULL){
+multiPlot <- function(avIntList, crossSec = NULL){ 
   
   D <- length(avIntList)
   M <- length(avIntList[[1]])
