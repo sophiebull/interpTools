@@ -6,7 +6,7 @@
 \usage{
 simXt(D, n = 1000, vary = "all", numTrend = 0,
   trendType = "polynomial", numFreq = 20, bandwidth = NULL, p = 0,
-  q = 0, fix)
+  q = 0, fix, snr = 1.5)
 }
 \arguments{
 \item{D}{The number of datasets to generate.}
@@ -28,6 +28,8 @@ simXt(D, n = 1000, vary = "all", numTrend = 0,
 \item{q}{If 'fix != q', this is the MA order of the noise component.}
 
 \item{fix}{Which order variable in ARMA(p,q) to fix if 'vary = Wt' (must be either "p" or "q").}
+
+\item{snr}{Specify the signal-to-noise ratio.}
 }
 \description{
 Function to simulate X_t. The component that is selected to vary will hold all required variables constant: \cr\cr
@@ -43,19 +45,19 @@ t=0:(n-1)
 
 # Vary Mt
 simData <- simXt(D=D, n=n, vary = "Mt", bandwidth = 3, numFreq = 30, 
-                 trendType = "polynomial")
+                 trendType = "polynomial", snr = 1.5)
 
 # Vary Tt
 simData <- simXt(D=D, n=n, vary = "Tt", bandwidth = 3, numTrend = 0, 
-                 trendType = "polynomial")
+                 trendType = "polynomial", snr = 1.5)
 
 # Vary Wt, p fixed
 simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
-                 numTrend = 0, trendType = "polynomial", p = 0, fix = "p")
+                 numTrend = 0, trendType = "polynomial", p = 0, fix = "p", snr = 1.5)
 
 # Vary Wt, q fixed
 simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
-                 numTrend = 10, trendType = "polynomial", q = 0, fix = "q")
+                 numTrend = 10, trendType = "polynomial", q = 0, fix = "q", snr = 1.5)
 
 # Creating list object for one of the above variations
 sets <- numeric(D)

@@ -5,8 +5,7 @@
 #' @param numTrend The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.
 # @param trendType The type of trends to include
  
-simMt <- function(n = 1000, numTrend = 0#, trendType = "polynomial"
-                  ){
+simMt <- function(n = 1000, numTrend = 0, trendType = "polynomial"){
   
   Mt_list <- list()
   t <- 0:(n-1)
@@ -15,7 +14,7 @@ simMt <- function(n = 1000, numTrend = 0#, trendType = "polynomial"
   mu <- runif(1, -n/100, n/100)
   mut <- numeric(numTrend)
   
-  #if(trendType == "polynomial"){
+  if(trendType == "polynomial"){
     
     if(numTrend > 0){
       center <- sample(1:n, 1)
@@ -34,26 +33,26 @@ simMt <- function(n = 1000, numTrend = 0#, trendType = "polynomial"
     if(numTrend == 0){
       mut = 0
     }
-  #}
+  }
   
-  #if(trendType == "exponential"){
-  #  if(numTrend > 0){
-  #    if(numTrend > 1){
-  #      for(k in 1:(numTrend-1)){
-  #        a <- sample(-(n/10):(n/10),1)
-  #        mut[k] <- paste("(",a,")*exp(",k,"*(t/n))+",sep="")
-  #      }
-  #    }
-  #    
-  #    a <- sample(-(n/10):(n/10),1)
-  #    mut[numTrend] <- paste("(",a,")*exp(",numTrend,"*(t/n))",sep="")
-  #    Mt_0 = NULL
-  #  }
-  #  
-  #  if(numTrend == 0){
-  #    mut = 0
-  #  }
-  #}
+  if(trendType == "exponential"){
+    if(numTrend > 0){
+      if(numTrend > 1){
+        for(k in 1:(numTrend-1)){
+          a <- sample(-(n/10):(n/10),1)
+          mut[k] <- paste("(",a,")*exp(",k,"*(t/n))+",sep="")
+        }
+      }
+      
+      a <- sample(-(n/10):(n/10),1)
+      mut[numTrend] <- paste("(",a,")*exp(",numTrend,"*(t/n))",sep="")
+      Mt_0 = NULL
+    }
+    
+    if(numTrend == 0){
+      mut = 0
+    }
+  }
   
   mut_fn <- mut
   Mt_fn <- paste(c(mut_fn,"+",mu),collapse="")

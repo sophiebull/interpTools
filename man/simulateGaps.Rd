@@ -19,6 +19,7 @@ simulateGaps(data, prop_vec, gap_vec, K)
 Function to simulate the gappy data for a single dataset and store in a list. Function requires gaps.R
 }
 \examples{
+ 
 prop_vec = c(0.05,0.10,0.15,0.20)
 gap_vec = c(1,5,10)
 K = 10 # number of gappy series to simulate under each p,g specification

@@ -4,10 +4,12 @@
 \alias{plotXt}
 \title{Plot Each Component of Xt}
 \usage{
-plotXt(d)
+plotXt(d, cptwise = T)
 }
 \arguments{
 \item{d}{The index of the original time series of interest}
+
+\item{cptwise}{Logical; whether to display Xt componentwise or not}
 }
 \description{
 A function to generate a triptych to visualize each component of the original time series

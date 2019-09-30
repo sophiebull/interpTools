@@ -12,7 +12,7 @@
 #' 
 #' gaps(rnorm(n), prop_missing = 0.30, gap_width = 2)
 #' 
-#' # will generate 30 missing points, with <15 gaps
+#' # will generate 30 missing points, with <15 holes
 #' 
 gaps <- function(x, prop_missing, gap_width){
   

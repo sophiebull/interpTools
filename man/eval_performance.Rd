@@ -2,7 +2,27 @@
 % Please edit documentation in R/eval_performance.R
 \name{eval_performance}
 \alias{eval_performance}
-\title{Evaluate Interpolation Performance of a Single Time Series}
+\title{Evaluate Interpolation Performance of a Single Time Series
+ 
+Function to define and store performance criteria for the comparison of a single interpolated series with its original.
+Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:\cr
+R = 1\cr
+R^2 = 1\cr
+abs_differences = 0\cr
+MBE = 0\cr
+ME = 0\cr
+MAE = 0\cr
+MRE = 0\cr
+MARE = 0\cr
+MAPE = 0\cr
+SSE = 0 \cr
+MSE = 0\cr
+RMS = 0 \cr
+NMSE = 0\cr
+RE = 1\cr
+RMSE = 0\cr
+NRMSD = 0\cr
+RMSS = 0\cr}
 \usage{
 eval_performance(x, X)
 }
@@ -12,9 +32,11 @@ eval_performance(x, X)
 \item{X}{The interpolated time series vector}
 }
 \description{
+Evaluate Interpolation Performance of a Single Time Series
+ 
 Function to define and store performance criteria for the comparison of a single interpolated series with its original.
 Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:\cr
-# R = 1\cr
+R = 1\cr
 R^2 = 1\cr
 abs_differences = 0\cr
 MBE = 0\cr

@@ -10,8 +10,6 @@ simMt(n = 1000, numTrend = 0, trendType = "polynomial")
 \item{n}{The length of the output series}
 
 \item{numTrend}{The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.}
-
-\item{trendType}{The type of trends to include}
 }
 \description{
 Function to simulate M_t: the mean component of X_t.

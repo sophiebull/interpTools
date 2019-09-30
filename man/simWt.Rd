@@ -4,7 +4,7 @@
 \alias{simWt}
 \title{Simulate W_t}
 \usage{
-simWt(n = 1000, p = 0, q = 0)
+simWt(n = 1000, p = 0, q = 0, var = 1)
 }
 \arguments{
 \item{n}{The length of the output series}

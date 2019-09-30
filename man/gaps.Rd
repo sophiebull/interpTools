@@ -17,6 +17,7 @@ gaps(x, prop_missing, gap_width)
 Function to generate gaps of a specified length constrained by proportion of missingness. Meant to be paired with simulateGaps.R
 }
 \examples{
+ 
 n = 100
 
 # Remove prop_missing*n points where the number of consecutive missing
@@ -24,6 +25,6 @@ n = 100
 
 gaps(rnorm(n), prop_missing = 0.30, gap_width = 2)
 
-# will generate 30 missing points, with <15 gaps
+# will generate 30 missing points, with <15 holes
 
 }
