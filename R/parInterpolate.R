@@ -68,7 +68,8 @@ parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL){
   require(snow)
   require(parallel)
   
-  stopifnot(!(is.null(methods) && is.null(FUN_CALL)), !(is.null(gappyTS)), is.ts(gappyTS))
+  stopifnot(!(is.null(methods) && is.null(FUN_CALL)), !(is.null(gappyTS))#, is.ts(gappyTS)
+            )
 
   ## DEFINING INTERPOLATION ALGORITHMS
   nearestNeighbor <- function(x) {
@@ -157,9 +158,6 @@ parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL){
     lapply(int_series <- vector(mode = 'list', length(gappyTS)),function(x) 
       lapply(int_series <- vector(mode = 'list',length(gappyTS[[1]])),function(x) 
         x<-vector(mode='list',length(gappyTS[[1]][[1]])))))
-  
-  ## Would be nice to wrap function in mclapply() instead of for()... 
-  # but the irony is that it will take too much time to learn how to do! :) 
   
   method_names <- numeric(length(methods))
   fun_names <- numeric(length(FUN_CALL))

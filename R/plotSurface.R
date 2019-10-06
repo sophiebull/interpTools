@@ -16,7 +16,7 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
   require(dplyr)
   require(RColorBrewer)
   
-  stopifnot(length(m)<=5, (layer_type == "method" || layer_type == "dataset"))
+  stopifnot((layer_type == "method" || layer_type == "dataset"))
   
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
@@ -44,7 +44,7 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
       for(vd in 1:D){
         for(p in 1:P){
           for(g in 1:G){
-            critMat[p,g] <- agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],"mean"]
+            critMat[p,g] <- agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],"median"]
             method_list_names[vm] <- as.character(agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s], "method"]) 
           }
         }
@@ -72,7 +72,8 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
                         c("#B42F32","#DF6747"),
                         c("#FFECD2","#FCB69F"),
                         c("#FF9A9E","#FECFEF"),
-                        c("#FEADA6","#F5EFEF"))
+                        c("#FEADA6","#F5EFEF"),
+                        c("#EE9CA7","#FFDDE1"))
         
       for(i in 1:length(colorList)){
         palette[[i]] <- colorRampPalette(colorList[[i]])(P*G)

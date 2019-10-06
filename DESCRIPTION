@@ -18,7 +18,6 @@ Depends: multitaper,
           parallel,
           ggplot2,
           gridExtra,
-          e1071,
           plotly,
           dplyr,
           RColorBrewer

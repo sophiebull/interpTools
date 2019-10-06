@@ -5,8 +5,12 @@
 #' @param task Type of aggregation. "default" returns the matrices, "errors" returns the 
 
 agEvaluate <- function(pmats){
-  
-  require(e1071)
+  skew <- function(x){
+    stopifnot(is.numeric(x))
+    
+    sk <- (sum((x-mean(x))^3)/(length(x)*sd(x)^3))
+    return(sk)
+  }
   
   algorithm_names <- c("Nearest.Neighbor",
                        "Linear.Interpolation", 
@@ -68,7 +72,7 @@ agEvaluate <- function(pmats){
               q75 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["75%",],
               q97.5 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1, FUN=function(x) quantile(x, probs = c(0.025,0.975)))["97.5%",],
               q100 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["100%",],
-              skew = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,skewness), 
+              skewness = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,skew), 
               
               gap_width = c(rep(gap_vec[g], 17)),
               prop_missing = c(rep(prop_vec[p],17)),

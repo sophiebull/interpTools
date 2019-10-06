@@ -1,6 +1,6 @@
 #' Plot Grid of Performance Metrics
 #' 
-#' Function to generate a grid of plots for visualizing a selection of performance metrics.
+#' Function to generate a grid of plots for visualizing a selection of performance metrics (median). 
 #'  
 #' @param agEval A list containing the aggregated performance metrics (result of agEval.R)
 #' @param d A vector of datasets of interest (must be a subset of agEval)
@@ -45,30 +45,30 @@ metPlot <- metDF
         for(vg in 1:G){
               for(s in 1:C){
                 
-                mean <- numeric(M)
+                median <- numeric(M)
                 sd <- numeric(M)
                 method <- numeric(M)
                 criteria <- numeric(M)
                 
                 for(vm in 1:M){
-                mean[vm] <- agEval[[d[vd]]][[p[vp]]][[g[vg]]][[m[vm]]][crit[s],"mean"]
+                median[vm] <- agEval[[d[vd]]][[p[vp]]][[g[vg]]][[m[vm]]][crit[s],"median"]
                 sd[vm] <- agEval[[d[vd]]][[p[vp]]][[g[vg]]][[m[vm]]][crit[s],"sd"]
                 method[vm] <- as.character(agEval[[d[vd]]][[p[vp]]][[g[vg]]][[m[vm]]][crit[s],"method"])
                 criteria[vm] <- crit[s]
               }
           
-            metDF[[vd]][[vp]][[vg]][[s]] <-   data.frame(mean = mean, sd = sd, method = method, criteria = criteria)
+            metDF[[vd]][[vp]][[vg]][[s]] <-   data.frame(median = median, sd = sd, method = method, criteria = criteria)
       
-            metPlot[[vd]][[vp]][[vg]][[s]] <- ggplot(metDF[[vd]][[vp]][[vg]][[s]],aes(x=method,y=mean)) +
+            metPlot[[vd]][[vp]][[vg]][[s]] <- ggplot(metDF[[vd]][[vp]][[vg]][[s]],aes(x=method,y=median)) +
 
               geom_col() + 
               
               geom_bar(data=subset(metDF[[vd]][[vp]][[vg]][[s]], 
-                                   eval(parse(text = paste("mean==",best[(criterion==crit[s]),'optimal'],"(mean)", sep = "")))), 
-                       aes(method, mean),
+                                   eval(parse(text = paste("median==",best[(criterion==crit[s]),'optimal'],"(median)", sep = "")))), 
+                       aes(method, median),
                        fill="mistyrose2", stat="identity") + 
               
-              geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), width=0.2)+
+              geom_errorbar(aes(ymin = median-sd, ymax = median+sd), width=0.2)+
             
               ggtitle(paste(crit[s],", optimal = ",best[(criterion == crit[s]),'optimal'],sep=""),
                       subtitle = paste("D",d[vd],", p=",prop_vec[p[vp]],", g=",gap_vec[g[vg]],sep=""))+
