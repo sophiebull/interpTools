@@ -95,7 +95,7 @@ plotXt <- function(d, cptwise = T){
     geom_line(aes(x=t,y=simData$Xt[[d]]), lwd = 0.2) +
     geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2, col = "blue")+
       
-    ggtitle(bquote(x[t] == m[t] + t[t] + xi[t]))+
+    ggtitle(bquote(x["t,"~.(d)] == m["t,"~.(d)] + t["t,"~.(d)] + xi["t,"~.(d)]))+
     
     labs(x = "time", y = "value")+
     theme_light() +
