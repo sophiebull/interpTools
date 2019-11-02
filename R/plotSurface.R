@@ -10,13 +10,16 @@
 #' @param m A vector of the interpolation methods of interest (maximum of 5)
 #' @param crit A character vector describing the performance metrics of interest
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
+#' @param layer_type "method" (default) or "dataset"; how to slice the data
+#' @param f "mean" or "median" (default); which statistic to use for f(p,g)
 
-plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), crit, agEval, layer_type = "method"){
+plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), crit, agEval, layer_type = "method", f = "median"){
   require(plotly)
   require(dplyr)
   require(RColorBrewer)
   
-  stopifnot((layer_type == "method" || layer_type == "dataset"))
+  stopifnot((layer_type == "method" || layer_type == "dataset"),
+            (f == "mean" || f == "median"))
   
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
@@ -44,7 +47,7 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
       for(vd in 1:D){
         for(p in 1:P){
           for(g in 1:G){
-            critMat[p,g] <- agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],"median"]
+            critMat[p,g] <- agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],f]
             method_list_names[vm] <- as.character(agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s], "method"]) 
           }
         }
@@ -81,13 +84,17 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
     
       axx <- list(
         nticks = length(gap_vec),
-        range = c(min(gap_vec),max(gap_vec))
+        range = c(min(gap_vec),max(gap_vec)),
+        title = "gap width"
       )
       
       axy <- list(
         nticks = length(prop_vec),
-        range = c(min(prop_vec),max(prop_vec))
+        range = c(min(prop_vec),max(prop_vec)),
+        title = "proportion missing"
       )
+      
+      axz <- list(title = "value")
       
     for(s in 1:C){
       for(vd in 1:D){
@@ -103,12 +110,14 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
         
         z <- paste(z, collapse = "")
         
-        plotList[[s]][[vd]] <- eval(parse(text = paste("plot_ly() %>%",
-                                                       "layout(xaxis = axx, yaxis = axy) %>%",
-                                                        z,sep="")))
+        plotList[[s]][[vd]] <-  eval(parse(text = paste('plot_ly(scene="',paste("scene",vd,sep=""),'") %>%',
+                                  "layout(xaxis = axx, yaxis = axy) %>%",
+                                   z,sep="")))
         
-        plotList[[s]][[vd]] <- plotList[[s]][[vd]] %>%  layout(title = paste("\n Criterion = ",names(z_list)[s],"\n Dataset = ",vd, sep = ""))
-          
+        plotList[[s]][[vd]] <- plotList[[s]][[vd]] %>%  layout(title = paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Dataset = ",vd, sep = "")) 
+        
+        plotList[[s]][[vd]] <- hide_colorbar(plotList[[s]][[vd]])
+        
         }
         names(plotList[[s]]) <- data_list_names
       }
@@ -135,13 +144,18 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
       
       axx <- list(
         nticks = length(gap_vec),
-        range = c(min(gap_vec),max(gap_vec))
+        range = c(min(gap_vec),max(gap_vec)),
+        title = "gap width"
       )
       
       axy <- list(
         nticks = length(prop_vec),
-        range = c(min(prop_vec),max(prop_vec))
+        range = c(min(prop_vec),max(prop_vec)),
+        title = "proportion missing"
       )
+      
+      axz <- list(title = "value")
+      
       
       for(s in 1:C){
         for(vm in 1:M){
@@ -157,12 +171,13 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
           
           z <- paste(z, collapse = "")
           
-          plotList[[s]][[vm]] <- eval(parse(text = paste("plot_ly() %>%",
+          plotList[[s]][[vm]] <- eval(parse(text = paste('plot_ly(scene="',paste("scene",vm,sep=""),'") %>%',
                                                          "layout(xaxis = axx, yaxis = axy) %>%",
                                                          z,sep="")))
           
-          plotList[[s]][[vm]] <- plotList[[s]][[vm]] %>%  layout(title = paste("\n Criterion = ",names(z_list)[s],"\n Method = ",method_list_names[vm], sep = ""))
+          plotList[[s]][[vm]] <- plotList[[s]][[vm]] %>%  layout(title = paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Method = ",method_list_names[vm], sep = ""))
           
+          plotList[[s]][[vm]] <- hide_colorbar(plotList[[s]][[vm]])
           }
         names(plotList[[s]]) <- method_list_names
         }
@@ -172,3 +187,5 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
   
 return(plotList)
 }
+
+
