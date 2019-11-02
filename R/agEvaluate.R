@@ -2,9 +2,9 @@
 #' 
 #' Function to 'condense' the performance matrices of the interpolations from each method (M) across K simulations in each (P,G) missingness specification 
 #' @param pmats The performance matrices (result of performance.R)
-#' @param task Type of aggregation. "default" returns the matrices, "errors" returns the 
+#' @param hist logical. TRUE returns a list of histograms of criteria, FALSE returns matrix of aggregated metrics
 
-agEvaluate <- function(pmats){
+agEvaluate <- function(pmats, hist = F){
   skew <- function(x){
     stopifnot(is.numeric(x))
     
@@ -58,9 +58,17 @@ agEvaluate <- function(pmats){
         for(m in 1:M){
           method_names[m] <- algorithm_names[methods[m]]
           
+          # Generate histograms in each subset
+          if(hist){
+            sqrtC = sqrt(length(pmats[[1]][[1]][[1]][[1]][[1]]))
+            par(mfrow=c(floor(sqrtC),ceiling(sqrtC)))
+            Evaluation[[d]][[p]][[g]][[m]] <- apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,hist)
+          }
+          
+          
             # compute the mean and distribution of the performance criteria in each (d,m,p,g) specification across all k pairs of (x,X) and 
             # store results in a list of data frames
-          
+          else if(!hist){
             Evaluation[[d]][[p]][[g]][[m]] <- data.frame(
               
               mean = rowMeans(sapply(pmats[[d]][[m]][[p]][[g]],unlist)),
@@ -73,12 +81,16 @@ agEvaluate <- function(pmats){
               q97.5 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1, FUN=function(x) quantile(x, probs = c(0.025,0.975)))["97.5%",],
               q100 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["100%",],
               skewness = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,skew), 
+              dip = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,FUN = function(x){
+                dip.test(x,simulate.p.value = TRUE)$p.value
+              }),
               
               gap_width = c(rep(gap_vec[g], 17)),
               prop_missing = c(rep(prop_vec[p],17)),
               dataset = c(rep(dataset[d],17)), 
               method = rep(algorithm_names[methods[m]],17) 
             )  
+          }
             
         }
         names(Evaluation[[d]][[p]][[g]]) <- method_names 
