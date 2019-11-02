@@ -20,4 +20,6 @@ Depends: multitaper,
           gridExtra,
           plotly,
           dplyr,
-          RColorBrewer
+          RColorBrewer,
+          tidyr,
+          diptest
