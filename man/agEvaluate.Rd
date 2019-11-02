@@ -4,12 +4,12 @@
 \alias{agEvaluate}
 \title{Aggregate the Performance Matrices of Multiple Interpolations}
 \usage{
-agEvaluate(pmats)
+agEvaluate(pmats, hist = F)
 }
 \arguments{
 \item{pmats}{The performance matrices (result of performance.R)}
 
-\item{task}{Type of aggregation. "default" returns the matrices, "errors" returns the}
+\item{hist}{logical. TRUE returns a list of histograms of criteria, FALSE returns matrix of aggregated metrics}
 }
 \description{
 Function to 'condense' the performance matrices of the interpolations from each method (M) across K simulations in each (P,G) missingness specification
