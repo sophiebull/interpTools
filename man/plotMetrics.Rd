@@ -22,5 +22,5 @@ plotMetrics(agEval, d = 1:length(agEval), p = 1:length(agEval[[1]]),
 \item{crit}{A character vector of performance metrics of interest}
 }
 \description{
-Function to generate a grid of plots for visualizing a selection of performance metrics.
+Function to generate a grid of plots for visualizing a selection of performance metrics (median).
 }
