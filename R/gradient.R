@@ -7,7 +7,9 @@
 #' @param crit A character vector describing the performance metrics of interest
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
  
-gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,agEval){
+gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,agEval,f = "median"){
+  
+  stopifnot((f == "median" | f == "mean"))
   
   # defining prop_vec and gap_vec
   prop_vec <- as.numeric(gsub("p","",names(agEval[[1]]))) # proportions
@@ -42,7 +44,7 @@ gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,a
       for(vd in 1:D){
         for(p in 1:P){
           for(g in 1:G){
-            critMat[p,g] <- agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],"mean"]
+            critMat[p,g] <- agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],f]
             method_list_names[vm] <- as.character(agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s], "method"]) 
           }
         }
