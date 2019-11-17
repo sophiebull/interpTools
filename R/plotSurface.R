@@ -1,7 +1,7 @@
 #' Plot Surface
 #' 
-#' Function to generate a surface plot to visualize average changes in the performance metrics of interest
-#' as the proportion of missing data and gap width increase. Metrics are averaged across K simulations in each p,g,d,m specification. \cr
+#' Function to generate a surface plot to visualize changes in the performance metrics of interest
+#' as the proportion of missing data and gap width increase. Metrics are aggregated across K simulations in each p,g,d,m specification. \cr
 #' The x-axis represents p, the proportion of missing data.\cr 
 #' The y-axis represents g, the gap width.\cr
 #' The z-axis represents the value of the performance metric of interest.
@@ -13,7 +13,12 @@
 #' @param layer_type "method" (default) or "dataset"; how to slice the data
 #' @param f "mean" or "median" (default); which statistic to use for f(p,g)
 
-plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), crit, agEval, layer_type = "method", f = "median"){
+plotSurface <- function(d=1:length(agEval), 
+                        m=1:length(agEval[[1]][[1]][[1]]), 
+                        crit, 
+                        agEval, 
+                        layer_type = "method", 
+                        f = "median"){
   require(plotly)
   require(dplyr)
   require(RColorBrewer)
@@ -71,12 +76,12 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
                     x <- vector(mode = 'list', D))
       
       palette <- list()
-      colorList <- list(c("#DA5526","#FEBC38"),
-                        c("#B42F32","#DF6747"),
-                        c("#FFECD2","#FCB69F"),
-                        c("#FF9A9E","#FECFEF"),
-                        c("#FEADA6","#F5EFEF"),
-                        c("#EE9CA7","#FFDDE1"))
+      colorList <- list(c("grey90","grey90"),
+                        c("grey70","grey70"),
+                        c("grey50","grey50"),
+                        c("grey30","grey30"),
+                        c("grey10","grey10"),
+                        c("grey0","grey0"))
         
       for(i in 1:length(colorList)){
         palette[[i]] <- colorRampPalette(colorList[[i]])(P*G)
@@ -132,11 +137,11 @@ plotSurface <- function(d=1:length(agEval), m=1:length(agEval[[1]][[1]][[1]]), c
         x <- vector(mode = 'list', M))
       
       palette <- list()
-      colorList <- list(c("#DA5526","#FEBC38"),
-                        c("#B42F32","#DF6747"),
-                        c("#FFECD2","#FCB69F"),
-                        c("#FF9A9E","#FECFEF"),
-                        c("#FEADA6","#F5EFEF"))
+      colorList <- list(c("grey90","grey90"),
+                            c("grey70","grey70"),
+                            c("grey50","grey50"),
+                            c("grey30","grey30"),
+                            c("grey10","grey10"))
       
       for(i in 1:length(colorList)){
         palette[[i]] <- colorRampPalette(colorList[[i]])(P*G)
