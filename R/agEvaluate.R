@@ -99,7 +99,7 @@ agEvaluate <- function(pmats, hist = F){
     }
     names(Evaluation[[d]]) <- prop_vec_names 
   }
-  names(Evaluation) <- names(OriginalData)
+  names(Evaluation) <- names(pmats)
   
     return(Evaluation)
 
