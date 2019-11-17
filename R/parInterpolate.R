@@ -197,6 +197,7 @@ parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL){
         )}
       )},
     mc.cores = detectCores())
+    
     }
   }
   
