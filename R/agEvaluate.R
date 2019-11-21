@@ -5,10 +5,18 @@
 #' @param hist logical. TRUE returns a list of histograms of criteria, FALSE returns matrix of aggregated metrics
 
 agEvaluate <- function(pmats, hist = F){
-  skew <- function(x){
+  skew <- function(x, na.rm = TRUE){
     stopifnot(is.numeric(x))
     
+    if(na.rm){
+      x <- x[!is.na(x)]
     sk <- (sum((x-mean(x))^3)/(length(x)*sd(x)^3))
+    }
+    
+    else if(!na.rm){
+    sk <- (sum((x-mean(x))^3)/(length(x)*sd(x)^3))
+    }
+    
     return(sk)
   }
   
@@ -35,6 +43,8 @@ agEvaluate <- function(pmats, hist = F){
   M <- length(pmats[[1]])
   P <- length(pmats[[1]][[1]])
   G <- length(pmats[[1]][[1]][[1]])
+  K <- length(pmats[[1]][[1]][[1]][[1]])
+  C <- length(pmats[[1]][[1]][[1]][[1]][[1]])
   
   dataset <- 1:D
   
@@ -60,7 +70,7 @@ agEvaluate <- function(pmats, hist = F){
           
           # Generate histograms in each subset
           if(hist){
-            sqrtC = sqrt(length(pmats[[1]][[1]][[1]][[1]][[1]]))
+            sqrtC = sqrt(C)
             par(mfrow=c(floor(sqrtC),ceiling(sqrtC)))
             Evaluation[[d]][[p]][[g]][[m]] <- apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,hist)
           }
@@ -71,24 +81,36 @@ agEvaluate <- function(pmats, hist = F){
           else if(!hist){
             Evaluation[[d]][[p]][[g]][[m]] <- data.frame(
               
-              mean = rowMeans(sapply(pmats[[d]][[m]][[p]][[g]],unlist)),
-              sd = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,sd),
-              q0 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["0%",],
-              q2.5 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1, FUN=function(x) quantile(x, probs = c(0.025,0.975)))["2.5%",],
-              q25 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["25%",],
-              median = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,median),
-              q75 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["75%",],
-              q97.5 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1, FUN=function(x) quantile(x, probs = c(0.025,0.975)))["97.5%",],
-              q100 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile)["100%",],
+              mean = rowMeans(sapply(pmats[[d]][[m]][[p]][[g]],unlist), na.rm = TRUE),
+              
+              sd = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,sd, na.rm = TRUE),
+              
+              q0 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile, na.rm = TRUE)["0%",],
+              
+              q2.5 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1, 
+                           FUN=function(x) quantile(x, probs = c(0.025,0.975), na.rm = TRUE))["2.5%",],
+              
+              q25 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile, na.rm = TRUE)["25%",],
+              
+              median = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,median, na.rm = TRUE),
+              
+              q75 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile, na.rm = TRUE)["75%",],
+              
+              q97.5 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1, 
+                            FUN=function(x) quantile(x, probs = c(0.025,0.975), na.rm = TRUE))["97.5%",],
+              
+              q100 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile, na.rm = TRUE)["100%",],
+              
               skewness = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,skew), 
-              dip = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,FUN = function(x){
-                dip.test(x,simulate.p.value = TRUE)$p.value
+              
+              dip = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,
+                          FUN = function(x){dip.test(x,simulate.p.value = TRUE)$p.value
               }),
               
-              gap_width = c(rep(gap_vec[g], 17)),
-              prop_missing = c(rep(prop_vec[p],17)),
-              dataset = c(rep(dataset[d],17)), 
-              method = rep(algorithm_names[methods[m]],17) 
+              gap_width = c(rep(gap_vec[g], C)),
+              prop_missing = c(rep(prop_vec[p],C)),
+              dataset = c(rep(dataset[d],C)), 
+              method = rep(algorithm_names[methods[m]],C) 
             )  
           }
             
