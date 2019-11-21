@@ -3,8 +3,9 @@
 #' Function to calculate the performance metrics between lists of original and interpolated series.
 #' @param OriginalData A list object of dimension Dxn of original (complete) time series 
 #' @param IntData A list object of dimension DxMxPxGxKxN of interpolated time series (output of parInterpolate.R)
+#' @param GappyData A list object of dimension DxPxGxKxN of the gappy original time series (output of simulateGaps.R)
 #' 
-performance <- function(OriginalData,IntData){
+performance <- function(OriginalData,IntData,GappyData){
   algorithm_names <- c("Nearest.Neighbor",
                        "Linear.Interpolation", 
                        "Natural.Cubic.Spline",
@@ -50,7 +51,7 @@ performance <- function(OriginalData,IntData){
         for(g in 1:G){
           gap_vec_names[g] <- c(paste("g", gap_vec[g],sep="")) # vector of names
           for(k in 1:K) { 
-            Performance[[d]][[m]][[p]][[g]][[k]] <- unlist(eval_performance(x = OriginalData[[d]], X = IntData[[d]][[m]][[p]][[g]][[k]]))
+            Performance[[d]][[m]][[p]][[g]][[k]] <- unlist(eval_performance(x = OriginalData[[d]], X = IntData[[d]][[m]][[p]][[g]][[k]], gappyx = GappyData[[d]][[p]][[g]][[k]]))
           }
           names(Performance[[d]][[m]][[p]]) <- gap_vec_names
         }
