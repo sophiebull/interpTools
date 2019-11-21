@@ -19,16 +19,26 @@
 #' RMSE = 0\cr
 #' NRMSD = 0\cr
 #' RMSS = 0\cr
+#' MdAPE = 0\cr
 #' @param x The original time series vector
 #' @param X The interpolated time series vector
+#' @param gappyx The gappy original time series vector
 
 #best <- data.frame(criterion = criteria, maximize = c(1,1,rep(0,11),1,rep(0,3))) # 1 = yes, 0 = no
 
-eval_performance <- function(x, X) {
+eval_performance <- function(x, X, gappyx) {
   # x = original , X = interpolated 
-  stopifnot(is.numeric(x), is.numeric(X), length(x) == length(X))
+  stopifnot(is.numeric(x), is.numeric(X), length(x) == length(X), is.numeric(gappyx), length(gappyx) == length(x), length(gappyx) == length(X))
   
   n <- length(x)
+  
+  # identify which values were interpolated
+  index <- which(is.na(gappyx))
+  
+  # only consider values which have been replaced
+  X <- X[index]
+  x <- x[index]
+  
   return <- list()
   
   # Coefficent of Correlation, r
@@ -100,5 +110,13 @@ eval_performance <- function(x, X) {
     return$RMSS <- NA 
   }
   
+  # Median Absolute Percentage Error
+  if (length(which(x == 0)) == 0) {
+    return$MdAPE <- median(abs((x - X) / x))*100  
+  } else {
+    return$MdAPE <- NA
+  }
+  
   return(return)
 }
+
