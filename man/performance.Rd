@@ -4,12 +4,14 @@
 \alias{performance}
 \title{Evaluate Interpolation Performance Across Multiple Time Series}
 \usage{
-performance(OriginalData, IntData)
+performance(OriginalData, IntData, GappyData)
 }
 \arguments{
 \item{OriginalData}{A list object of dimension Dxn of original (complete) time series}
 
 \item{IntData}{A list object of dimension DxMxPxGxKxN of interpolated time series (output of parInterpolate.R)}
+
+\item{GappyData}{A list object of dimension DxPxGxKxN of the gappy original time series (output of simulateGaps.R)}
 }
 \description{
 Function to calculate the performance metrics between lists of original and interpolated series.
