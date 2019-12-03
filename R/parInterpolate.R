@@ -149,7 +149,7 @@ parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL){
                        "na_mean(option = 'median', x = ",
                        "na_mean(option = 'mode', x = ", 
                        "na_random(",
-                       "interpolate(gap = which(is.na(x) == TRUE), progress = FALSE, z = ")
+                       "tsinterp::interpolate(gap = which(is.na(x) == TRUE), progress = FALSE, z = ")
   
   algorithms <- data.frame(algorithm_names, algorithm_calls)
   
