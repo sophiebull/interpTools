@@ -24,7 +24,7 @@ G <- length(g)
 C <- length(crit)
 
 criterion <- rownames(agEval[[1]][[1]][[1]][[1]])
-maximize <- c(1,1,rep(0,11),1,rep(0,3)) # 1 = yes, 0 = no
+maximize <- c(1,1,rep(0,11),1,rep(0,4)) # 1 = yes, 0 = no
 optimal <- maximize
 optimal[which(optimal == "1")] <- "max"
 optimal[which(optimal == "0")] <- "min"
