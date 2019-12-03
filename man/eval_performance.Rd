@@ -22,14 +22,17 @@ NMSE = 0\cr
 RE = 1\cr
 RMSE = 0\cr
 NRMSD = 0\cr
-RMSS = 0\cr}
+RMSS = 0\cr
+MdAPE = 0\cr}
 \usage{
-eval_performance(x, X)
+eval_performance(x, X, gappyx)
 }
 \arguments{
 \item{x}{The original time series vector}
 
 \item{X}{The interpolated time series vector}
+
+\item{gappyx}{The gappy original time series vector}
 }
 \description{
 Evaluate Interpolation Performance of a Single Time Series
@@ -53,4 +56,5 @@ RE = 1\cr
 RMSE = 0\cr
 NRMSD = 0\cr
 RMSS = 0\cr
+MdAPE = 0\cr
 }
