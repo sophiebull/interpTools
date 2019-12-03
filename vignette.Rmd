@@ -1,0 +1,508 @@
+---
+title: "Vignette"
+author: "Sophie Castel"
+date: "11/26/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Attaching library: \verb+sophTools+
+```{r, cache = TRUE, warnings = FALSE, echo = FALSE, eval = FALSE}
+library(devtools)
+install_github("castels/sophTools")
+```
+
+```{r}
+library(sophTools)
+```
+
+## Setting a seed for reproducibility
+```{r, cache = TRUE}
+set.seed(100)
+```
+
+## Initialize basic parameters
+
+\begin{itemize}
+\item $D$ = number of datasets to generate
+\item $n$ = length of each time series
+\item $t$ = vector of time indices
+\end{itemize}
+
+```{r, cache = TRUE}
+D = 5
+n=100
+t=0:(n-1)
+```
+
+# Data generation
+
+## Varying Mt
+Fixed variables:
+\begin{itemize}
+\item $\eta$ = 3
+\item \verb+numFreq+ = $\psi$ = 30
+\item \verb+trendType+ = ``polynomial"
+\item \verp+p+ = 0
+\item \verb+q+ = 0
+\item \verb+SNR+ = 5
+\end{itemize}
+
+```{r, cache = TRUE}
+bandwidth = 3
+numFreq = 30
+trendType = "polynomial"
+p = 0
+q = 0
+snr = 5
+```
+
+Unfixed variables:
+\begin{itemize}
+\item \verb+numTrend+ = $d$, for $d$ in $0,...,D-1$
+\end{itemize}
+
+```{r, cache = TRUE}
+simData <- simXt(D=D, n=n, vary = "Mt", 
+                 bandwidth = bandwidth, 
+                 numFreq = numFreq, 
+                 trendType = trendType, 
+                 snr = snr)
+```
+
+## Varying Tt
+Fixed variables:
+\begin{itemize}
+\item $\eta$ = 3
+\item \verb+numTrend+ = $\phi$ = 0
+\item \verb+trendType+ = ``polynomial"
+\item \verp+p+ = 0
+\item \verb+q+ = 0
+\item \verb+snr+ = 5
+\end{itemize}
+
+```{r, cache = TRUE}
+bandwidth = 3
+numTrend = 0
+trendType = "polynomial"
+p = 0
+q = 0
+snr = 5
+```
+
+Unfixed variables:
+\begin{itemize}
+\item \verb+numFreq+ = $d*10$, for $d$ in $1,...,D$
+\end{itemize}
+
+```{r}
+simData <- simXt(D=D, n=n, vary = "Tt", 
+                 bandwidth = bandwidth, 
+                 numTrend = numTrend, 
+                 trendType = trendType, 
+                 snr = snr)
+```
+
+## Varying Wt, fixing p
+Fixed variables:
+\begin{itemize}
+\item $\eta$ = 3
+\item \verb+numFreq+ = $\psi$ = 30
+\item \verb+numTrend+ = $\phi$ = 0
+\item \verb+trendType+ = ``polynomial"
+\item \verp+p+ = 0
+\item \verb+snr+ = 5
+\end{itemize}
+
+```{r, cache = TRUE}
+bandwidth = 3
+numFreq = 30
+numTrend = 0
+trendType = "polynomial"
+p = 0
+snr = 5
+```
+
+Unfixed variables:
+\begin{itemize}
+\item \verb+q+ = $d$ for $d$ in $0,...,D-1$
+\end{itemize}
+
+```{r, cache = TRUE}
+simData <- simXt(D=D, n=n, vary = "Wt", 
+                 bandwidth = bandwidth, 
+                 numFreq = numFreq, 
+                 numTrend = numTrend, 
+                 trendType = trendType, 
+                 p = p, fix = "p", 
+                 snr = snr)
+```
+
+## Varying Wt, fixing q
+Fixed variables:
+\begin{itemize}
+\item $\eta$ = 3
+\item \verb+numFreq+ = $\psi$ = 30
+\item \verb+numTrend+ = $\phi$ = 0
+\item \verb+trendType+ = ``polynomial"
+\item \verp+q+ = 0
+\item \verb+snr+ = 5
+\end{itemize}
+
+```{r, cache = TRUE}
+bandwidth = 3
+numFreq = 30
+numTrend = 0
+trendType = "polynomial"
+q = 0
+snr = 5
+```
+
+Unfixed variables:
+\begin{itemize}
+\item \verb+p+ = $d$ for $d$ in $0,...,D-1$
+\end{itemize}
+
+```{r, cache = TRUE}
+simData <- simXt(D=D, n=n, vary = "Wt", 
+                 bandwidth = bandwidth, 
+                 numFreq = numFreq, 
+                 numTrend = numTrend, 
+                 trendType = trendType, 
+                 q = q, fix = "q", 
+                 snr = snr)
+```
+
+Generate a list object called \verb+OriginalData+, with dimension $d,n$:
+$d = 1,...,D$ = dataset$_d$
+$n = 1,...,N$ = length of time series
+
+```{r, cache = TRUE}
+sets <- numeric(D)
+for(d in 1:(D-1)){
+  sets[d] <- paste("D",d,"=simData$Xt[[",d,"]],",sep="")
+}
+sets[D] <- paste("D",D,"=simData$Xt[[",D,"]]",sep="")
+list_call <- paste("list(",paste(sets,collapse=""),")")
+      
+OriginalData = eval(parse(text=list_call))
+```
+
+To access a particular list value, follow the following format: \verb+OriginalData+$[[d]][[n]]$
+
+# Visualizing the original data
+## Example: Dataset 4
+```{r}
+plotXt(4,cptwise = T)
+```
+
+# Generating Gappy Data
+
+## Initializing basic parameters
+
+\begin{itemize}
+\item \verb+prop_vec+ = $\vec{p} = p_1,p_2...,p_P$ = vector of proportions of data missing
+\item \verb+gap_vec+ = $\vec{g} = g_1,g_2,...,g_G$ = vector of gap widths
+\item $K$ = number of gappy series to simulate under each $(p,g)$ specification
+\end{itemize}
+
+```{r, cache = TRUE}
+prop_vec = c(0.1,0.2,0.3)
+gap_vec = c(1,5,10)
+K = 10 
+```
+
+Generate a multi-level list object called \verb+GappyData+, with dimension $d,p,g,k,n$:
+$d = 1,...,D$ = dataset$_d$
+$p = 1,...,P$ = proportion of missing values$_p$
+$g = 1,...,G$ = gap width$_g$
+$k = 1,...,K$ = sample ID under each $d,p,g$ specification
+$n = 1,...,N$ = length of time series
+
+```{r, cache = TRUE}
+GappyData <- list()
+
+for(d in 1:length(OriginalData)){
+  GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), 
+                                 prop_vec = prop_vec, 
+                                 gap_vec = gap_vec, 
+                                 K = K)
+}
+names(GappyData) <- names(OriginalData)
+```
+
+To access a particular list value, follow the following format: \verb+GappyData+$[[d]][[p]][[g]][[k]][[n]]$
+
+# Parallel Interpolation
+
+## Progress Bar
+```{r, cache = TRUE}
+pb = txtProgressBar(min = 0, max = length(OriginalData), initial = 0, style = 3) 
+```
+
+## Specify interpolation methods
+\begin{enumerate}
+\item Nearest Neighbor
+\item Linear Interpolation
+\item Natural Cubic Spline
+\item FMM Cubic Spline
+\item Hermite Cubic Spline
+\item Stineman Interpolation
+\item Kalman - ARIMA
+\item Kalman - StructTS
+\item Last Observation Carried Forward
+\item Next Observation Carried Backward
+\item Simple Moving Average
+\item Linear Weighted Moving Average
+\item Exponential Weighted Moving Average
+\item Replace with Mean
+\item Replace with Median
+\item Replace with Mode
+\item Replace with Random
+\item Hybrid Wiener 
+\end{enumerate}
+
+```{r, cache = TRUE}
+methods <- c(3,7,15)
+```
+
+Generate a multi-level list object called \verb+IntData+, with dimension $d,m,p,g,k,n$:
+$d = 1, ...,D$ = dataset$_d$
+$m = 1, ...,M$ = interpolation method$_m$
+$p = 1, ...,P$ length(prop_vec) = proportion of missing values$_p$
+$g = 1, ...,G$ length(gap_vec) = gap width$_g$
+$k = 1, ...,K$ = sample ID under each $d,m,p,g,k$ specification
+$n = 1, ... , N$ = length of each time series
+
+```{r, cache = TRUE}
+IntData <- list()
+
+for(d in 1:length(OriginalData)){
+  IntData[[d]] <- parInterpolate(gappyTS = GappyData[[d]], methods = methods)
+  setTxtProgressBar(pb,d)
+}
+names(IntData) <- names(OriginalData)
+```
+
+To access a particular list value, follow the following format: \verb+IntData+$[[d]][[m]][[p]][[g]][[k]][[n]]$
+
+# Conducting the Performance Evaluation
+Compare the each interpolated series with the original, based on these criteria:
+
+\begin{itemize}
+R = 1
+R^2 = 1
+abs_differences = 0
+MBE = 0
+ME = 0
+MAE = 0
+MRE = 0
+MARE = 0
+MAPE = 0
+SSE = 0 
+MSE = 0
+RMS = 0 
+NMSE = 0
+RE = 1
+RMSE = 0
+NRMSD = 0
+RMSS = 0
+MdAPE = 0
+\end{itemize}
+
+Where a value of 1 means that the criterion is optimal at a maximum; a value of 0 indicates a criterion is optimized at a minimum.
+
+Generate a list object called \verb+pMats+, of dimension $d,m,p,g,k$, where the terminal node is a vector of length $C$ giving the criterion values..
+
+$d = 1, ...,D$ = dataset$_d$
+$m = 1, ...,M$ = interpolation method$_m$
+$p = 1, ...,P$ length(prop_vec) = proportion of missing values$_p$
+$g = 1, ...,G$ length(gap_vec) = gap width$_g$
+$k = 1, ...,K$ = sample ID under each $d,m,p,g,k$ specification
+$c = 1, ...,C$ = criterion$_c$
+
+To access a particular list value, follow the following format: \verb+pMats+$[[d]][[m]][[p]][[g]][[k]][[c]]$
+
+```{r pMats, cache = TRUE}
+pMats <- performance(OriginalData=OriginalData, IntData=IntData, GappyData = GappyData)
+```
+
+# Aggregating the Performance Metrics
+Generate performance matrices aggregating (default: \textbf{median}) across the $k$ interpolations in each $d,p,g,m$ specification.
+
+Generate a list object called \verb+ag+, of dimension $d,p,g,m$, where the terminal node is a performance matrix.
+
+$d = 1, ...,D$ = dataset$_d$
+$p = 1, ...,P$ length(prop_vec) = proportion of missing values$_p$
+$g = 1, ...,G$ length(gap_vec) = gap width$_g$
+$m = 1, ...,M$ = interpolation method$_m$
+
+To access a particular list value, follow the following format: \verb+ag+$[[d]][[p]][[g]][[m]]$
+
+```{r Evaluation, cache = TRUE}
+ag <- agEvaluate(pmats = pMats)
+```
+
+Example of information available in \verb+ag+:
+
+```{r, cache = TRUE}
+str(ag[[1]][[1]][[1]][[1]])
+```
+
+# Showing the Distribution (Skewness) of Each Criterion
+Collect and visualize the distribution of the skewness values for each criterion across all simulations: 
+```{r Skewness}
+plotSkew(agEval = ag, cptwise = T)
+```
+
+# Visualize Performance Metrics
+Coloured bar indicates the "best". Generate a grid of plots:
+
+
+```{r}
+pm <- plotMetrics(agEval=ag,d=1:2,p=1,g=3,crit = c("MSE"), m=1:3)
+```
+
+# Generating Surface Plots 
+Creating a surface to see the changes with proportion missing and gap size increase.
+\begin{itemize}
+\item $x$-axis = gap width = $g_1,g_2,...,g_G$
+\item $y$-axis = proportion missing = $p_1,p_2,...p_P$
+\item $z$-axis = aggregated criterion across $K$ simulations (default: \textbf{median})
+
+The $x,y$-plane forms a \textbf{discrete mesh}.
+
+## ACROSS METHOD
+Result is a list object named \verb+ps+ of dimension $c,d$.
+
+```{r, cache = TRUE}
+ps<- plotSurface(crit=c("MAPE","NRMSD"), agEval = ag, layer_type = "method", f="median")
+```
+
+To access a particular list element (surface plot), follow the following format: \verb+ps+$[[c]][[d]]$. For example, a surface plot of the median \textbf{MAPE} value in dataset 1:
+
+```{r, cache = TRUE}
+ps[[1]][[1]] #criterion, dataset
+```
+
+Plots for each criterion across all datasets can be combined into one grid using \verb+subplot()+. You may have to adjust the camera parameters. For example, combining all \textbf{MAPE} surface plots:
+
+```{r, cache = TRUE}
+pp1MAPE <- ps[[1]][[1]] # criterion, dataset
+pp2MAPE <- ps[[1]][[2]] # criterion, dataset
+pp3MAPE <- ps[[1]][[3]] # criterion, dataset
+pp4MAPE <- ps[[1]][[4]] # criterion, dataset
+pp5MAPE <- ps[[1]][[5]] # criterion, dataset
+
+sub1  <- subplot(pp1MAPE,pp2MAPE,pp3MAPE,pp4MAPE,pp5MAPE) %>%
+  
+            layout(title = names(ps)[1],
+                   
+             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), aspectmode = 'manual', aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), aspectmode = 'manual', aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), aspectmode = 'manual', aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), aspectmode = 'manual', aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             scene5 = list(domain=list(x=c(1/4,3/4), y=c(0,1/3)), aspectmode = 'manual', aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             annotations = list(list(text = "Dataset 1", x = 1/4-1/25, y = 24/25, showarrow = FALSE), 
+                                list(text = "Dataset 2", x = 3/4+1/25, y = 24/25, showarrow = FALSE), 
+                                list(text = "Dataset 3", x = 1/4-1/25, y = 15.333/25, showarrow = FALSE), 
+                                list(text = "Dataset 4", x = 3/4+1/25, y = 15.333/25, showarrow = FALSE), 
+                                list(text = "Dataset 5", x = 1/2, y = 7.333/25, showarrow = FALSE))
+             )
+sub1
+```
+
+## ACROSS DATASET
+Result is a list object named \verb+ps+ of dimension $c,m$.
+
+```{r, cache = TRUE}
+PS<- plotSurface(crit=c("MAPE","NRMSD"), agEval = ag, layer_type = "dataset", f="median")
+``` 
+
+To access a particular list element (surface plot), follow the following format: \verb+ps+$[[c]][[m]]$. For example, a surface plot of the median \textbf{MAPE} value for the first method:
+
+```{r, cache = TRUE}
+PS[[1]][[1]] #criterion, method
+```
+
+Plots for each criterion across all methods can be combined into one grid using \verb+subplot()+. You may have to adjust the camera parameters. For example, combining all \textbf{MAPE} surface plots:
+
+```{r, cache = TRUE}
+PP1MAPE <- PS[[1]][[1]] # criterion, method
+PP2MAPE <- PS[[1]][[2]] # criterion, method
+PP3MAPE <- PS[[1]][[3]] # criterion, method
+
+sub2  <- subplot(PP1MAPE,PP2MAPE,PP3MAPE) %>%
+  
+            layout(title = names(PS)[1],
+                   
+             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
+                          aspectmode = 'manual', aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
+                           aspectmode = 'manual', aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene3 = list(domain=list(x=c(1/4,3/4), y=c(1/4,3/4)), 
+                           aspectmode = 'manual', aspectratio=list(x=1,y=1,z=0.5)),
+             
+             annotations = list(list(text = names(PS[[1]])[1], x = 1/4-1/25, y = 24/25, showarrow = FALSE), 
+                                list(text = names(PS[[1]])[2], x = 3/4+1/25, y = 24/25, showarrow = FALSE), 
+                                list(text = names(PS[[1]])[3], x = 1/4-1/25, y = 15.333/25, showarrow = FALSE))
+             )
+sub2
+```
+
+# Generating Cross-Section Plots
+Collapse the three-dimensional surface plots across $p$ or $g$. The result is a list object of ribbon plots of dimension $c,d$, or $c,m$ (depending on \verb+layer_type+). The line represents the \emph{median}, the upper bound is the maximum value across the collapsed variable, and the lower bound is the minimum value across the collapsed variable.
+
+For example, we can view, by method, a cross section of \verb+gap_width+, $g$, by collapsing the surface plot across \verb+prop_missing+, $p$.
+
+```{r}
+plotListCS <- plotCS(m = 1:3, agEval = ag, 
+                     cross_section = "g", 
+                     layer_type = "method", 
+                     crit = c("MAPE","NRMSD"))
+
+```
+
+Looking at the \textbf{NRMSD} criterion in this cross section:
+```{r}
+plotListCS[[2]][[1]] #criterion, dataset
+```
+
+# Computing the Gradient for the Surface Plot
+The gradient of a surface plot will give the slope at each ($p,g$) junction point on the discrete mesh. The result is a list named \verb+gg+ of dimension $c,m,d$: 
+
+```{r}
+gg <- gradient(agEval = ag, crit = "MAPE", f = "median")
+```
+
+For example, the gradient of the median \textbf{MAPE} surface for the first interpolation algorithm in dataset 2:
+```{r}
+gg1 <- gg[[1]][[1]][[2]] # criterion, method, dataset 
+```
+
+Large slopes indicate algorithm instability at a $p,g$ junction. The maximum slope can be determined:
+```{r}
+gg1[which.max(abs(gg1[,"slope"])),]
+```
+The above result indicates that the algorithm is most unstable when \verb+gap width+ is constant at $g=10$ and \verb+proportion missing+ changes from $p=20$ to $p=30$. 
+
+Small slopes indicate algorithm stability at a $p,g$ junction. The minimum slope can be determined:
+```{r}
+gg1[which.min(abs(gg1[,"slope"])),]
+```
+The above result indicates that the algorithm is most stable when \verb+gap width+ decreases from $g=10$ to $g=5$ and \verb+proportion missing+ changes from $p=20$ to $p=30$. 
+
+
