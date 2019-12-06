@@ -74,8 +74,8 @@ plotCS <- function(d=1:length(agEval),
   ## z_list[[criterion]][[method]][[dataset]]
   
   if(layer_type == "method"){ 
-    colorList <- colorRampPalette(colors = c("blue","pink"))(M)
-    
+    colorList <- c("grey90","grey70","grey50","grey30","grey10","grey0")
+
     if(cross_section == "p"){
     axx <- prop_vec
     data <- z_list
@@ -100,7 +100,7 @@ plotCS <- function(d=1:length(agEval),
           z[vm] <- paste("geom_ribbon(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])), 
                                                    aes(x = axx, ymin = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,min),
                                                    ymax = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,max)), 
-                                                   fill = colorList[",vm,"], alpha = 0.1) + 
+                                                   fill = colorList[",vm,"], alpha = 0.2) + 
 
                           geom_line(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])), 
                           aes(x = axx, y = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,median),
@@ -110,7 +110,7 @@ plotCS <- function(d=1:length(agEval),
         z[M] <- paste("geom_ribbon(data = data.frame(fun(data[[",s,"]][[",M,"]][[",vd,"]])), 
                                                    aes(x = axx, ymin = apply(fun(data[[",s,"]][[",M,"]][[",vd,"]]),1,min),
                                                    ymax = apply(fun(data[[",s,"]][[",M,"]][[",vd,"]]),1,max)),
-                                                   fill = colorList[",M,"], alpha = 0.1) + 
+                                                   fill = colorList[",M,"], alpha = 0.2) + 
                       
                       geom_line(data = data.frame(fun(data[[",s,"]][[",M,"]][[",vd,"]])), 
                       aes(x = axx, y = apply(fun(data[[",s,"]][[",M,"]][[",vd,"]]),1,median), 
@@ -125,7 +125,7 @@ plotCS <- function(d=1:length(agEval),
         plotList[[s]][[vd]] <- plotList[[s]][[vd]] +  
                                 ggtitle(paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Dataset = ",vd, sep = "")) + 
                                 xlab(axxTitle) + ylab("value") + 
-                                scale_colour_manual("", breaks = names(data[[s]]), values = colorList)
+                                scale_colour_manual("", breaks = names(data[[s]])[1:M], values = colorList[1:M])
         
         }
       names(plotList[[s]]) <- data_list_names
@@ -136,7 +136,7 @@ plotCS <- function(d=1:length(agEval),
   
   
   else if(layer_type == "dataset"){ 
-    colorList <- colorRampPalette(colors = c("blue","pink"))(D)
+    colorList <- c("grey90","grey70","grey50","grey30","grey10","grey0")
     
     if(cross_section == "p"){
       axx <- prop_vec
@@ -162,7 +162,7 @@ plotCS <- function(d=1:length(agEval),
           z[vd] <- paste("geom_ribbon(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])), 
                                                    aes(x = axx, ymin = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,min),
                                                    ymax = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,max)), 
-                                                   fill = colorList[",vd,"], alpha = 0.1) + 
+                                                   fill = colorList[",vd,"], alpha = 0.2) + 
 
                           geom_line(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])), 
                           aes(x = axx, y = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,median),
@@ -172,7 +172,7 @@ plotCS <- function(d=1:length(agEval),
         z[D] <- paste("geom_ribbon(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",D,"]])), 
                                                    aes(x = axx, ymin = apply(fun(data[[",s,"]][[",vm,"]][[",D,"]]),1,min),
                                                    ymax = apply(fun(data[[",s,"]][[",vm,"]][[",D,"]]),1,max)),
-                                                   fill = colorList[",D,"], alpha = 0.1) + 
+                                                   fill = colorList[",D,"], alpha = 0.2) + 
                       
                       geom_line(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",D,"]])), 
                       aes(x = axx, y = apply(fun(data[[",s,"]][[",vm,"]][[",D,"]]),1,median), 
@@ -187,7 +187,7 @@ plotCS <- function(d=1:length(agEval),
         plotList[[s]][[vm]] <- plotList[[s]][[vm]] +  
           ggtitle(paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Method = ",method_list_names[vm], sep = "")) + 
           xlab(axxTitle) + ylab("value") + 
-          scale_colour_manual("", breaks = names(data[[s]][[vm]]), values = colorList)
+          scale_colour_manual("", breaks = names(data[[s]][[vm]])[1:D], values = colorList[1:D])
         
       }
       names(plotList[[s]]) <- method_list_names
