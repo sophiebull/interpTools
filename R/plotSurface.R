@@ -18,7 +18,7 @@ plotSurface <- function(d=1:length(agEval),
                         crit, 
                         agEval, 
                         layer_type = "method", 
-                        f = "median"){
+                        f = "median", output = "plots"){
   require(plotly)
   require(dplyr)
   require(RColorBrewer)
@@ -107,17 +107,22 @@ plotSurface <- function(d=1:length(agEval),
         for(vm in 1:(M-1)){
           z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",vm,"]][[",vd,"]], 
                          colorscale = list(seq(0,1,length.out=P*G), palette[[",vm,"]]), 
-                         name = names(z_list[[1]])[",vm,"]) %>% ",sep="")
+                         name = names(z_list[[1]])[",vm,"], opacity = 1) %>% ",sep="")
         }
         z[M] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",M,"]][[",vd,"]], 
                       colorscale = list(seq(0,1,length.out=P*G), palette[[",M,"]]),
-                      name = names(z_list[[1]])[",M,"])",sep="")
+                      name = names(z_list[[1]])[",M,"], opacity = 1)",sep="")
         
         z <- paste(z, collapse = "")
         
         plotList[[s]][[vd]] <-  eval(parse(text = paste('plot_ly(scene="',paste("scene",vd,sep=""),'") %>%',
-                                  "layout(xaxis = axx, yaxis = axy) %>%",
-                                   z,sep="")))
+                                  "layout(xaxis = axx, yaxis = axy) %>%
+                                    layout(",paste("scene",vd,sep=""),"= list(
+                                      xaxis = list(title = ''),
+                                      yaxis = list(title = ''),
+                                      zaxis = list(title = '')
+                                    )) %>%",z,sep="")))
+
         
         plotList[[s]][[vd]] <- plotList[[s]][[vd]] %>%  layout(title = paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Dataset = ",vd, sep = "")) 
         
@@ -167,17 +172,22 @@ plotSurface <- function(d=1:length(agEval),
           z <- numeric(D)
           for(vd in 1:(D-1)){
             z[vd] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",vm,"]][[",vd,"]], 
-                           colorscale = list(seq(0,1,length.out=P*G), palette[[",vd,"]]), 
-                           name = names(z_list[[1]][[1]])[",vd,"]) %>% ",sep="")
+                           colorscale = list(seq(0,1,length.out=P*G), palette[[",vd,"]]),
+                           name = names(z_list[[1]][[1]])[",vd,"], opacity = 1) %>% ",sep="")
           }
           z[D] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",vm,"]][[",D,"]], 
                         colorscale = list(seq(0,1,length.out=P*G), palette[[",D,"]]),
-                        name = names(z_list[[1]][[1]])[",D,"])",sep="")
+                        name = names(z_list[[1]][[1]])[",D,"], opacity = 1)",sep="")
           
           z <- paste(z, collapse = "")
           
           plotList[[s]][[vm]] <- eval(parse(text = paste('plot_ly(scene="',paste("scene",vm,sep=""),'") %>%',
-                                                         "layout(xaxis = axx, yaxis = axy) %>%",
+                                                         "layout(xaxis = axx, yaxis = axy) %>%
+                                                         layout(",paste("scene",vm,sep=""),"= list(
+                                                         xaxis = list(title = ''),
+                                                         yaxis = list(title = ''),
+                                                         zaxis = list(title = '')
+                                                         )) %>%",
                                                          z,sep="")))
           
           plotList[[s]][[vm]] <- plotList[[s]][[vm]] %>%  layout(title = paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Method = ",method_list_names[vm], sep = ""))
@@ -189,8 +199,14 @@ plotSurface <- function(d=1:length(agEval),
       names(plotList) <- crit
     }  
   
-  
-return(plotList)
-}
+  if(output == "plots"){
+    return(plotList)
+  }
+  else if(output == "raw"){
+    return(z_list)
+ }  
+  }
 
+
+  
 
