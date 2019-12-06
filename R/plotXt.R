@@ -93,7 +93,7 @@ plotXt <- function(d, cptwise = T){
     xt <- ggplot()+
     
     geom_line(aes(x=t,y=simData$Xt[[d]]), lwd = 0.2) +
-    geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2, col = "blue")+
+    geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2, col = "white")+
       
     ggtitle(bquote(x["t,"~.(d)] == m["t,"~.(d)] + t["t,"~.(d)] + xi["t,"~.(d)]))+
     
