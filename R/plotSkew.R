@@ -23,6 +23,21 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL){
   q1s <- skews
   q3s <- q1s
   
+  skew <- function(x, na.rm = TRUE){
+    stopifnot(is.numeric(x))
+    
+    if(na.rm){
+      x <- x[!is.na(x)]
+      sk <- (sum((x-mean(x))^3)/(length(x)*sd(x)^3))
+    }
+    
+    else if(!na.rm){
+      sk <- (sum((x-mean(x))^3)/(length(x)*sd(x)^3))
+    }
+    
+    return(sk)
+  }
+  
   i <- 1
   
   for(d in 1:D){
@@ -51,7 +66,7 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL){
   
   skewMeans <- data.frame(key = colnames(skews), value = apply(skews,2,mean))
   skewMeds <- data.frame(key = colnames(skews), value = apply(skews,2,median))
-  skewSkews <- data.frame(key = colnames(skews), value = apply(skews,2,skewness))
+  skewSkews <- data.frame(key = colnames(skews), value = apply(skews,2,skew))
   
   
   gather <- gather(skews)
