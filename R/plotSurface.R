@@ -12,6 +12,7 @@
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
 #' @param layer_type "method" (default) or "dataset"; how to slice the data
 #' @param f "mean" or "median" (default); which statistic to use for f(p,g)
+#' @param output "raw" or "plots" (default); "raw" returns a list of f(p,g) values, "plots" returns a list of plots
 
 plotSurface <- function(d=1:length(agEval), 
                         m=1:length(agEval[[1]][[1]][[1]]), 
