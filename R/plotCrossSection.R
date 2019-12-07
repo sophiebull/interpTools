@@ -100,19 +100,21 @@ plotCS <- function(d=1:length(agEval),
           z[vm] <- paste("geom_ribbon(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])), 
                                                    aes(x = axx, ymin = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,min),
                                                    ymax = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,max)), 
-                                                   fill = colorList[",vm,"], alpha = 0.2) + 
+                                                   fill = colorList[",vm,"], alpha = 0.4) + 
 
-                          geom_line(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])), 
-                          aes(x = axx, y = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,median),
-                              col = names(data[[",s,"]])[",vm,"])) + ",sep="") 
+                          geom_line(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])),
+                            colour = colorList[",vm,"],
+                            aes(x = axx, y = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,median),
+                            col = names(data[[",s,"]])[",vm,"])) + ",sep="") 
         }
         
         z[M] <- paste("geom_ribbon(data = data.frame(fun(data[[",s,"]][[",M,"]][[",vd,"]])), 
                                                    aes(x = axx, ymin = apply(fun(data[[",s,"]][[",M,"]][[",vd,"]]),1,min),
                                                    ymax = apply(fun(data[[",s,"]][[",M,"]][[",vd,"]]),1,max)),
-                                                   fill = colorList[",M,"], alpha = 0.2) + 
+                                                   fill = colorList[",M,"], alpha = 0.4) + 
                       
-                      geom_line(data = data.frame(fun(data[[",s,"]][[",M,"]][[",vd,"]])), 
+                      geom_line(data = data.frame(fun(data[[",s,"]][[",M,"]][[",vd,"]])),
+                      colour = colorList[",M,"],
                       aes(x = axx, y = apply(fun(data[[",s,"]][[",M,"]][[",vd,"]]),1,median), 
                       col = names(data[[",s,"]])[",M,"]))",sep="")
       
@@ -125,7 +127,7 @@ plotCS <- function(d=1:length(agEval),
         plotList[[s]][[vd]] <- plotList[[s]][[vd]] +  
                                 ggtitle(paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Dataset = ",vd, sep = "")) + 
                                 xlab(axxTitle) + ylab("value") + 
-                                scale_colour_manual("", breaks = names(data[[s]])[1:M], values = colorList[1:M])
+                                scale_colour_manual("", breaks = names(data[[s]]), values = colorList, labels = names(data[[s]]))
         
         }
       names(plotList[[s]]) <- data_list_names
@@ -162,19 +164,21 @@ plotCS <- function(d=1:length(agEval),
           z[vd] <- paste("geom_ribbon(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])), 
                                                    aes(x = axx, ymin = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,min),
                                                    ymax = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,max)), 
-                                                   fill = colorList[",vd,"], alpha = 0.2) + 
+                                                   fill = colorList[",vd,"], alpha = 0.4) + 
 
-                          geom_line(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])), 
+                          geom_line(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",vd,"]])),
+                          colour = colorList[",vd,"],
                           aes(x = axx, y = apply(fun(data[[",s,"]][[",vm,"]][[",vd,"]]),1,median),
-                              col = names(data[[",s,"]][[",vm,"]])[",vd,"])) + ",sep="") 
+                          col = names(data[[",s,"]][[",vm,"]])[",vd,"])) + ",sep="") 
         }
         
         z[D] <- paste("geom_ribbon(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",D,"]])), 
                                                    aes(x = axx, ymin = apply(fun(data[[",s,"]][[",vm,"]][[",D,"]]),1,min),
                                                    ymax = apply(fun(data[[",s,"]][[",vm,"]][[",D,"]]),1,max)),
-                                                   fill = colorList[",D,"], alpha = 0.2) + 
+                                                   fill = colorList[",D,"], alpha = 0.4) + 
                       
-                      geom_line(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",D,"]])), 
+                      geom_line(data = data.frame(fun(data[[",s,"]][[",vm,"]][[",D,"]])),
+                      colour = colorList[",D,"],
                       aes(x = axx, y = apply(fun(data[[",s,"]][[",vm,"]][[",D,"]]),1,median), 
                       col = names(data[[",s,"]][[",vm,"]])[",D,"]))",sep="")
         
@@ -187,7 +191,8 @@ plotCS <- function(d=1:length(agEval),
         plotList[[s]][[vm]] <- plotList[[s]][[vm]] +  
           ggtitle(paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Method = ",method_list_names[vm], sep = "")) + 
           xlab(axxTitle) + ylab("value") + 
-          scale_colour_manual("", breaks = names(data[[s]][[vm]])[1:D], values = colorList[1:D])
+          scale_colour_manual("", breaks = names(data[[s]][[vm]]), 
+                                  values = colorList, labels = names(data[[s]][[vm]]))
         
       }
       names(plotList[[s]]) <- method_list_names
