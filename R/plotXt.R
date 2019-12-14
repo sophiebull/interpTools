@@ -4,7 +4,7 @@
 #' @param d The index of the original time series of interest
 #' @param cptwise Logical; whether to display Xt componentwise or not
 
-plotXt <- function(d, cptwise = T){
+plotXt <- function(d, simData, cptwise = T){
   require(ggplot2) 
   require(gridExtra)
   
@@ -29,7 +29,7 @@ plotXt <- function(d, cptwise = T){
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.ticks.x = element_blank(),
-          plot.margin = unit(c(1,0,1,1),"cm"),
+          plot.margin = unit(c(1,0.2,1,1),"cm"),
           axis.title.y = element_blank())
   
   if(is.null(simData$Tt_bandwidth[[d]])){
@@ -53,7 +53,7 @@ plotXt <- function(d, cptwise = T){
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0,0,1,1),"cm"),
+          plot.margin = unit(c(0,0.2,1,1),"cm"),
           axis.title.y = element_blank()) 
 
   
@@ -65,7 +65,7 @@ plotXt <- function(d, cptwise = T){
     
     labs(x = "time", y = "")+
     theme_light()+
-    theme(plot.margin = unit(c(0,0,1,1),"cm"),
+    theme(plot.margin = unit(c(0,0.2,1,1),"cm"),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.title.y = element_blank())
@@ -74,7 +74,7 @@ plotXt <- function(d, cptwise = T){
     
     geom_point(aes(x = simData$Tt_freq[[d]], y = rep(0,length(simData$Tt_freq[[d]]))), size = 0.4) + 
     geom_vline(xintercept = simData$Tt_freq[[d]], lwd = 0.05) + 
-    ggtitle(bquote(psi == .(length(simData$Tt_freq[[d]]))*","~'bin width' == .(bw))) +
+    ggtitle(bquote(psi == .(length(simData$Tt_freq[[d]]))*","~'bandwidth' == .(bw))) +
     
     labs(x = bquote(f == omega/(2*pi)), y = "") +
     xlim(0,0.5) + 
@@ -85,7 +85,7 @@ plotXt <- function(d, cptwise = T){
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.ticks.y = element_blank(),
-          plot.margin = unit(c(0,0,0,1),"cm")) +
+          plot.margin = unit(c(0,0.2,0,1),"cm")) +
     
     coord_fixed(ratio = 0.4)
   
