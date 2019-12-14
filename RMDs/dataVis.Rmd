@@ -1,0 +1,749 @@
+---
+title: "dataVis"
+author: "Sophie Castel"
+date: "7/18/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(plotly)
+```
+
+# LITTLE GRAPHIC
+```{r}
+p <- 1:5
+g <- 1:5
+z <- matrix(nrow = length(p), ncol = length(g))
+
+
+for(g in 1:length(g)){
+z[,g] = rnorm(5)
+}
+
+
+lg <- plot_ly() %>% add_surface(x=p,y=g,z=z)
+lg
+```
+
+# ORIGINAL DATA
+```{r}
+p1 <- plotXt(1, simData = testsimData, cptwise = F)
+p2 <- plotXt(2, simData = testsimData, cptwise = F)
+p3 <- plotXt(3, simData = testsimData, cptwise = F)
+p4 <- plotXt(4, simData = testsimData, cptwise = F)
+p5 <- plotXt(5, simData = testsimData, cptwise = F)
+
+setwd("/home/sophie/sophTools/files/plots")
+png("dataXt.png", width = 502, height = 596)
+grid.arrange(p1,p2,p3,p4,p5)
+dev.off()
+
+```
+
+# FREQUENCY DISTRIBUTION (DATASET 4 ANOMALY, ORIGINAL)
+```{r}
+plotTt_freq <- function(i, simData){
+  
+  bandwidth = simData$Tt_bandwidth[[i]]
+  
+    if(is.null(simData$Tt_bandwidth[[i]])){
+    bw = "unspecified"
+  }
+  
+  else if(!(is.null(simData$Tt_bandwidth[[i]]))){
+    bw = eval(substitute(paste(10^-bandwidth), list(bandwidth = simData$Tt_bandwidth[[i]])))
+  }
+  
+  p <- ggplot() + 
+    
+    geom_point(aes(x = simData$Tt_freq[[i]], y = rep(0,length(simData$Tt_freq[[i]]))), size = 0.4) + 
+    geom_vline(xintercept = simData$Tt_freq[[i]], lwd = 0.05) + 
+    ggtitle(bquote(d==.(i)*","~psi == .(length(simData$Tt_freq[[i]]))*","~'bandwidth' == .(bw))) +
+    
+    xlim(0,0.5) + 
+    ylim(0,0) + 
+    theme_light()+
+    
+    theme(axis.text.y = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.ticks.y = element_blank(),
+          plot.margin = unit(c(0,0.2,0,0.2),"cm")) +
+    
+    coord_fixed(ratio = 0.4)
+  
+  return(p)
+}
+
+
+ppTtFreq1 <- plotTt_freq(1, simData = new.simData) + theme(axis.title.y = element_blank(),
+                                                           axis.title.x = element_blank(),
+                                         plot.title = element_text(hjust = 0),
+                                         text=element_text(size=12))
+
+ppTtFreq2 <- plotTt_freq(2, simData = new.simData) + theme(axis.title.y = element_blank(),
+                                                           axis.title.x = element_blank(),
+                                         plot.title = element_text(hjust = 0),
+                                         text=element_text(size=12))
+                                                                            
+ppTtFreq3 <- plotTt_freq(3, simData = new.simData) + theme(axis.title.y = element_blank(),
+                                                           axis.title.x = element_blank(),
+                                         plot.title = element_text(hjust = 0),
+                                         text=element_text(size=12))
+                                                                            
+ppTtFreq4 <- plotTt_freq(4, simData = new.simData) + theme(axis.title.y = element_blank(),
+                                                           axis.title.x = element_blank(),
+                                         plot.title = element_text(hjust = 0),
+                                         text=element_text(size=12))
+                                                                            
+ppTtFreq5 <- plotTt_freq(5, simData = new.simData) + theme(axis.title.y = element_blank(),
+                                                           axis.title.x = element_blank(),
+                                         plot.title = element_text(hjust = 0),
+                                         text=element_text(size=12))
+
+setwd("/home/sophie/sophTools/files/plots")
+png("dataTt_Freq_o.png", width = 502, height = 596)
+grid.arrange(ppTtFreq1,ppTtFreq2,ppTtFreq3,ppTtFreq4,ppTtFreq5, nrow = 5,
+             bottom = textGrob(bquote(f == omega/(2*pi)), hjust = 0.45))
+dev.off()
+
+```
+
+
+# SKEWNESS
+```{r}
+setwd("/home/sophie/sophTools/files/plots")
+png("critSkew.png", height = 700, width = 596)
+plotSkew(agEval = testag, cptwise = T, symmetric = NULL)
+dev.off()
+
+```
+
+Now let's see the corresponding performance metrics across all methods. Coloured bar indicates the "best":
+```{r}
+pm1 <- plotMetrics(agEval=testag, p = c(3), g=c(1), d=1, crit = c("MAPE"))
+pm2 <- plotMetrics(agEval=testag, p = c(4), g=c(2), d=1, crit = c("MAPE"))
+pm3 <- plotMetrics(agEval=testag, p = c(5), g=c(3), d=1, crit = c("MAPE"))
+pm4 <- plotMetrics(agEval=testag, p = c(6), g=c(4), d=1, crit = c("MAPE"))
+pm5 <- plotMetrics(agEval=testag, p = c(5), g=c(1), d=1, crit = c("MAPE"))
+pm6 <- plotMetrics(agEval=testag, p = c(6), g=c(1), d=1, crit = c("MAPE"))
+
+grid.arrange(pm1,pm2,pm3,pm4,pm5,pm6)
+```
+
+# SURFACE PLOTS
+## LAYER_TYPE = METHOD
+LEGEND (WITH SPLINES, PLOTLY)
+```{r}
+greyList <- c("grey90", "grey70", "grey50","grey30","grey10", "grey0")
+
+# get z_list
+z_list <- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "method", f="median", output = "raw")
+  
+manualLegend <- data.frame(color = as.character(greyList), 
+                           nameSurface = gsub("Average","Avg",rev(gsub("."," ",names(z_list[[1]]),fixed = TRUE))), 
+                           x = rep(0,length(names(z_list[[1]]))), 
+                           y = seq(0.20,0.80,length.out = length(names(z_list[[1]]))), 
+                           textcol = rep(toRGB("black"),length(greyList)),
+                           stringsAsFactors = FALSE)
+  
+theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
+  
+                    add_trace(
+                      x = manualLegend$x, 
+                      y = manualLegend$y, 
+                      color = manualLegend$color, 
+                      colors = manualLegend$color,
+                      showlegend = F,
+                      marker=list(size = 20)) %>%
+
+              add_text(x = manualLegend$x+0.03, 
+                        y = manualLegend$y,
+                        text = manualLegend$nameSurface,
+                        color = manualLegend$textcol,
+                        textposition = "right") %>% 
+  
+              layout(xaxis = list(title = "", 
+                                  showgrid = F, 
+                                  showticklabels = F,
+                                  zeroline = F,
+                                  range = c(-0.05,0.3)), 
+                     yaxis = list(title = "", 
+                                  showgrid = F, 
+                                  showticklabels = F,
+                                  zeroline = F,
+                                  range = c(0,1.05))
+                     )
+
+   
+```
+
+SURFACE PLOTS (WITH SPLINES)
+```{r}
+ps<- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "method", f="median", output = "plots")
+
+titleList <- list()
+
+for(i in 1:length(ps[[1]])){
+      titleList[[i]] <- list(
+        text = paste("Dataset ",i,sep=""),
+        xref = "paper",
+        yref = "paper",
+        yanchor = "bottom",
+        xanchor = "center",
+        align = "center",
+        x = 0.5,
+        y = 0.75,
+        showarrow = FALSE
+      )
+    }
+
+pp1MAPE <- ps[[1]][[1]] %>% layout(annotations = titleList[[1]]) # criterion, dataset
+pp2MAPE <- ps[[1]][[2]] %>% layout(annotations = titleList[[2]])# criterion, dataset
+pp3MAPE <- ps[[1]][[3]] %>% layout(annotations = titleList[[3]])# criterion, dataset
+pp4MAPE <- ps[[1]][[4]] %>% layout(annotations = titleList[[4]])# criterion, dataset
+pp5MAPE <- ps[[1]][[5]] %>% layout(annotations = titleList[[5]])# criterion, dataset
+
+pp1NRMSD <- ps[[2]][[1]] %>% layout(annotations = titleList[[1]])# criterion, dataset
+pp2NRMSD <- ps[[2]][[2]] %>% layout(annotations = titleList[[2]])# criterion, dataset
+pp3NRMSD <- ps[[2]][[3]] %>% layout(annotations = titleList[[3]])# criterion, dataset
+pp4NRMSD <- ps[[2]][[4]] %>% layout(annotations = titleList[[4]])# criterion, dataset
+pp5NRMSD <- ps[[2]][[5]] %>% layout(annotations = titleList[[5]])# criterion, dataset
+
+sub1  <- subplot(pp1MAPE,pp2MAPE,pp3MAPE,pp4MAPE,pp5MAPE,theLegend, nrows = 3) %>%
+  
+            layout(title = names(ps)[1],
+             
+             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
+                          aspectmode = 'manual', 
+                          aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
+             )
+
+sub2  <- subplot(pp1NRMSD,pp2NRMSD,pp3NRMSD,pp4NRMSD,pp5NRMSD,theLegend, nrows = 3) %>%
+  
+            layout(title = names(ps)[2],
+             
+             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
+                          aspectmode = 'manual', 
+                          aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
+             )
+```
+
+Showing how bad cubic splines are (D1,MAPE)
+```{r}
+psC <- plotSurface(d=1,crit=c("MAPE","NRMSD"),agEval=testag, layer_type="method")
+title = list(
+        text = "Dataset 1",
+        xref = "paper",
+        yref = "paper",
+        yanchor = "bottom",
+        xanchor = "center",
+        align = "center",
+        x = 0.5,
+        y = 0.9,
+        showarrow = FALSE
+      )
+
+psCMAPE <- psC[[1]][[1]] %>% layout(annotations = title)
+
+sub1b <- subplot(psCMAPE,theLegend) %>%
+          layout(title = names(psC)[1],
+                 
+            scene = list(domain=list(x=c(0,1/2), y=c(1/3,1)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=0.6,y=0.6,z=1),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.40))),
+             
+             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)))
+  )      
+```
+
+LEGEND (WITHOUT SPLINES, PLOTLY)
+```{r}
+greyList <- c("grey90", "grey70", "grey50")
+
+# get z_list
+z_list <- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "dataset", f="median", output = "raw")
+
+manualLegend <- data.frame(color = as.character(greyList), 
+                           nameSurface = gsub("Average","Avg",rev(gsub("."," ",names(z_list[[1]])[4:6],fixed = TRUE))), 
+                           x = rep(0,length(names(z_list[[1]])[4:6])), 
+                           y = seq(0.4,0.65,length.out = length(names(z_list[[1]])[4:6])), 
+                           textcol = rep(toRGB("black"),length(greyList)),
+                           stringsAsFactors = FALSE)
+  
+theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
+  
+                    add_trace(
+                      x = manualLegend$x, 
+                      y = manualLegend$y, 
+                      color = manualLegend$color, 
+                      colors = manualLegend$color,
+                      showlegend = F,
+                      marker=list(size = 20)) %>%
+
+              add_text(x = manualLegend$x+0.03, 
+                        y = manualLegend$y,
+                        text = manualLegend$nameSurface,
+                        color = manualLegend$textcol,
+                        textposition = "right") %>% 
+  
+              layout(xaxis = list(title = "", 
+                                  showgrid = F, 
+                                  showticklabels = F,
+                                  zeroline = F,
+                                  range = c(-0.05,0.3)), 
+                     yaxis = list(title = "", 
+                                  showgrid = F, 
+                                  showticklabels = F,
+                                  zeroline = F,
+                                  range = c(0,1))
+                     )
+
+   
+```
+
+SURFACE PLOTS (WITHOUT SPLINES)
+```{r}
+ps<- plotSurface(crit=c("MAPE","NRMSD"), m=4:6, agEval = testag, layer_type = "method", f="median")
+
+titleList <- list()
+
+for(i in 1:length(ps[[1]])){
+      titleList[[i]] <- list(
+        text = paste("Dataset ",i,sep=""),
+        xref = "paper",
+        yref = "paper",
+        yanchor = "bottom",
+        xanchor = "center",
+        align = "center",
+        x = 0.5,
+        y = 0.75,
+        showarrow = FALSE
+      )
+    }
+
+pp1MAPEb <- ps[[1]][[1]] %>% layout(annotations = titleList[[1]]) # criterion, dataset
+pp2MAPEb <- ps[[1]][[2]] %>% layout(annotations = titleList[[2]])# criterion, dataset
+pp3MAPEb <- ps[[1]][[3]] %>% layout(annotations = titleList[[3]])# criterion, dataset
+pp4MAPEb <- ps[[1]][[4]] %>% layout(annotations = titleList[[4]])# criterion, dataset
+pp5MAPEb <- ps[[1]][[5]] %>% layout(annotations = titleList[[5]])# criterion, dataset
+
+pp1NRMSDb <- ps[[2]][[1]] %>% layout(annotations = titleList[[1]])# criterion, dataset
+pp2NRMSDb <- ps[[2]][[2]] %>% layout(annotations = titleList[[2]])# criterion, dataset
+pp3NRMSDb <- ps[[2]][[3]] %>% layout(annotations = titleList[[3]])# criterion, dataset
+pp4NRMSDb <- ps[[2]][[4]] %>% layout(annotations = titleList[[4]])# criterion, dataset
+pp5NRMSDb <- ps[[2]][[5]] %>% layout(annotations = titleList[[5]])# criterion, dataset
+
+sub3  <- subplot(pp1MAPEb,pp2MAPEb,pp3MAPEb,pp4MAPEb,pp5MAPEb,theLegend, nrows = 3) %>%
+  
+            layout(title = names(ps)[1],
+             
+             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
+                          aspectmode = 'manual', 
+                          aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
+             )
+
+sub4  <- subplot(pp1NRMSDb,pp2NRMSDb,pp3NRMSDb,pp4NRMSDb,pp5NRMSDb,theLegend, nrows = 3) %>%
+  
+            layout(title = names(ps)[2],
+             
+             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
+                          aspectmode = 'manual', 
+                          aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
+             )
+
+```
+
+## LAYER_TYPE = DATASET
+LEGEND (PLOTLY)
+```{r}
+# WITHOUT SPLINES
+greyList <- c("grey90", "grey70", "grey50","grey30","grey10")
+
+# get z_list
+z_list <- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "dataset", f="median", output = "raw")
+
+manualLegend <- data.frame(color = as.character(greyList), 
+                           nameSurface = rev(gsub("D","Dataset ",names(z_list[[1]][[1]]),fixed=TRUE)), 
+                           x = rep(0,length(names(z_list[[1]][[1]]))), 
+                           y = seq(0.20,0.80,length.out = length(names(z_list[[1]][[1]]))), 
+                           textcol = rep(toRGB("black"),length(greyList)),
+                           stringsAsFactors = FALSE)
+  
+theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
+  
+                    add_trace(
+                      x = manualLegend$x, 
+                      y = manualLegend$y, 
+                      color = manualLegend$color, 
+                      colors = manualLegend$color,
+                      showlegend = F,
+                      marker=list(size = 20)) %>%
+
+              add_text(x = manualLegend$x+0.03, 
+                        y = manualLegend$y,
+                        text = manualLegend$nameSurface,
+                        color = manualLegend$textcol,
+                        textposition = "right") %>% 
+  
+              layout(xaxis = list(title = "", 
+                                  showgrid = F, 
+                                  showticklabels = F,
+                                  zeroline = F,
+                                  range = c(-0.1,0.3)), 
+                     yaxis = list(title = "", 
+                                  showgrid = F, 
+                                  showticklabels = F,
+                                  zeroline = F,
+                                  range = c(0,1))
+                     )
+
+   
+```
+
+SURFACE PLOTS (WITHOUT SPLINES)
+```{r}
+PS <- plotSurface(crit=c("MAPE","NRMSD"), m = 4:6, agEval = testag, layer_type = "dataset", f = "median", output = "plots")
+
+titleList <- list()
+
+for(i in 1:length(PS[[1]])){
+      titleList[[i]] <- list(
+        text = gsub("Average","Avg", gsub("."," ", names(PS[[1]])[i],fixed = TRUE)),
+        xref = "paper",
+        yref = "paper",
+        yanchor = "bottom",
+        xanchor = "center",
+        align = "center",
+        x = 0.5,
+        y = 0.75,
+        showarrow = FALSE
+      )
+}
+
+PP1MAPE <- PS[[1]][[1]] %>% layout(annotations = titleList[[1]]) # criterion, method
+PP2MAPE <- PS[[1]][[2]] %>% layout(annotations = titleList[[2]]) # criterion, method
+PP3MAPE <- PS[[1]][[3]] %>% layout(annotations = titleList[[3]]) # criterion, method
+
+PP1NRMSD <- PS[[2]][[1]] %>% layout(annotations = titleList[[1]]) # criterion, method
+PP2NRMSD <- PS[[2]][[2]] %>% layout(annotations = titleList[[2]]) # criterion, method
+PP3NRMSD <- PS[[2]][[3]] %>% layout(annotations = titleList[[3]]) # criterion, method
+
+sub5  <- subplot(PP1MAPE,PP2MAPE,PP3MAPE,theLegend, nrows = 3) %>%
+  
+            layout(title = names(ps)[2],
+             
+             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
+                          aspectmode = 'manual', 
+                          aspectratio=list(x=1,y=1,z=0.8),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.8),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.8),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
+             )
+
+sub6  <- subplot(PP1NRMSD,PP2NRMSD,PP3NRMSD,theLegend, nrows = 3) %>%
+  
+            layout(title = names(ps)[2],
+             
+             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
+                          aspectmode = 'manual', 
+                          aspectratio=list(x=1,y=1,z=0.5),
+                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=1,y=1,z=0.5),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
+             
+             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
+             )
+
+```
+
+# CROSS SECTIONS
+## LAYER_TYPE = METHOD
+LEGEND (GGPLOT)
+```{r}
+greyList <- c("grey90", "grey70", "grey50")
+# get z_list
+z_list <- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "dataset", f="median", output = "raw")
+
+manualLegend <- data.frame(color = as.character(greyList), 
+                           nameSurface = gsub("Average","Avg",gsub("."," ",names(z_list[[1]])[4:6],fixed = TRUE)), 
+                           x = rep(0,length(names(z_list[[1]])[4:6])), 
+                           y = seq(0.4,0.65,length.out = length(names(z_list[[1]])[4:6])), 
+                           textcol = rep(toRGB("black"),length(greyList)),
+                           stringsAsFactors = FALSE)
+  
+theLegend <- ggplot(data = manualLegend) +
+  
+              geom_point(
+                      x = manualLegend$x, 
+                      y = manualLegend$y, 
+                      color = manualLegend$color,
+                      size = 8) +
+
+              geom_text(x = manualLegend$x+0.05, 
+                        y = manualLegend$y,
+                        label = manualLegend$nameSurface,
+                        color = "black",
+                        hjust = 0, size = 6) +
+  
+              xlim(-0.1,0.5) + 
+              
+              theme_void()
+
+```  
+
+CROSS_SECTION = P
+```{r}
+plotListCS <- plotCS(m = 4:6, agEval = testag, cross_section = "p", layer_type = "method", crit = c("MAPE","NRMSD"))
+
+#MAPE 
+
+pCSMAPE1 <- plotListCS[[1]][[1]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 1")
+pCSMAPE2 <- plotListCS[[1]][[2]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 2")
+pCSMAPE3 <- plotListCS[[1]][[3]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 3")
+pCSMAPE4 <- plotListCS[[1]][[4]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 4")
+pCSMAPE5 <- plotListCS[[1]][[5]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 5")
+
+setwd("/home/sophie/sophTools/files/plots")
+png("MAPECSbyMethod_p.png", width = 875, height = 965)
+
+grid.arrange(pCSMAPE1, pCSMAPE2, pCSMAPE3, pCSMAPE4, pCSMAPE5, theLegend, nrow = 3,
+             top=textGrob(names(plotListCS)[1],gp=gpar(fontsize=18,font=1)), 
+             bottom = textGrob("proportion missing", gp = gpar(fontsize = 14, font = 1)))
+
+dev.off()
+
+# NRMSE
+
+pCSNRMSE1 <- plotListCS[[2]][[1]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 1")
+pCSNRMSE2 <- plotListCS[[2]][[2]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 2")
+pCSNRMSE3 <- plotListCS[[2]][[3]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 3")
+pCSNRMSE4 <- plotListCS[[2]][[4]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 4")
+pCSNRMSE5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 5")
+
+setwd("/home/sophie/sophTools/files/plots")
+png("NRMSECSbyMethod_p.png", width = 875, height = 965)
+
+grid.arrange(pCSNRMSE1, pCSNRMSE2, pCSNRMSE3, pCSNRMSE4, pCSNRMSE5, theLegend, nrow = 3,
+             top=textGrob(names(plotListCS)[2],gp=gpar(fontsize=18,font=1)), 
+             bottom = textGrob("proportion missing", gp = gpar(fontsize = 14, font = 1)))
+
+dev.off()
+
+```
+
+CROSS_SECTION = G
+```{r}
+plotListCS <- plotCS(m = 4:6, agEval = testag, cross_section = "g", layer_type = "method", crit = c("MAPE","NRMSD"))
+
+#MAPE 
+
+pCSMAPE1 <- plotListCS[[1]][[1]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 1")
+pCSMAPE2 <- plotListCS[[1]][[2]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 2")
+pCSMAPE3 <- plotListCS[[1]][[3]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 3")
+pCSMAPE4 <- plotListCS[[1]][[4]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 4")
+pCSMAPE5 <- plotListCS[[1]][[5]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 5")
+
+setwd("/home/sophie/sophTools/files/plots")
+png("MAPECSbyMethod_g.png", width = 875, height = 965)
+
+grid.arrange(pCSMAPE1, pCSMAPE2, pCSMAPE3, pCSMAPE4, pCSMAPE5, theLegend, nrow = 3,
+             top=textGrob(names(plotListCS)[1],gp=gpar(fontsize=18,font=1)), 
+             bottom = textGrob("gap width", gp = gpar(fontsize = 14, font = 1)))
+
+dev.off()
+
+# NRMSE
+
+pCSNRMSE1 <- plotListCS[[2]][[1]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 1")
+pCSNRMSE2 <- plotListCS[[2]][[2]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 2")
+pCSNRMSE3 <- plotListCS[[2]][[3]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 3")
+pCSNRMSE4 <- plotListCS[[2]][[4]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 4")
+pCSNRMSE5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
+                                         axis.title.y = element_blank(),
+                                         plot.title = element_text(hjust = 0.5),
+                                         text=element_text(size=12)) + labs(title = "Dataset 5")
+
+setwd("/home/sophie/sophTools/files/plots")
+png("NRMSECSbyMethod_g.png", width = 875, height = 965)
+
+grid.arrange(pCSNRMSE1, pCSNRMSE2, pCSNRMSE3, pCSNRMSE4, pCSNRMSE5, theLegend, nrow = 3,
+             top=textGrob(names(plotListCS)[2],gp=gpar(fontsize=18,font=1)), 
+             bottom = textGrob("gap width", gp = gpar(fontsize = 14, font = 1)))
+
+dev.off()
+```
+

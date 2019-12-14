@@ -1,0 +1,379 @@
+---
+title: "Data Simulation"
+author: "Sophie Castel"
+date: "7/23/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(devtools)
+install_github('castels/sophTools')
+library(sophTools)
+```
+play wth trends keeping everything else fixed with enough periodicities to have meaningful data randomize the frequencies (20, 30) spaced relatively well, no noise structure, just random noise. Then include nonpolynomial trends, piecewise functions 
+
+Then strip out trends, make it flat, just have periodicities, let them get closer in frequency time varying amplitudes, frequency modulation. what happens when we violate the assumption that Tt is periodic
+
+Algorithm has three stages, try to break it in three ways. Allow for detection of nonpolynomial trends in Mt, include polynomial frequency modulation in detection of Tt,
+
+Future work, change the degree of clustering so that its not MCAR but follows some probability distribution. Change the length of the series.Change the Tt algorith to include nonpolyomials. Convert to linear combination of polynomials first (Fourier series) then remove to tackle nonpolynomia trends?
+
+# Generating Original Data
+## Initializing basic parameters, setting seed 
+```{r initialize, cache = TRUE}
+D = 5
+n=1000
+t=0:(n-1)
+```
+## Varying Mt
+Here we generate a list of $D$ datasets of dimension $D\times n$. 
+
+Fixed variables:
+\begin{itemize}
+\item \verb+bandwidth+ = $10^{-3}$
+\item \verb+numFreq+ = 20
+\item \verb+trendType+ = ``polynomial"
+\item \verp+p+ = 0
+\item \verb+q+ = 0
+\end{itemize}
+
+Unfixed variables:
+\begin{itemize}
+\item \verb+numTrend+ = $d$, for $d$ in $0,...,D-1$
+\end{itemize}
+
+```{r, cache = TRUE}
+set.seed(23)
+
+# Breaking Mt
+simData <- simXt(D=D, n=n, vary = "Mt", bandwidth = 5, numFreq = 30, trendType = "polynomial", snr = 20)
+
+# Creating list object
+sets <- numeric(D)
+for(d in 1:(D-1)){
+  sets[d] <- paste("D",d,"=simData$Xt[[",d,"]],",sep="")
+}
+sets[D] <- paste("D",D,"=simData$Xt[[",D,"]]",sep="")
+list_call <- paste("list(",paste(sets,collapse=""),")")
+      
+OriginalData = eval(parse(text=list_call))
+```
+
+## Varying Tt
+Here we generate a list of $D$ datasets of dimension $D\times n$. 
+
+Fixed variables:
+\begin{itemize}
+\item \verb+bandwidth+ = $10^{-3}$
+\item \verb+numTrend+ = 0
+\item \verb+trendType+ = ``polynomial"
+\item \verp+p+ = 0
+\item \verb+q+ = 0
+\end{itemize}
+
+Unfixed variables:
+\begin{itemize}
+\item \verb+numFreq+ = $d*10$, for $d$ in $1,...,D$
+\end{itemize}
+
+```{r, cache = TRUE}
+set.seed(23)
+
+# Breaking Tt
+simData <- simXt(D=D, n=n, vary = "Tt", bandwidth = 2, numTrend = 3, trendType = "polynomial", snr = 5)
+
+# Creating list object
+sets <- numeric(D)
+for(d in 1:(D-1)){
+  sets[d] <- paste("D",d,"=simData$Xt[[",d,"]],",sep="")
+}
+sets[D] <- paste("D",D,"=simData$Xt[[",D,"]]",sep="")
+list_call <- paste("list(",paste(sets,collapse=""),")")
+      
+OriginalData = eval(parse(text=list_call))
+```
+
+## Varying Wt, fixing p
+Here we generate a list of $D$ datasets of dimension $D\times n$. 
+
+Fixed variables:
+\begin{itemize}
+\item \verb+bandwidth+ = $10^{-3}$
+\item \verb+numFreq+ = 20
+\item \verb+numTrend+ = 0
+\item \verb+trendType+ = ``polynomial"
+\item \verp+p+ = 0
+\end{itemize}
+
+Unfixed variables:
+\begin{itemize}
+\item \verb+q+ = $d$ for $d$ in $0,...,D-1$
+\end{itemize}
+
+```{r, cache = TRUE}
+set.seed(23)
+
+# Breaking Wt, p fixed
+simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, numTrend = 0, trendType = "polynomial", p = 0, fix = "p", snr = 20)
+
+# Creating list object
+sets <- numeric(D)
+for(d in 1:(D-1)){
+  sets[d] <- paste("D",d,"=simData$Xt[[",d,"]],",sep="")
+}
+sets[D] <- paste("D",D,"=simData$Xt[[",D,"]]",sep="")
+list_call <- paste("list(",paste(sets,collapse=""),")")
+      
+OriginalData = eval(parse(text=list_call))
+```
+
+## Varying Wt, fixing q
+Here we generate a list of $D$ datasets of dimension $D\times n$. 
+
+Fixed variables:
+\begin{itemize}
+\item \verb+bandwidth+ = $10^{-3}$
+\item \verb+numFreq+ = 20
+\item \verb+numTrend+ = 0
+\item \verb+trendType+ = ``polynomial"
+\item \verp+q+ = 0
+\end{itemize}
+
+Unfixed variables:
+\begin{itemize}
+\item \verb+p+ = $d$ for $d$ in $0,...,D-1$
+\end{itemize}
+
+```{r, cache = TRUE}
+set.seed(23)
+
+# Breaking Wt, q fixed
+simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, numTrend = 10, trendType = "polynomial", q = 0, fix = "q", snr = 20)
+
+# Creating list object
+sets <- numeric(D)
+for(d in 1:(D-1)){
+  sets[d] <- paste("D",d,"=simData$Xt[[",d,"]],",sep="")
+}
+sets[D] <- paste("D",D,"=simData$Xt[[",D,"]]",sep="")
+list_call <- paste("list(",paste(sets,collapse=""),")")
+      
+OriginalData = eval(parse(text=list_call))
+```
+
+# Generating Gappy Data
+```{r GappyData, cache = TRUE}
+set.seed(23)
+
+prop_vec = c(0.05,0.1,0.15,0.2,0.25,0.30)
+gap_vec = c(1,5,10,25)
+K = 1000 # number of gappy series to simulate under each p,g specification
+
+GappyData <- list()
+
+for(d in 1:length(OriginalData)){
+  GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = K)
+}
+names(GappyData) <- names(OriginalData)
+
+# dimension (d, p, g, k) 
+```
+
+From this we get a multi-level list object called GappyData, with dimension $d,p,g,k, n$:
+$d = 1,...,D$ = dataset$_d$
+$p = 1,...,P$ = proportion of missing values$_p$
+$g = 1,...,G$ = gap width$_g$
+$k = 1,...,K$ = sample ID under each $d,p,g$ specification
+$n = 1,...,N$ = length of time series
+
+To call a particular list value, follow the following format:
+GappyData[["D$d$"]]\$p$p$\$g$g$[[$k$]]
+
+
+##REGENERATING DATA SET 4 --- the weird one
+```{r}
+set.seed(23)
+snr = 5
+bandwidth = 2
+
+Mt <- list()
+  Mt$fn <- simData$Mt_fn[[4]]
+  Mt$value <- simData$Mt[[4]]
+  Mt$mu <- simData$Mt_mu[[4]]
+  Mt$numtrend <- simData$Mt_numTrend[[4]]
+
+
+Tt <- simTt(n=1000, numFreq = 40, bandwidth = bandwidth)
+Wt <- simWt(n=1000, var = var(Tt$value)/snr) 
+#P AND Q PARAMETERS DO NOT CHANGE; JUST THE VARIANCE OF Wt
+
+D4 <- list()   
+
+      D4$Xt <- Mt$value+Tt$value+Wt$value
+      D4$Mt <- Mt$value
+      D4$Mt_mu <- Mt$mu
+      D4$Mt_numTrend <- Mt$numTrend
+      D4$Wt <- Wt$value
+      D4$Tt <- Tt$value
+      D4$Mt_fn <- Mt$fn
+      D4$Tt_fn <- Tt$fn
+      D4$Tt_freq <- Tt$freq
+      D4$Tt_bandwidth <- Tt$bandwidth
+      D4$Wt_p <- Wt$p
+      D4$Wt_q <- Wt$q
+      D4$SNR <- var(Tt$value)/var(Wt$value) 
+
+```
+
+### GENERATING GAPPY DATA
+```{r}
+set.seed(23)
+prop_vec = c(0.05,0.1,0.15,0.2,0.25,0.30)
+gap_vec = c(1,5,10,25)
+K = 1000 # number of gappy series to simulate under each p,g specification
+
+GappyData4 <- simulateGaps(data = as.numeric(D4$Xt), prop_vec = prop_vec, gap_vec = gap_vec, K = K)
+
+names(GappyData4) <- "D4"
+```
+
+
+### REVISING OLD SIMDATA AND ORIGINALDATA AND GAPPYDATA
+
+```{r}
+# New original data
+new.OriginalData <- OriginalData
+new.OriginalData[[4]] <- D4$Xt
+
+# New sim data list
+new.simData <- simData
+
+new.simData$Xt[[4]] <- D4$Xt
+new.simData$Mt[[4]] <- D4$Mt
+new.simData$Mt_mu[[4]] <- D4$Mt_mu
+new.simData$Mt_numTrend[[4]] <- 3
+new.simData$Wt[[4]] <- D4$Wt
+new.simData$Tt[[4]] <- D4$Tt
+new.simData$Mt_fn[[4]] <- D4$Mt_fn
+new.simData$Tt_fn[[4]] <- D4$Tt_fn
+new.simData$Tt_freq[[4]] <- D4$Tt_freq
+new.simData$Tt_bandwidth[[4]] <- D4$Tt_bandwidth
+new.simData$Wt_p[[4]] <- D4$Wt_p
+new.simData$Wt_q[[4]] <- D4$Wt_q
+new.simData$SNR[[4]] <- D4$SNR
+
+# New gappy data
+
+new.GappyData <- GappyData
+new.GappyData[[4]] <- GappyData4
+```
+
+# TESTING FURTHER 
+Dataset four is still weird. Maybe because lack of low frequencies? 
+Removing four random frequencies from the 40, replace with four of the lowest frequencies from D5
+```{r}
+# identify the lowest four frequencies from D5
+lowFour <- sort(simData$Tt_freq[[5]])[1:4]
+
+# remove four random frequencies from D4
+rFour <- simData$Tt_freq[[4]][-sample(1:length(simData$Tt_freq[[4]]),4)]
+
+# paste in the low frequencies from D5 into D4
+newFreq <- c(rFour,lowFour)
+newW <- newFreq*(2*pi)
+
+# regenerate Tt in D4 
+t <- 0:999
+n <- 1000
+snr = 5
+bandwidth = 2
+
+newTt <- numeric(length(newW))
+
+for(f in 1:(length(newW)-1)){
+      a <- rnorm(1, mean = 0, sd = n/200) #95% runs from -n/100 to n/100
+      newTt[f] <- paste("(",a,")*sin(",newW[f],"*t)+",sep="")
+    }
+  newTt[length(newW)] <- paste("(",a,")*sin(",newW[length(newW)],"*t)",sep="")
+
+newTt_fn <- paste(newTt,collapse="")  
+newTt <- eval(parse(text = paste(newTt,collapse = "")))
+ 
+newTt_list <- list()
+
+newTt_list$fn <- newTt_fn
+newTt_list$value <- newTt
+newTt_list$freq <- newFreq
+newTt_list$bandwidth <- simData$Tt_bandwidth[[4]]
+
+# Adding to make Xt
+
+newMt <- list()
+  newMt$fn <- simData$Mt_fn[[4]]
+  newMt$value <- simData$Mt[[4]]
+  newMt$mu <- simData$Mt_mu[[4]]
+  newMt$numtrend <- simData$Mt_numTrend[[4]]
+  
+newWt <- simWt(n=1000, var = var(newTt_list$value)/snr) 
+
+D4 <- list()   
+
+      D4$Xt <- newMt$value+newTt_list$value+newWt$value
+      D4$Mt <- newMt$value
+      D4$Mt_mu <- newMt$mu
+      D4$Mt_numTrend <- newMt$numTrend
+      D4$Wt <- newWt$value
+      D4$Tt <- newTt_list$value
+      D4$Mt_fn <- newMt$fn
+      D4$Tt_fn <- newTt_list$fn
+      D4$Tt_freq <- newTt_list$freq
+      D4$Tt_bandwidth <- newTt_list$bandwidth
+      D4$Wt_p <- newWt$p
+      D4$Wt_q <- newWt$q
+      D4$SNR <- var(newTt_list$value)/var(newWt$value) 
+
+### GENERATING GAPPY DATA
+set.seed(23)
+prop_vec = c(0.05,0.1,0.15,0.2,0.25,0.30)
+gap_vec = c(1,5,10,25)
+K = 1000 # number of gappy series to simulate under each p,g specification
+
+newGappyData4 <- simulateGaps(data = as.numeric(D4$Xt), prop_vec = prop_vec, gap_vec = gap_vec, K = K)
+
+names(newGappyData4) <- "D4"
+
+### REVISING OLD SIMDATA AND ORIGINALDATA AND GAPPYDATA
+
+# New original data
+testOriginalData <- new.OriginalData
+testOriginalData[[4]] <- D4$Xt
+
+# New sim data list
+testsimData <- simData
+
+testsimData$Xt[[4]] <- D4$Xt
+testsimData$Mt[[4]] <- D4$Mt
+testsimData$Mt_mu[[4]] <- D4$Mt_mu
+testsimData$Mt_numTrend[[4]] <- 3
+testsimData$Wt[[4]] <- D4$Wt
+testsimData$Tt[[4]] <- D4$Tt
+testsimData$Mt_fn[[4]] <- D4$Mt_fn
+testsimData$Tt_fn[[4]] <- D4$Tt_fn
+testsimData$Tt_freq[[4]] <- D4$Tt_freq
+testsimData$Tt_bandwidth[[4]] <- D4$Tt_bandwidth
+testsimData$Wt_p[[4]] <- D4$Wt_p
+testsimData$Wt_q[[4]] <- D4$Wt_q
+testsimData$SNR[[4]] <- D4$SNR
+
+# New gappy data
+
+testGappyData <- new.GappyData
+testGappyData[[4]] <- newGappyData4
+
+```
+
+

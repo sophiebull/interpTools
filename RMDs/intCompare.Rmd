@@ -1,0 +1,179 @@
+---
+title: "Comparing the Performance of the HW Interpolator Against Other Known Interpolators"
+author: "Sophie Castel"
+date: "7/23/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Coding a Progress Bar
+```{r}
+pb = txtProgressBar(min = 0, max = length(OriginalData), initial = 0, style = 3) 
+```
+
+# Interpolating the Gappy Data (in parallel)
+Perform parallel interpolation on the Gappy Data using specified methods
+```{r IntData, cache = TRUE}
+set.seed(23)
+
+methods <- c(3,4,5,7,13,18)
+IntData <- list()
+
+for(d in 1:length(OriginalData)){
+  IntData[[d]] <- parInterpolate(gappyTS = GappyData[[d]], methods = methods)
+  setTxtProgressBar(pb,d)
+}
+names(IntData) <- names(OriginalData)
+```
+
+From this we get a multi-level list object called IntData, with dimension $d,m,p,g,k,n$:
+$d = 1, ...,D$ = dataset$_d$
+$m = 1, ...,M$ = interpolation method$_m$
+$p = 1, ...,P$ length(prop_vec) = proportion of missing values$_p$
+$g = 1, ...,G$ length(gap_vec) = gap width$_g$
+$k = 1, ...,K$ = sample ID under each $d,m,p,g,k$ specification
+$n = 1, ... , N$ = length of each time series
+
+# Computing the Performance Metrics
+Applying the function to our Original and Interpolated Data:
+```{r pmats, cache = TRUE}
+pMats <- performance(OriginalData=OriginalData, IntData=IntData, GappyData = GappyData)
+```
+
+So, we have a list: $D \times M \times P \times G \times N \times C$ where $M$ is the number of interpolation methods used and $C=18$ is the number of performance criteria computed.
+
+What are we interested in? The performance of each interpolation method with respect to the proportion missing and gap width. 
+Thus, we want to compute the mean of each of the 17 performance criteria in each g,p,d,m specification across all k simulations.
+
+# Aggregating the Performance Metrics
+```{r Evaluation, cache = TRUE}
+ag <- agEvaluate(pmats = pMats)
+```
+
+# Showing the Distribution (Skewness) for Each Criterion
+Skewness measures the relative size of the two tails. We determine the best representative statistic (mean or median) for each criterion by looking at the distribution of the skewness measures across all simulations.  Distributions of skewness values with a mean roughly centered at zero indicate that on average the criterion has a reliably symmetric distribution, and the mean will be used as the best measure.  Distributions of skewness values with a mean not in the neighbourhood of zero indicate that on average the criterion has a skewed distribution, and the median will be used as the best measure.
+
+Collect and visualize the distribution of the skewness values for each criterion across all simulations: 
+```{r Skewness}
+plotSkew(agEval = testag, cptwise = T)
+
+# Creating a table:
+tab <- xtable()
+
+```
+
+# Non-Parametric Confidence Intervals for C
+
+
+### REDOING DATA SET 4 
+```{r}
+methods <- c(3,4,5,7,13,18)
+
+GappyData4 <- testGappyData[[4]]
+
+theIntData4 <- parInterpolate(gappyTS = GappyData4, methods = methods)
+thedata <- theIntData4
+
+intData4 <- list()
+intData4$D4 <- thedata
+
+orgData4 <- list()
+orgData4$D4 <- as.numeric(D4$Xt)
+
+pmats4 <- performance(OriginalData=orgData4, IntData=intData4)
+
+ag4 <- agEvaluate(pmats = pmats4)
+
+```
+
+## REVISING OLD INT OBJECT and AG and PMATS
+
+```{r}
+new.IntData <- IntData
+new.IntData[[4]] <- IntData4
+
+new.ag <- ag
+new.ag[[4]] <- ag4[[1]]
+
+new.pmats <- pmats
+new.pmats[[4]] <- pmats4
+
+```
+
+
+## CHECKING FOR NaNs in pmats
+```{r}
+
+logical.check <- vector(length = D*M*P*G*K)
+logical.frame <- data.frame(check = logical.check, 
+                            d = logical.check, 
+                            m = logical.check, 
+                            p = logical.check,
+                            g = logical.check,
+                            k = logical.check
+                            )
+  
+i=1
+for(d in 1:D){
+  for(m in 1:M){
+    for(p in 1:P){
+      for(g in 1:G){
+        for(k in 1:K){
+          
+          logical.frame$logical.check[i] <- sum(is.na(pmats[[d]][[m]][[p]][[g]][[k]]))
+          
+          if(logical.frame$logical.check[i] != 0){
+            logical.frame$d[i] = d
+            logical.frame$m[i] = m
+            logical.frame$p[i] = p
+            logical.frame$g[i] = g
+            logical.frame$k[i] = k
+          }
+          
+          
+            i = i+1
+        }
+      }
+    }
+  }
+}
+
+
+logical.frame[logical.frame$logical.check != 0,]
+
+```
+
+Testing Dataset 4 again (with low frequencies)
+```{r}
+methods <- c(3,4,5,7,13,18)
+
+library(tsinterp)
+
+newIntData4 <- parInterpolate(gappyTS = newGappyData4, methods = methods)
+newthedata <- newIntData4
+
+newintData4 <- list()
+newintData4$D4 <- newthedata
+
+neworgData4 <- list()
+neworgData4$D4 <- as.numeric(D4$Xt)
+
+newpmats4 <- performance(OriginalData=neworgData4, IntData=newintData4)
+
+newag4 <- agEvaluate(pmats = pmats4)
+
+
+```
+
+
+
+```{r}
+testpMats <- performance(OriginalData=testOriginalData, IntData=testIntt, GappyData = testGappyData)
+
+testag <- agEvaluate(pmats = testpMats)
+
+
+```
