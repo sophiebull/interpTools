@@ -8,9 +8,9 @@
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
 #' @param cptwise logical; Whether to display plots individually (histograms) or together as a density plot
 #' @param symmetric logical; TRUE = Display only symmetric criteria, FALSE = Display only asymmetric criteria, NULL = Display all criteria
-#' 
+#' @param output character; "plots" (default) or "table".
 
-plotSkew <- function(agEval, cptwise=F, symmetric= NULL){
+plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots"){
   
   D <- length(agEval)
   P <- length(agEval[[1]])
@@ -142,7 +142,21 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL){
         scale_colour_manual(values = colorRampPalette(c("blue","pink","turquoise"))(C)) #tidyr
     }
     
+
+    vals <- format(round(skewMeans$value,2),nsmall = 2)
+    
+    vals[symCritIn] <- paste0("\\textbf{", vals[symCritIn], "}") # bold non-skewed criteria
+    
+    theTable <- data.frame(rownames(skewMeans),vals)
+    colnames(theTable) <- c("criterion","mean skewness")
+    
+    if(output == "plots"){
     return(thePlot)
+    }
+    
+    else if(output == "table"){
+      return(theTable)
+    }
   }
 
 }
