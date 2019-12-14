@@ -1,0 +1,14 @@
+% latex table generated in R 3.6.0 by xtable 1.8-4 package
+% Fri Dec 13 11:05:54 2019
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlllllll}
+  \hline
+ & method & (p0.05,g1) & (p0.1,g1) & (p0.15,g1) & (p0.2,g1) & (p0.25,g1) & (p0.3,g1) \\ 
+  \hline
+1 & Kalman ARIMA & 2.25 & 3.00 & 3.64 & 4.20 & 4.78 & 5.25 \\ 
+  2 & Exponential Weighted Moving Average &  5.06 &  6.64 &  7.78 &  8.75 &  9.57 & 10.37 \\ 
+  3 & Hybrid Wiener Interpolator & \textbf{1.85} & \textbf{2.36} & \textbf{2.77} & \textbf{3.11} & \textbf{3.43} & \textbf{3.72} \\ 
+   \hline
+\end{tabular}
+\end{table}

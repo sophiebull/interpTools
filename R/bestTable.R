@@ -7,7 +7,7 @@
 #' @param crit A character string describing the performance metric of interest
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
 #' @param f "mean" or "median" (default); which statistic to use for f(p,g)
-#' @param fixed "g" or "p"; specifies which variable to hold constant in the table (gap width or proportion missing)
+#' @param cross_section "g" or "p"; specifies which variable to hold constant in the table (gap width or proportion missing)
 #' @param fixedIndex An integer specifying the index position of the variable in "fixed" to hold constant in the table
 #' @param collapse logical; Generate a table collapsing across the fixed variable (T), or select a fixed index (over 'fixed') (F)
 #' 
@@ -16,7 +16,8 @@ bestTable <- function(d=1,
                       m=1:length(agEval[[1]][[1]][[1]]), 
                       crit="MSE",
                       f = "median",
-                      fixed = "g",
+                      cross_section = "g",
+                      layer_type = "method",
                       fixedIndex = NULL,
                       collapse = T){
   
@@ -29,6 +30,19 @@ bestTable <- function(d=1,
   if(collapse && !(is.null(fixedIndex))){
     warning(paste("Since collapse = ",collapse,", fixedIndex is ignored.",sep=""))
   }
+  
+  if (layer_type == "method" && length(d) > 1) {
+    warning(paste("If layer_type = ",layer_type,", d must have length = 1.",sep=""))
+    stop()
+  }
+  
+  if (layer_type == "dataset" && length(m) > 1) {
+    warning(paste("If layer_type = ",layer_type,", m must have length = 1.",sep=""))
+    stop()
+  }
+  
+  
+  stopifnot(layer_type == "method" | layer_type == "dataset")
   
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
@@ -91,8 +105,9 @@ bestTable <- function(d=1,
   
   theTableList <- list()
   
+  if(layer_type == "method"){
   if(!collapse){
-    if(fixed == "g"){
+    if(cross_section == "g"){
       
       for(p in 1:P){
         theTable <- matrix(nrow = M, ncol = 5)
@@ -118,7 +133,7 @@ bestTable <- function(d=1,
       names(theTableList) <- paste("(",prop_vec_names,",",gap_vec_names[fixedIndex],")", sep = "")
     }
     
-    else if(fixed == "p"){
+    else if(cross_section == "p"){
       
       for(g in 1:G){
         theTable <- matrix(nrow = M, ncol = 5)
@@ -146,7 +161,7 @@ bestTable <- function(d=1,
   }
   
   else if(collapse){
-    if(fixed == "g"){
+    if(cross_section == "g"){
       
       for(p in 1:P){
         theTable <- matrix(nrow = M, ncol = 5)
@@ -172,7 +187,7 @@ bestTable <- function(d=1,
       names(theTableList) <- prop_vec_names
     }
     
-    else if(fixed == "p"){
+    else if(cross_section == "p"){
       
       for(g in 1:G){
         theTable <- matrix(nrow = M, ncol = 5)
@@ -197,6 +212,118 @@ bestTable <- function(d=1,
       
       names(theTableList) <- gap_vec_names
     }
+  }
+  }
+  
+  
+  else if(layer_type == "dataset"){
+    if(!collapse){
+      if(cross_section == "g"){
+        
+        for(p in 1:P){
+          theTable <- matrix(nrow = D, ncol = 5)
+          for(d in 1:D){
+            theTable[d,] <- format(round(
+              cbind(
+                min(z_list[[crit]][[1]][[d]][,fixedIndex]),
+                q2.5_list[[crit]][[1]][[d]][,fixedIndex][p],
+                z_list[[crit]][[1]][[d]][,fixedIndex][p],
+                q97.5_list[[crit]][[1]][[d]][,fixedIndex][p]),
+              max(z_list[[crit]][[1]][[d]][,fixedIndex])
+              ,2), nsmall = 2)
+          }
+          
+          theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}")
+          
+          theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
+          colnames(theTable) = c("dataset", "min","$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max")
+          
+          theTableList[[p]] <- theTable
+        }
+        
+        names(theTableList) <- paste("(",prop_vec_names,",",gap_vec_names[fixedIndex],")", sep = "")
+      }
+      
+      else if(cross_section == "p"){
+        
+        for(g in 1:G){
+          theTable <- matrix(nrow = D, ncol = 5)
+          for(d in 1:D){
+            theTable[d,] <- format(round(
+              cbind(
+                min(z_list[[crit]][[1]][[d]][fixedIndex,]),
+                q2.5_list[[crit]][[1]][[d]][fixedIndex,][g],
+                z_list[[crit]][[1]][[d]][fixedIndex,][g],
+                q97.5_list[[crit]][[1]][[d]][fixedIndex,][g],
+                max(z_list[[crit]][[1]][[d]][fixedIndex,]))
+              ,2), nsmall = 2)
+          }
+          
+          theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}")
+          
+          theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
+          colnames(theTable) = c("dataset", "min", "$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max")
+          
+          theTableList[[g]] <- theTable
+        }
+        
+        names(theTableList) <- paste("(",prop_vec_names[fixedIndex],",",gap_vec_names,")", sep = "")
+      }
+    }
+    
+    else if(collapse){
+      if(cross_section == "g"){
+        
+        for(p in 1:P){
+          theTable <- matrix(nrow = D, ncol = 5)
+          for(d in 1:D){
+            theTable[m,] <- format(round(
+              cbind(
+                apply(z_list[[crit]][[1]][[d]],1,min)[p],
+                apply(q2.5_list[[crit]][[1]][[d]],1,median)[p],
+                apply(z_list[[crit]][[1]][[d]],1,median)[p],
+                apply(q97.5_list[[crit]][[1]][[d]],1,median)[p],
+                apply(z_list[[crit]][[1]][[d]],1,max)[p])
+              ,2), nsmall = 2)
+          }
+          
+          theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}")
+          
+          theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
+          colnames(theTable) = c("dataset", "min","$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max")
+          
+          theTableList[[p]] <- theTable
+        }
+        
+        names(theTableList) <- prop_vec_names
+      }
+      
+      else if(cross_section == "p"){
+        
+        for(g in 1:G){
+          theTable <- matrix(nrow = D, ncol = 5)
+          for(d in 1:D){
+            theTable[d,] <- format(round(
+              cbind(
+                apply(q2.5_list[[crit]][[1]][[d]],2,min)[g],
+                apply(q2.5_list[[crit]][[1]][[d]],2,median)[g],
+                apply(z_list[[crit]][[1]][[d]],2,median)[g],
+                apply(q97.5_list[[crit]][[1]][[d]],2,median)[g],
+                apply(q2.5_list[[crit]][[1]][[d]],2,max)[g])
+              ,2), nsmall = 2)
+          }
+          
+          theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}")
+          
+          theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
+          colnames(theTable) = c("dataset", "min","$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max")
+          
+          theTableList[[g]] <- theTable
+        }
+        
+        names(theTableList) <- gap_vec_names
+      }
+    } 
   }
   
   return(theTableList)
