@@ -123,6 +123,7 @@ agEvaluate <- function(pmats, hist = F){
   }
   names(Evaluation) <- names(pmats)
   
+  class(Evaluation) <- "agEvaluate"
     return(Evaluation)
 
 } 
