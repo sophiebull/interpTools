@@ -18,7 +18,8 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots"){
   M <- length(agEval[[1]][[1]][[1]])
   C <- nrow(agEval[[1]][[1]][[1]][[1]])
 
-  stopifnot(is.logical(cptwise) | is.logical(symmetric))
+  stopifnot((is.logical(cptwise) | is.logical(symmetric)), class(agEval) == "agEvaluate")
+  
   skews <- matrix(ncol = D*P*G*M, nrow = nrow(agEval[[1]][[1]][[1]][[1]]))
   q1s <- skews
   q3s <- q1s
