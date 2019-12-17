@@ -16,6 +16,7 @@ plotMetrics <- function(agEval,d=1:length(agEval),
                         crit){
 
   require(ggplot2)
+  stopifnot(class(agEval) == "agEvaluate")
   
 D <- length(d)
 P <- length(p)
