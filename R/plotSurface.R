@@ -19,52 +19,29 @@ plotSurface <- function(d=1:length(agEval),
                         crit, 
                         agEval, 
                         layer_type = "method", 
-                        f = "median", output = "plots"){
+                        f = "median"){
   require(plotly)
   require(dplyr)
   require(RColorBrewer)
   
   stopifnot((layer_type == "method" || layer_type == "dataset"),
-            (f == "mean" || f == "median"))
+            f %in% names(agEval[[1]][[1]][[1]][[1]])[1:11], class(agEval) == "agEvaluate",
+            length(f) == 1)
   
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
   prop_vec_names <- names(agEval[[1]])
   gap_vec_names <- names(agEval[[1]][[1]])
 
-  
+
   D <- length(d)
   M <- length(m)
   C <- length(crit)
+ 
+  z_list <- compileMatrix(agEval)[[f]]
   
-  z_list <- lapply(z_list <- vector(mode = 'list', C),function(x)
-    lapply(z_list <- vector(mode = 'list', M),function(x) 
-      x <- vector(mode = 'list', D)))
-  
-  critMat <- matrix(nrow=length(agEval[[1]]),ncol=length(agEval[[1]][[1]]))
-  rownames(critMat) <- prop_vec_names
-  colnames(critMat) <- gap_vec_names
-  
-  data_list_names <- numeric(D)
-  method_list_names <- numeric(M)
-  
-  for(s in 1:C){
-    for(vm in 1:M){
-      for(vd in 1:D){
-        for(p in 1:P){
-          for(g in 1:G){
-            critMat[p,g] <- agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],f]
-            method_list_names[vm] <- as.character(agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s], "method"]) 
-          }
-        }
-        z_list[[s]][[vm]][[vd]] <- critMat
-        data_list_names[vd] <- paste("D",d[vd],sep="") 
-      }
-      names(z_list[[s]][[vm]]) <- data_list_names
-    }
-    names(z_list[[s]]) <- method_list_names
-  }
-  names(z_list) <- crit
+  method_list_names <- names(z_list[[1]])[m]
+  data_list_names <- names(z_list[[1]][[1]])[d]
   
   ## Generating a list of surfaces 
   
@@ -106,13 +83,13 @@ plotSurface <- function(d=1:length(agEval),
       for(vd in 1:D){
         z <- numeric(M)
         for(vm in 1:(M-1)){
-          z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",vm,"]][[",vd,"]], 
+          z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]], 
                          colorscale = list(seq(0,1,length.out=P*G), palette[[",vm,"]]), 
-                         name = names(z_list[[1]])[",vm,"], opacity = 1) %>% ",sep="")
+                         name = names(z_list[[1]])[",m[vm],"], opacity = 1) %>% ",sep="")
         }
-        z[M] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",M,"]][[",vd,"]], 
+        z[M] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][[",m[M],"]][[",d[vd],"]], 
                       colorscale = list(seq(0,1,length.out=P*G), palette[[",M,"]]),
-                      name = names(z_list[[1]])[",M,"], opacity = 1)",sep="")
+                      name = names(z_list[[1]])[",m[M],"], opacity = 1)",sep="")
         
         z <- paste(z, collapse = "")
         
@@ -125,7 +102,8 @@ plotSurface <- function(d=1:length(agEval),
                                     )) %>%",z,sep="")))
 
         
-        plotList[[s]][[vd]] <- plotList[[s]][[vd]] %>%  layout(title = paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Dataset = ",vd, sep = "")) 
+        plotList[[s]][[vd]] <- plotList[[s]][[vd]] %>%  
+          layout(title = paste("\n Criterion = ", names(z_list[crit[s]])," (",f,")","\n Dataset = ",d[vd], sep = "")) 
         
         plotList[[s]][[vd]] <- hide_colorbar(plotList[[s]][[vd]])
         
@@ -172,13 +150,13 @@ plotSurface <- function(d=1:length(agEval),
         for(vm in 1:M){
           z <- numeric(D)
           for(vd in 1:(D-1)){
-            z[vd] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",vm,"]][[",vd,"]], 
+            z[vd] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]], 
                            colorscale = list(seq(0,1,length.out=P*G), palette[[",vd,"]]),
-                           name = names(z_list[[1]][[1]])[",vd,"], opacity = 1) %>% ",sep="")
+                           name = names(z_list[[1]][[1]])[",d[vd],"], opacity = 1) %>% ",sep="")
           }
-          z[D] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[[",s,"]][[",vm,"]][[",D,"]], 
+          z[D] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][[",m[vm],"]][[",d[D],"]], 
                         colorscale = list(seq(0,1,length.out=P*G), palette[[",D,"]]),
-                        name = names(z_list[[1]][[1]])[",D,"], opacity = 1)",sep="")
+                        name = names(z_list[[1]][[1]])[",d[D],"], opacity = 1)",sep="")
           
           z <- paste(z, collapse = "")
           
@@ -191,7 +169,7 @@ plotSurface <- function(d=1:length(agEval),
                                                          )) %>%",
                                                          z,sep="")))
           
-          plotList[[s]][[vm]] <- plotList[[s]][[vm]] %>%  layout(title = paste("\n Criterion = ",names(z_list)[s]," (",f,")","\n Method = ",method_list_names[vm], sep = ""))
+          plotList[[s]][[vm]] <- plotList[[s]][[vm]] %>%  layout(title = paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Method = ",method_list_names[m[vm]], sep = ""))
           
           plotList[[s]][[vm]] <- hide_colorbar(plotList[[s]][[vm]])
           }
@@ -200,12 +178,9 @@ plotSurface <- function(d=1:length(agEval),
       names(plotList) <- crit
     }  
   
-  if(output == "plots"){
     return(plotList)
-  }
-  else if(output == "raw"){
-    return(z_list)
- }  
+
+   
   }
 
 
