@@ -8,7 +8,7 @@ plotXt <- function(d, simData, cptwise = T){
   require(ggplot2) 
   require(gridExtra)
   
-stopifnot(class(simData) == "simData")
+stopifnot(class(simData) == "simList")
 
   t <- 0:(length(simData$Xt[[d]])-1)
     
