@@ -7,9 +7,12 @@
 #' @param crit A character vector describing the performance metrics of interest
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
  
+
 gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,agEval,f = "median"){
   
-  stopifnot((f == "median" | f == "mean"))
+  stopifnot(f %in% names(agEval[[1]][[1]][[1]][[1]])[1:11], class(agEval) == "agEvaluate",
+            crit %in% rownames(agEval[[1]][[1]][[1]][[1]]),
+            length(d) <= length(agEval), length(m) <= length(agEval[[1]][[1]][[1]]))
   
   # defining prop_vec and gap_vec
   prop_vec <- as.numeric(gsub("p","",names(agEval[[1]]))) # proportions
@@ -17,6 +20,8 @@ gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,a
   
   prop_vec_names <- names(agEval[[1]])
   gap_vec_names <- names(agEval[[1]][[1]])
+  
+
   
   ################# Create z_list (list of critMat)
   P <- length(agEval[[1]])
@@ -26,43 +31,23 @@ gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,a
   M <- length(m)
   C <- length(crit)
   
-  z_list <- lapply(z_list <- vector(mode = 'list', C),function(x)
-    lapply(z_list <- vector(mode = 'list', M),function(x) 
-      x <- vector(mode = 'list', D)))
+  z_list <- compileMatrix(agEval)[[f]]
   
-  gradient_list <- z_list
+  data_list_names <- names(z_list[[1]][[1]])[d]
+  method_list_names <- names(z_list[[1]])[m]
   
-  critMat <- matrix(nrow=length(agEval[[1]]),ncol=length(agEval[[1]][[1]]))
-  rownames(critMat) <- prop_vec_names
-  colnames(critMat) <- gap_vec_names
+  # criterion, method, dataset 
   
-  data_list_names <- numeric(D)
-  method_list_names <- numeric(M)
-  
-  for(s in 1:C){
-    for(vm in 1:M){
-      for(vd in 1:D){
-        for(p in 1:P){
-          for(g in 1:G){
-            critMat[p,g] <- agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s],f]
-            method_list_names[vm] <- as.character(agEval[[d[vd]]][[p]][[g]][[m[vm]]][crit[s], "method"]) 
-          }
-        }
-        z_list[[s]][[vm]][[vd]] <- critMat
-        data_list_names[vd] <- paste("D",d[vd],sep="") 
-      }
-      names(z_list[[s]][[vm]]) <- data_list_names
-    }
-    names(z_list[[s]]) <- method_list_names
-  }
-  names(z_list) <- crit
-  
+  gradient_list <- lapply(gradient_list <- vector(mode = 'list', C),function(x)
+    lapply(gradient_list <- vector(mode = 'list', M),function(x)
+        x <- vector(mode = 'list', D)))
+
   ################################ Creating a list to store each (d,m,crit) gradient
   
   for(s in 1:C){
     for(vm in 1:M){
       for(vd in 1:D){
-        critMat <- z_list[[s]][[vm]][[vd]]
+        critMat <- z_list[[crit[s]]][[m[vm]]][[d[vd]]]
         
         I <- nrow(critMat)
         J <- ncol(critMat)
@@ -466,7 +451,9 @@ gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,a
     names(gradient_list[[s]]) <- method_list_names
   }
 names(gradient_list) <- crit
-  
+
+class(gradient_list) <- "gradientObject"
+
   return(gradient_list)
 }
 
