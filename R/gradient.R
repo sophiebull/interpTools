@@ -6,6 +6,7 @@
 #' @param m A vector of the interpolation methods of interest 
 #' @param crit A character vector describing the performance metrics of interest
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
+#' @param f "median" (default): which statistic will be represented by the gradient
  
 
 gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,agEval,f = "median"){
