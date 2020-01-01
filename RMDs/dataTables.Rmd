@@ -20,8 +20,8 @@ print(xtable(skewTab), file="skewTab.txt", include.rownames = F, sanitize.text.f
 # BEST METHOD, g fixed, collapse across g
 ```{r}
 f = "median"
-cross_section = "g"
-unfixed = "p"
+cross_section = "p"
+theFixed = "g"
 
 # MAPE
 crit = "MAPE"
@@ -35,7 +35,7 @@ btD2MAPE_p <-bestTable(d=2, agEval = testag, m=4:6, crit=crit, f = f, cross_sect
 attr(btD2MAPE_p, "subheadings") <- names(btD2MAPE_p)
 
 ## D3
-btD3MAPE_p <-bestTable(d=3, agEval = testag, m=4:6, crit=crit, f = f, cross_section = cross_section, collapse = T)
+btD3MAPE_g <-bestTable(d=3, agEval = testag, m=4:6, crit=crit, f = f, cross_section = cross_section, collapse = T)
 attr(btD3MAPE_p, "subheadings") <- names(btD3MAPE_p)
 
 ## D4
@@ -46,8 +46,9 @@ attr(btD4MAPE_p, "subheadings") <- names(btD4MAPE_p)
 btD5MAPE_p <-bestTable(d=5, agEval = testag, m=4:6, crit=crit, f = f, cross_section = cross_section, collapse = T)
 attr(btD5MAPE_p, "subheadings") <- names(btD5MAPE_p)
 
-caption_MAPE <- paste0("Sampling distribution of the ",f, " ",crit," values in dataset ",d,". Statistics are aggregated across $",cross_section,"$ and shown for each value of $",unfixed,"$.")
-
+for (d in 1:5){
+caption_MAPE[d] <- paste0("Sampling distribution of the ",f, " ",crit," values in dataset ",d,". Statistics are aggregated across $",theFixed,"$ and shown for each value of $",cross_section,"$.")
+}
 
 # NRMSD
 
@@ -73,30 +74,43 @@ attr(btD4NRMSD_p, "subheadings") <- names(btD4NRMSD_p)
 btD5NRMSD_p <-bestTable(d=5, agEval = testag, m=4:6, crit=crit, f = f, cross_section = cross_section, collapse = T)
 attr(btD5NRMSD_p, "subheadings") <- names(btD5NRMSD_p)
 
-caption_NRMSD <- paste0("Sampling distribution of the ",f, " ",crit," values in dataset ",d,". Statistics are aggregated across $",cross_section,"$ and shown for each value of $",unfixed,"$.")
+for (d in 1:5){
+caption_NRMSD[d] <- paste0("Sampling distribution of the ",f, " ",crit," values in dataset ",d,". Statistics are aggregated across $",theFixed,"$ and shown for each value of $",cross_section,"$.")}
 ```
 
 ```{r}
-setwd("/home/sophie/sophTools/files/tables")
+setwd("/home/sophie/sophTools/files/tables/CSp/MAPE")
 
 for(i in 1:5){
-  print(xtableList(eval(parse(text = paste("btD",i,"MAPE_p",sep=""))), caption = caption_MAPE[i]), 
+  fileConn <- file(paste("btD",i,"MAPE_p.txt",sep=""))
+  
+  writeLines(print(xtableList(eval(parse(text = paste("btD",i,"MAPE_p",sep=""))), caption = caption_MAPE[i]), 
         file = paste("btD",i,"MAPE_p.txt",sep=""),
         include.rownames = F,
-        sanitize.text.function = function(x) x)}
+        sanitize.text.function = function(x) x), fileConn)
   
-    print(xtableList(eval(parse(text = paste("btD",i,"NRMSD_p",sep=""))), caption = caption_NRMSD[i]), 
+  close(fileConn)
+  }
+  
+setwd("/home/sophie/sophTools/files/tables/CSp/NRMSD")
+
+for(i in 1:5){
+  fileConn <- file(paste("btD",i,"NRMSD_p.txt",sep=""))
+    writeLines(print(xtableList(eval(parse(text = paste("btD",i,"NRMSD_p",sep=""))), caption = caption_NRMSD[i]), 
         file = paste("btD",i,"NRMSD_p.txt",sep=""),
         include.rownames = F,
-        sanitize.text.function = function(x) x)
+        sanitize.text.function = function(x) x), fileConn)
+  
+  close(fileConn)
+  }
 
 ```
 
 # BEST METHOD, p fixed, collapse across p
 ```{r}
 f = "median"
-cross_section = "p"
-unfixed = "g"
+cross_section = "g"
+theFixed = "p"
 
 # MAPE
 crit = "MAPE"
@@ -121,7 +135,9 @@ attr(btD4MAPE_g, "subheadings") <- names(btD4MAPE_g)
 btD5MAPE_g <-bestTable(d=5, agEval = testag, m=4:6, crit=crit, f = f, cross_section = cross_section, collapse = T)
 attr(btD5MAPE_g, "subheadings") <- names(btD5MAPE_g)
 
-caption_MAPE <- paste0("Sampling distribution of the ",f, " ",crit," values in dataset ",d,". Statistics are aggregated across $",cross_section,"$ and shown for each value of $",unfixed,"$.")
+for (d in 1:5){
+caption_MAPE[d] <- paste0("Sampling distribution of the ",f, " ",crit," values in dataset ",d,". Statistics are aggregated across $",theFixed,"$ and shown for each value of $",cross_section,"$.")
+}
 
 
 # NRMSD
@@ -148,22 +164,35 @@ attr(btD4NRMSD_g, "subheadings") <- names(btD4NRMSD_g)
 btD5NRMSD_g <-bestTable(d=5, agEval = testag, m=4:6, crit=crit, f = f, cross_section = cross_section, collapse = T)
 attr(btD5NRMSD_g, "subheadings") <- names(btD5NRMSD_g)
 
-caption_NRMSD <- paste0("Sampling distribution of the ",f, " ",crit," values in dataset ",d,". Statistics are aggregated across $",cross_section,"$ and shown for each value of $",unfixed,"$.")
+for (d in 1:5){
+caption_NRMSD[d] <- paste0("Sampling distribution of the ",f, " ",crit," values in dataset ",d,". Statistics are aggregated across $",theFixed,"$ and shown for each value of $",cross_section,"$.")}
 ```
 
 ```{r}
-setwd("/home/sophie/sophTools/files/tables")
+setwd("/home/sophie/sophTools/files/tables/CSg/MAPE")
 
 for(i in 1:5){
-  print(xtableList(eval(parse(text = paste("btD",i,"MAPE_g",sep=""))), caption = caption_MAPE[i]), 
+  fileConn <- file(paste("btD",i,"MAPE_g.txt",sep=""))
+  
+  writeLines(print(xtableList(eval(parse(text = paste("btD",i,"MAPE_g",sep=""))), caption = caption_MAPE[i]), 
         file = paste("btD",i,"MAPE_g.txt",sep=""),
         include.rownames = F,
-        sanitize.text.function = function(x) x)}
+        sanitize.text.function = function(x) x), fileConn)
   
-    print(xtableList(eval(parse(text = paste("btD",i,"NRMSD_g",sep=""))), caption = caption_NRMSD[i]), 
+  close(fileConn)
+}
+
+setwd("/home/sophie/sophTools/files/tables/CSg/NRMSD")
+
+for(i in 1:5){
+  fileConn <- file(paste("btD",i,"NRMSD_g.txt",sep=""))
+    writeLines(print(xtableList(eval(parse(text = paste("btD",i,"NRMSD_g",sep=""))), caption = caption_NRMSD[i]), 
         file = paste("btD",i,"NRMSD_g.txt",sep=""),
         include.rownames = F,
-        sanitize.text.function = function(x) x)
+        sanitize.text.function = function(x) x), fileConn)
+  
+  close(fileConn)
+  }
 
 ```
 

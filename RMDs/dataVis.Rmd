@@ -143,7 +143,8 @@ LEGEND (WITH SPLINES, PLOTLY)
 greyList <- c("grey90", "grey70", "grey50","grey30","grey10", "grey0")
 
 # get z_list
-z_list <- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "method", f="median", output = "raw")
+z_list <- compileMatrix(agEval=testag)[["median"]]
+
   
 manualLegend <- data.frame(color = as.character(greyList), 
                            nameSurface = gsub("Average","Avg",rev(gsub("."," ",names(z_list[[1]]),fixed = TRUE))), 
@@ -185,7 +186,7 @@ theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
 
 SURFACE PLOTS (WITH SPLINES)
 ```{r}
-ps<- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "method", f="median", output = "plots")
+ps<- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "method", f="median")
 
 titleList <- list()
 
@@ -314,7 +315,7 @@ LEGEND (WITHOUT SPLINES, PLOTLY)
 greyList <- c("grey90", "grey70", "grey50")
 
 # get z_list
-z_list <- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "dataset", f="median", output = "raw")
+z_list <- compileMatrix(agEval=testag)[["median"]]
 
 manualLegend <- data.frame(color = as.character(greyList), 
                            nameSurface = gsub("Average","Avg",rev(gsub("."," ",names(z_list[[1]])[4:6],fixed = TRUE))), 
@@ -459,7 +460,8 @@ LEGEND (PLOTLY)
 greyList <- c("grey90", "grey70", "grey50","grey30","grey10")
 
 # get z_list
-z_list <- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "dataset", f="median", output = "raw")
+z_list <- compileMatrix(agEval=testag)[["median"]]
+
 
 manualLegend <- data.frame(color = as.character(greyList), 
                            nameSurface = rev(gsub("D","Dataset ",names(z_list[[1]][[1]]),fixed=TRUE)), 
@@ -501,7 +503,7 @@ theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
 
 SURFACE PLOTS (WITHOUT SPLINES)
 ```{r}
-PS <- plotSurface(crit=c("MAPE","NRMSD"), m = 4:6, agEval = testag, layer_type = "dataset", f = "median", output = "plots")
+PS <- plotSurface(crit=c("MAPE","NRMSD"), m = 4:6, agEval = testag, layer_type = "dataset", f = "median")
 
 titleList <- list()
 
@@ -579,7 +581,7 @@ LEGEND (GGPLOT)
 ```{r}
 greyList <- c("grey90", "grey70", "grey50")
 # get z_list
-z_list <- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "dataset", f="median", output = "raw")
+z_list <- compileMatrix(agEval = testag)[["median"]]
 
 manualLegend <- data.frame(color = as.character(greyList), 
                            nameSurface = gsub("Average","Avg",gsub("."," ",names(z_list[[1]])[4:6],fixed = TRUE)), 
@@ -610,7 +612,7 @@ theLegend <- ggplot(data = manualLegend) +
 
 CROSS_SECTION = P
 ```{r}
-plotListCS <- plotCS(m = 4:6, agEval = testag, cross_section = "p", layer_type = "method", crit = c("MAPE","NRMSD"))
+plotListCS <- plotCS(m = 4:6, agEval = testag, cross_section = "p", layer_type = "method", crit = c("MAPE","NRMSD"), f = "median")
 
 #MAPE 
 
@@ -675,6 +677,44 @@ grid.arrange(pCSNRMSE1, pCSNRMSE2, pCSNRMSE3, pCSNRMSE4, pCSNRMSE5, theLegend, n
              bottom = textGrob("proportion missing", gp = gpar(fontsize = 14, font = 1)))
 
 dev.off()
+
+```
+BREAKING IT DOWN FURTHER
+```{r}
+
+setwd("/home/sophie/sophTools/files/plots")
+png("D1NRMSECSunbyMethod_p.png", width = 655, height = 965)
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=1, m=4:6, f = "median", layer_type = "method")
+dev.off()
+
+
+setwd("/home/sophie/sophTools/files/plots")
+png("D2NRMSECSunbyMethod_p.png", width = 655, height = 965)
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=2, m=4:6, f = "median", layer_type = "method")
+dev.off()
+
+
+
+setwd("/home/sophie/sophTools/files/plots")
+png("D3NRMSECSunbyMethod_p.png", width = 655, height = 965)
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=3, m=4:6, f = "median", layer_type = "method")
+dev.off()
+
+ 
+
+setwd("/home/sophie/sophTools/files/plots")
+png("D4NRMSECSunbyMethod_p.png", width = 655, height = 986)
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=4, m=4:6, f = "median", layer_type = "method")
+dev.off()
+
+
+
+setwd("/home/sophie/sophTools/files/plots")
+png("D5NRMSECSunbyMethod_p.png", width = 655, height = 986)
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=5, m=4:6, f = "median", layer_type = "method")
+dev.off()
+
+
 
 ```
 
