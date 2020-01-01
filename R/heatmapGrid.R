@@ -1,3 +1,21 @@
+#'  Generate Heatmap Objects 
+#' 
+#'  A function to generate heatmaps to visualize results from objects of class "\code{agEvaluate}" (from \code{agEvaluate()}). \cr
+#'  
+#'  
+#' @param agEval A list object of class "\code{agEvaluate}" (result of \code{agEvaluate()} of aggregated performance metrics
+#' @param f "\code{median}" (default): Which statistic should be used that will be represented in the heatmap
+#' @param crit numeric; a vector of performance criteria
+#' @param m numeric; a vector describing the index positions of desired methods (corresponding to \code{agEval})
+#' @param d numeric; a vector describing the index positions of desired datasets (corresponding to \code{agEval})
+#' @param type "\code{z}" (default) or "\code{gradient}"; Generate heatmaps of the matrix of PxG values of the performance metrics\cr 
+#'        in \code{crit} (for \code{type} ='\code{z}'), or the values of the slopes between adjacent values in the performance matrices \cr
+#'        (for \code{type} = '\code{gradient}')
+#' @param output "\code{graphic}" (default) or "\code{matrix}"; If \code{type = "z"}, \code{output} is coerced to "\code{graphic}". Otherwise, if \cr
+#'        \code{type = "gradient"} and \code{output = "matrix"}, the function will return the matrix of slopes arranged in a grid corresponding to each\cr
+#'        adjacent point in the performance matrix. 
+#' @param col character; A vector of colours to use for the heatmap graphic.
+
 heatmapGrid <- function(agEval, f = "median", crit, m, d, type = "z", output = "graphic", col = c("red","yellow")){
   
   stopifnot((output == "graphic" | output == "matrix"),
