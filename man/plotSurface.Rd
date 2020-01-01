@@ -18,7 +18,7 @@ plotSurface(d = 1:length(agEval), m = 1:length(agEval[[1]][[1]][[1]]),
 
 \item{layer_type}{"method" (default) or "dataset"; how to slice the data}
 
-\item{f}{"mean" or "median" (default); which statistic to use for f(p,g)}
+\item{f}{"median" (default); which statistic to use for f(p,g)}
 }
 \description{
 Function to generate a surface plot to visualize changes in the performance metrics of interest

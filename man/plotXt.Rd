@@ -4,7 +4,7 @@
 \alias{plotXt}
 \title{Plot Each Component of Xt}
 \usage{
-plotXt(d, cptwise = T)
+plotXt(d, simData, cptwise = T)
 }
 \arguments{
 \item{d}{The index of the original time series of interest}

@@ -4,7 +4,7 @@
 \alias{plotSkew}
 \title{Aggregate and plot the skewness statistics over all simulations}
 \usage{
-plotSkew(agEval, cptwise = F, symmetric = NULL)
+plotSkew(agEval, cptwise = F, symmetric = NULL, output = "plots")
 }
 \arguments{
 \item{agEval}{A list object (result of agEval.R) of aggregated performance metrics}
@@ -12,6 +12,8 @@ plotSkew(agEval, cptwise = F, symmetric = NULL)
 \item{cptwise}{logical; Whether to display plots individually (histograms) or together as a density plot}
 
 \item{symmetric}{logical; TRUE = Display only symmetric criteria, FALSE = Display only asymmetric criteria, NULL = Display all criteria}
+
+\item{output}{character; "plots" (default) or "table".}
 }
 \description{
 Function to display the sampling distributions of the skewness statistics for each criterion across all simulations. 

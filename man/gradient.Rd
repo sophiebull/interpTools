@@ -15,6 +15,8 @@ gradient(d = 1:length(agEval), m = 1:length(agEval[[1]][[1]][[1]]),
 \item{crit}{A character vector describing the performance metrics of interest}
 
 \item{agEval}{A list object (result of agEval.R) of aggregated performance metrics}
+
+\item{f}{"median" (default): which statistic will be represented by the gradient}
 }
 \description{
 A function that will calculate the slope between every combination of adjacent points in a grid.
