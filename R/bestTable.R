@@ -98,30 +98,44 @@ bestTable <- function(d=1,
     if(cross_section == "p"){
       
       for(p in 1:P){
-        theTable <- matrix(nrow = M, ncol = 6)
+        theTable <- matrix(nrow = M, ncol = 4) # Change to 6 if including the min and max
         for(vm in 1:M){
           theTable[vm,] <- format(round(
             cbind(
-              min_list[[crit]][[m[vm]]][[d]][,fixedIndex][p],
+              #min_list[[crit]][[m[vm]]][[d]][,fixedIndex][p],
               q2.5_list[[crit]][[m[vm]]][[d]][,fixedIndex][p],
               z_list[[crit]][[m[vm]]][[d]][,fixedIndex][p],
               q97.5_list[[crit]][[m[vm]]][[d]][,fixedIndex][p],
-              max_list[[crit]][[m[vm]]][[d]][,fixedIndex][p], 
+              #max_list[[crit]][[m[vm]]][[d]][,fixedIndex][p], 
               q97.5_list[[crit]][[m[vm]]][[d]][,fixedIndex][p] - q2.5_list[[crit]][[m[vm]]][[d]][,fixedIndex][p]) # IQR
             ,3), nsmall = 3)
         }
         
         if(optimize == 0){
-          theTable[which.min(theTable[,4]),] <- paste0("\\textbf{", theTable[which.min(theTable[,4]),], "}")
+          theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
         }
         
         else if(optimize == 1){
-          theTable[which.max(theTable[,4]),] <- paste0("\\textbf{", theTable[which.max(theTable[,4]),], "}")
+          theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
         }
         
-        theTable <- cbind(gsub("Exponential Weighted Moving Average", "Exp. Weighted Moving Avg.",
-                               gsub("."," ", method_list_names,fixed=TRUE), fixed = TRUE), data.frame(theTable))
-        colnames(theTable) = c("method", "min","$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max", "$Q_{97.5\\%} - Q_{2.5\\%}$")
+        theTable <- cbind(gsub("Kalman ARIMA", "KAF", 
+                               gsub("Hybrid Wiener Interpolator", "HWI", 
+                                    gsub("Exponential Weighted Moving Average", "EWMA",
+                                         gsub("."," ", method_list_names,
+                                              fixed=TRUE),
+                                         fixed = TRUE),
+                                    fixed = TRUE),
+                               fixed = TRUE),
+                          data.frame(theTable))
+        
+        colnames(theTable) = c("method", 
+                               #"min",
+                               "$Q_{2.5\\%}$",
+                               "median",
+                               "$Q_{97.5\\%}$",
+                               #"max", 
+                               "$Q_{97.5\\%} - Q_{2.5\\%}$")
         
         theTableList[[p]] <- theTable
       }
@@ -132,30 +146,44 @@ bestTable <- function(d=1,
     else if(cross_section == "g"){
       
       for(g in 1:G){
-        theTable <- matrix(nrow = M, ncol = 6)
+        theTable <- matrix(nrow = M, ncol = 4) # change to 6 if including min and max
         for(vm in 1:M){
           theTable[vm,] <- format(round(
             cbind(
-              min_list[[crit]][[m[vm]]][[d]][fixedIndex,][g],
+              #min_list[[crit]][[m[vm]]][[d]][fixedIndex,][g],
               q2.5_list[[crit]][[m[vm]]][[d]][fixedIndex,][g],
               z_list[[crit]][[m[vm]]][[d]][fixedIndex,][g],
               q97.5_list[[crit]][[m[vm]]][[d]][fixedIndex,][g],
-              max_list[[crit]][[m[vm]]][[d]][fixedIndex,][g],
+              #max_list[[crit]][[m[vm]]][[d]][fixedIndex,][g],
               q97.5_list[[crit]][[m[vm]]][[d]][fixedIndex,][g] - q2.5_list[[crit]][[m[vm]]][[d]][fixedIndex,][g])
             ,3), nsmall = 3)
         }
         
         if(optimize == 0){
-          theTable[which.min(theTable[,4]),] <- paste0("\\textbf{", theTable[which.min(theTable[,4]),], "}")
+          theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
         }
         
         else if(optimize == 1){
-          theTable[which.max(theTable[,4]),] <- paste0("\\textbf{", theTable[which.max(theTable[,4]),], "}")
+          theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
         }
         
-        theTable <- cbind(gsub("Exponential Weighted Moving Average", "Exp. Weighted Moving Avg.",
-                               gsub("."," ", method_list_names,fixed=TRUE), fixed = TRUE), data.frame(theTable))
-        colnames(theTable) = c("method", "min", "$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max", "$Q_{97.5\\%} - Q_{2.5\\%}$")
+        theTable <- cbind(gsub("Kalman ARIMA", "KAF", 
+                               gsub("Hybrid Wiener Interpolator", "HWI", 
+                                    gsub("Exponential Weighted Moving Average", "EWMA",
+                                         gsub("."," ", method_list_names,
+                                              fixed=TRUE),
+                                         fixed = TRUE),
+                                    fixed = TRUE),
+                               fixed = TRUE),
+                          data.frame(theTable))
+        
+        colnames(theTable) = c("method", 
+                               #"min",
+                               "$Q_{2.5\\%}$",
+                               "median",
+                               "$Q_{97.5\\%}$",
+                               #"max",
+                               "$Q_{97.5\\%} - Q_{2.5\\%}$")
         
         theTableList[[g]] <- theTable
       }
@@ -168,31 +196,45 @@ bestTable <- function(d=1,
     if(cross_section == "p"){
       
       for(p in 1:P){
-        theTable <- matrix(nrow = M, ncol = 6)
+        theTable <- matrix(nrow = M, ncol = 4) #change to 6 if including min and max
         for(vm in 1:M){
           theTable[vm,] <- format(round(
             cbind(
-              apply(z_list[[crit]][[m[vm]]][[d]],1,min)[p],
+              #apply(z_list[[crit]][[m[vm]]][[d]],1,min)[p],
               apply(z_list[[crit]][[m[vm]]][[d]],1,function (x) quantile(x, probs = c(0.025,0.975))["2.5%"])[p],
               apply(z_list[[crit]][[m[vm]]][[d]],1,median)[p],
               apply(z_list[[crit]][[m[vm]]][[d]],1,function (x) quantile(x, probs = c(0.025,0.975))["97.5%"])[p],
-              apply(z_list[[crit]][[m[vm]]][[d]],1,max)[p],
+              #apply(z_list[[crit]][[m[vm]]][[d]],1,max)[p],
               apply(z_list[[crit]][[m[vm]]][[d]],1,function (x) quantile(x, probs = c(0.025,0.975))["97.5%"])[p] - 
               apply(z_list[[crit]][[m[vm]]][[d]],1,function (x) quantile(x, probs = c(0.025,0.975))["2.5%"])[p])
             ,3), nsmall = 3)
         }
         
         if(optimize == 0){
-          theTable[which.min(theTable[,4]),] <- paste0("\\textbf{", theTable[which.min(theTable[,4]),], "}")
+          theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
         }
         
         else if(optimize == 1){
-          theTable[which.max(theTable[,4]),] <- paste0("\\textbf{", theTable[which.max(theTable[,4]),], "}")
+          theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
         }
         
-        theTable <- cbind(gsub("Exponential Weighted Moving Average", "Exp. Weighted Moving Avg.",
-                               gsub("."," ", method_list_names,fixed=TRUE), fixed = TRUE), data.frame(theTable))
-        colnames(theTable) = c("method", "min","$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max","$Q_{97.5\\%} - Q_{2.5\\%}$")
+        theTable <- cbind(gsub("Kalman ARIMA", "KAF", 
+                               gsub("Hybrid Wiener Interpolator", "HWI", 
+                                    gsub("Exponential Weighted Moving Average", "EWMA",
+                                         gsub("."," ", method_list_names,
+                                              fixed=TRUE),
+                                         fixed = TRUE),
+                                    fixed = TRUE),
+                               fixed = TRUE),
+                          data.frame(theTable))
+        
+        colnames(theTable) = c("method",
+                               #"min",
+                               "$Q_{2.5\\%}$",
+                               "median",
+                               "$Q_{97.5\\%}$",
+                               #"max",
+                               "$Q_{97.5\\%} - Q_{2.5\\%}$")
         
         theTableList[[p]] <- theTable
       }
@@ -203,31 +245,45 @@ bestTable <- function(d=1,
     else if(cross_section == "g"){
       
       for(g in 1:G){
-        theTable <- matrix(nrow = M, ncol = 6)
+        theTable <- matrix(nrow = M, ncol = 4) #change to 6 if including min and max
         for(vm in 1:M){
           theTable[vm,] <- format(round(
             cbind(
-              apply(z_list[[crit]][[m[vm]]][[d]],2,min)[g],
+              #apply(z_list[[crit]][[m[vm]]][[d]],2,min)[g],
               apply(z_list[[crit]][[m[vm]]][[d]],2,function (x) quantile(x, probs = c(0.025,0.975))["2.5%"])[g],
               apply(z_list[[crit]][[m[vm]]][[d]],2,median)[g],
               apply(z_list[[crit]][[m[vm]]][[d]],2,function (x) quantile(x, probs = c(0.025,0.975))["97.5%"])[g],
-              apply(z_list[[crit]][[m[vm]]][[d]],2,max)[g],
+              #apply(z_list[[crit]][[m[vm]]][[d]],2,max)[g],
               apply(z_list[[crit]][[m[vm]]][[d]],2,function (x) quantile(x, probs = c(0.025,0.975))["97.5%"])[g] - 
               apply(z_list[[crit]][[m[vm]]][[d]],2,function (x) quantile(x, probs = c(0.025,0.975))["2.5%"])[g])
             ,3), nsmall = 3)
         }
         
         if(optimize == 0){
-          theTable[which.min(theTable[,4]),] <- paste0("\\textbf{", theTable[which.min(theTable[,4]),], "}")
+          theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
         }
         
         else if(optimize == 1){
-          theTable[which.max(theTable[,4]),] <- paste0("\\textbf{", theTable[which.max(theTable[,4]),], "}")
+          theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
         }
         
-        theTable <- cbind(gsub("Exponential Weighted Moving Average", "Exp. Weighted Moving Avg.",
-                               gsub("."," ", method_list_names,fixed=TRUE), fixed = TRUE), data.frame(theTable))
-        colnames(theTable) = c("method", "min","$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max", "$Q_{97.5\\%} - Q_{2.5\\%}$")
+        theTable <- cbind(gsub("Kalman ARIMA", "KAF", 
+                               gsub("Hybrid Wiener Interpolator", "HWI", 
+                                    gsub("Exponential Weighted Moving Average", "EWMA",
+                                         gsub("."," ", method_list_names,
+                                              fixed=TRUE),
+                                         fixed = TRUE),
+                                    fixed = TRUE),
+                               fixed = TRUE),
+                          data.frame(theTable))
+        
+        colnames(theTable) = c("method", 
+                               #"min",
+                               "$Q_{2.5\\%}$",
+                               "median",
+                               "$Q_{97.5\\%}$",
+                               #"max",
+                               "$Q_{97.5\\%} - Q_{2.5\\%}$")
         
         theTableList[[g]] <- theTable
       }
@@ -243,29 +299,35 @@ bestTable <- function(d=1,
       if(cross_section == "p"){
         
         for(p in 1:P){
-          theTable <- matrix(nrow = D, ncol = 6)
+          theTable <- matrix(nrow = D, ncol = 4) #change to 6 if including min and max
           for(vd in 1:D){
             theTable[vd,] <- format(round(
               cbind(
-                min_list[[crit]][[m]][[d[vd]]][,fixedIndex][p],
+                #min_list[[crit]][[m]][[d[vd]]][,fixedIndex][p],
                 q2.5_list[[crit]][[m]][[d[vd]]][,fixedIndex][p],
                 z_list[[crit]][[m]][[d[vd]]][,fixedIndex][p],
                 q97.5_list[[crit]][[m]][[d[vd]]][,fixedIndex][p],
-                max_list[[crit]][[m]][[d[vd]]][,fixedIndex][p],
+                #max_list[[crit]][[m]][[d[vd]]][,fixedIndex][p],
                 q97.5_list[[crit]][[m]][[d[vd]]][,fixedIndex][p] - q2.5_list[[crit]][[m]][[d[vd]]][,fixedIndex][p])
               ,3), nsmall = 3)
           }
           
           if(optimize == 0){
-            theTable[which.min(theTable[,4]),] <- paste0("\\textbf{", theTable[which.min(theTable[,4]),], "}")
+            theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
           }
           
           else if(optimize == 1){
-            theTable[which.max(theTable[,4]),] <- paste0("\\textbf{", theTable[which.max(theTable[,4]),], "}")
+            theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
           }
           
           theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
-          colnames(theTable) = c("dataset", "min","$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max", "$Q_{97.5\\%} - Q_{2.5\\%}$")
+          colnames(theTable) = c("dataset", 
+                                 #"min",
+                                 "$Q_{2.5\\%}$",
+                                 "median",
+                                 "$Q_{97.5\\%}$",
+                                 #"max",
+                                 "$Q_{97.5\\%} - Q_{2.5\\%}$")
           
           theTableList[[p]] <- theTable
         }
@@ -276,29 +338,35 @@ bestTable <- function(d=1,
       else if(cross_section == "g"){
         
         for(g in 1:G){
-          theTable <- matrix(nrow = D, ncol = 6)
+          theTable <- matrix(nrow = D, ncol = 4) #change to 6 if including min and max
           for(vd in 1:D){
             theTable[vd,] <- format(round(
               cbind(
-                min_list[[crit]][[m]][[d[vd]]][fixedIndex,][g],
+                #min_list[[crit]][[m]][[d[vd]]][fixedIndex,][g],
                 q2.5_list[[crit]][[m]][[d[vd]]][fixedIndex,][g],
                 z_list[[crit]][[m]][[d[vd]]][fixedIndex,][g],
                 q97.5_list[[crit]][[m]][[d[vd]]][fixedIndex,][g],
-                max_list[[crit]][[m]][[d[vd]]][fixedIndex,][g],
+                #max_list[[crit]][[m]][[d[vd]]][fixedIndex,][g],
                 q97.5_list[[crit]][[m]][[d[vd]]][fixedIndex,][g] - q2.5_list[[crit]][[m]][[d[vd]]][fixedIndex,][g])
               ,3), nsmall = 3)
           }
           
           if(optimize == 0){
-            theTable[which.min(theTable[,4]),] <- paste0("\\textbf{", theTable[which.min(theTable[,4]),], "}")
+            theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
           }
           
           else if(optimize == 1){
-            theTable[which.max(theTable[,4]),] <- paste0("\\textbf{", theTable[which.max(theTable[,4]),], "}")
+            theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
           }
           
           theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
-          colnames(theTable) = c("dataset", "min", "$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max", "$Q_{97.5\\%} - Q_{2.5\\%}$")
+          colnames(theTable) = c("dataset", 
+                                 #"min", 
+                                 "$Q_{2.5\\%}$",
+                                 "median",
+                                 "$Q_{97.5\\%}$",
+                                 #"max",
+                                 "$Q_{97.5\\%} - Q_{2.5\\%}$")
           
           theTableList[[g]] <- theTable
         }
@@ -311,30 +379,36 @@ bestTable <- function(d=1,
       if(cross_section == "p"){
         
         for(p in 1:P){
-          theTable <- matrix(nrow = D, ncol = 6)
+          theTable <- matrix(nrow = D, ncol = 4) #change to 6 if including min and max
           for(vd in 1:D){
             theTable[vd,] <- format(round(
               cbind(
-                apply(z_list[[crit]][[m]][[d[vd]]],1,min)[p],
+                #apply(z_list[[crit]][[m]][[d[vd]]],1,min)[p],
                 apply(z_list[[crit]][[m]][[d[vd]]],1,function (x) quantile(x, probs = c(0.025,0.975))["2.5%"])[p],
                 apply(z_list[[crit]][[m]][[d[vd]]],1,median)[p],
                 apply(z_list[[crit]][[m]][[d[vd]]],1,function (x) quantile(x, probs = c(0.025,0.975))["97.5%"])[p],
-                apply(z_list[[crit]][[m]][[d[vd]]],1,max)[p],
+                #apply(z_list[[crit]][[m]][[d[vd]]],1,max)[p],
                 apply(z_list[[crit]][[m]][[d[vd]]],1,function (x) quantile(x, probs = c(0.025,0.975))["97.5%"])[p] - 
                 apply(z_list[[crit]][[m]][[d[vd]]],1,function (x) quantile(x, probs = c(0.025,0.975))["2.5%"])[p])
               ,3), nsmall = 3)
           }
           
           if(optimize == 0){
-            theTable[which.min(theTable[,4]),] <- paste0("\\textbf{", theTable[which.min(theTable[,4]),], "}")
+            theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
           }
           
           else if(optimize == 1){
-            theTable[which.max(theTable[,4]),] <- paste0("\\textbf{", theTable[which.max(theTable[,4]),], "}")
+            theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
           }
           
           theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
-          colnames(theTable) = c("dataset", "min","$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max", "$Q_{97.5\\%} - Q_{2.5\\%}$")
+          colnames(theTable) = c("dataset", 
+                                 #"min",
+                                 "$Q_{2.5\\%}$",
+                                 "median",
+                                 "$Q_{97.5\\%}$",
+                                 #"max",
+                                 "$Q_{97.5\\%} - Q_{2.5\\%}$")
           
           theTableList[[p]] <- theTable
         }
@@ -345,30 +419,36 @@ bestTable <- function(d=1,
       else if(cross_section == "g"){
         
         for(g in 1:G){
-          theTable <- matrix(nrow = D, ncol = 6)
+          theTable <- matrix(nrow = D, ncol = 4) #change to 6 if including min and max
           for(vd in 1:D){
             theTable[vd,] <- format(round(
               cbind(
-                apply(z_list[[crit]][[m]][[d[vd]]],2,min)[g],
+                #apply(z_list[[crit]][[m]][[d[vd]]],2,min)[g],
                 apply(z_list[[crit]][[m]][[d[vd]]],2,function (x) quantile(x, probs = c(0.025,0.975))["2.5%"])[g],
                 apply(z_list[[crit]][[m]][[d[vd]]],2,median)[g],
                 apply(z_list[[crit]][[m]][[d[vd]]],2,function (x) quantile(x, probs = c(0.025,0.975))["97.5%"])[g],
-                apply(z_list[[crit]][[m]][[d[vd]]],2,max)[g],
+                #apply(z_list[[crit]][[m]][[d[vd]]],2,max)[g],
                 apply(z_list[[crit]][[m]][[d[vd]]],2,function (x) quantile(x, probs = c(0.025,0.975))["97.5%"])[g] - 
                 apply(z_list[[crit]][[m]][[d[vd]]],2,function (x) quantile(x, probs = c(0.025,0.975))["2.5%"])[g])
               ,3), nsmall = 3)
           }
           
           if(optimize == 0){
-            theTable[which.min(theTable[,4]),] <- paste0("\\textbf{", theTable[which.min(theTable[,4]),], "}")
+            theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
           }
           
           else if(optimize == 1){
-            theTable[which.max(theTable[,4]),] <- paste0("\\textbf{", theTable[which.max(theTable[,4]),], "}")
+            theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
           }
           
           theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
-          colnames(theTable) = c("dataset", "min","$Q_{2.5\\%}$","median","$Q_{97.5\\%}$","max", "$Q_{97.5\\%} - Q_{2.5\\%}$")
+          colnames(theTable) = c("dataset", 
+                                 #"min",
+                                 "$Q_{2.5\\%}$",
+                                 "median",
+                                 "$Q_{97.5\\%}$",
+                                 #"max",
+                                 "$Q_{97.5\\%} - Q_{2.5\\%}$")
           
           theTableList[[g]] <- theTable
         }
