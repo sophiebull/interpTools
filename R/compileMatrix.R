@@ -1,3 +1,11 @@
+#'  Compile agEvaluate Objects into Matrices
+#' 
+#'  A function to compile objects of class "agEvaluate" (from agEvaluate()) into matrices of dimension PxG.\cr
+#'  Elements of agEvaluate are arranged into this matrix corresponding to (p,g).
+#'  
+#' @param agEval A list object (result of agEvaluate.R) of aggregated performance metrics
+#' 
+
 compileMatrix <-  function(agEval){ 
   
 D <- length(agEval)  
