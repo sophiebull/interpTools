@@ -19,26 +19,7 @@ agEvaluate <- function(pmats, hist = F){
     
     return(sk)
   }
-  
-  algorithm_names <- c("Nearest.Neighbor",
-                       "Linear.Interpolation", 
-                       "Natural.Cubic.Spline",
-                       "FMM Cubic.Spline", 
-                       "Hermite.Cubic.Spline",
-                       "Stineman.Interpolation",
-                       "Kalman.ARIMA",
-                       "Kalman.StructTS",
-                       "Last.Observation.Carried.Forward",
-                       "Next.Observation.Carried.Backward", 
-                       "Simple.Moving.Average", 
-                       "Linear.Weighted.Moving.Average",
-                       "Exponential.Weighted.Moving.Average",
-                       "Replace.with.Mean",
-                       "Replace.with.Median", 
-                       "Replace.with.Mode",
-                       "Replace.with.Random",
-                       "Hybrid.Wiener.Interpolator")
-  
+
   D <- length(pmats)
   M <- length(pmats[[1]])
   P <- length(pmats[[1]][[1]])
@@ -66,7 +47,7 @@ agEvaluate <- function(pmats, hist = F){
       for(g in 1:G){
         gap_vec_names[g] <- c(paste("g", gap_vec[g],sep="")) # vector of names
         for(m in 1:M){
-          method_names[m] <- algorithm_names[methods[m]]
+          method_names[m] <- names(pmats[[1]])[m]
           
           # Generate histograms in each subset
           if(hist){
@@ -110,7 +91,7 @@ agEvaluate <- function(pmats, hist = F){
               gap_width = c(rep(gap_vec[g], C)),
               prop_missing = c(rep(prop_vec[p],C)),
               dataset = c(rep(dataset[d],C)), 
-              method = rep(algorithm_names[methods[m]],C) 
+              method = rep(names(pmats[[1]])[m],C) 
             )  
           }
             
