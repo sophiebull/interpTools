@@ -2,24 +2,24 @@
 #' 
 #' Function to perform interpolation on gappy series in parallel using user-specified interpolation methods.\cr\cr
 #' INTERPOLATION METHOD IDS\cr
-#' 1 - Nearest Neighbor\cr
-#' 2 - Linear Interpolation\cr
-#' 3 - Natural Cubic Spline\cr
-#' 4 - FMM Cubic Spline\cr 
-#' 5 - Hermite Cubic Spline\cr
-#' 6 - Stineman Interpolation\cr
-#' 7 - Kalman - ARIMA\cr
-#' 8 - Kalman - StructTS\cr
-#' 9 - Last Observation Carried Forward\cr
-#' 10 - Next Observation Carried Backward\cr
-#' 11 - Simple Moving Average\cr
-#' 12 - Linear Weighted Moving Average\cr
-#' 13 - Exponential Weighted Moving Average\cr
-#' 14 - Replace with Mean\cr
-#' 15 - Replace with Median\cr
-#' 16 - Replace with Mode\cr
-#' 17 - Replace with Random\cr
-#' 18 - Hybrid Wiener \cr
+#' 1 - Nearest Neighbor - NN\cr
+#' 2 - Linear Interpolation - LI\cr
+#' 3 - Natural Cubic Spline - NCS\cr
+#' 4 - FMM Cubic Spline - FMM\cr 
+#' 5 - Hermite Cubic Spline - HCS\cr
+#' 6 - Stineman Interpolation - SI\cr
+#' 7 - Kalman ARIMA - KAF\cr
+#' 8 - Kalman StructTS - KSF\cr
+#' 9 - Last Observation Carried Forward - LOCF\cr
+#' 10 - Next Observation Carried Backward - NOCB\cr
+#' 11 - Simple Moving Average - SMA\cr
+#' 12 - Linear Weighted Moving Average - LWMA\cr
+#' 13 - Exponential Weighted Moving Average - EWMA\cr
+#' 14 - Replace with Mean - RMEA\cr
+#' 15 - Replace with Median - REMD\cr
+#' 16 - Replace with Mode - RMOD\cr
+#' 17 - Replace with Random -RRND\cr
+#' 18 - Hybrid Wiener Interpolator - HWI\cr
 #' 
 #' @param gappyTS A gappy time series vector
 #' @param methods vector of IDs for selected interpolation methods, where m = 1,...,M
@@ -114,24 +114,24 @@ parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL){
     return(x)
   }
   
-  algorithm_names <- c("Nearest.Neighbor",
-                       "Linear.Interpolation", 
-                       "Natural.Cubic.Spline",
-                       "FMM Cubic.Spline", 
-                       "Hermite.Cubic.Spline",
-                       "Stineman.Interpolation",
-                       "Kalman.ARIMA",
-                       "Kalman.StructTS",
-                       "Last.Observation.Carried.Forward",
-                       "Next.Observation.Carried.Backward", 
-                       "Simple.Moving.Average", 
-                       "Linear.Weighted.Moving.Average",
-                       "Exponential.Weighted.Moving.Average",
-                       "Replace.with.Mean",
-                       "Replace.with.Median", 
-                       "Replace.with.Mode",
-                       "Replace.with.Random",
-                       "Hybrid.Wiener.Interpolator")
+  algorithm_names <- c("NN",
+                       "LI", 
+                       "NCS",
+                       "FMM", 
+                       "HCS",
+                       "SI",
+                       "KAF",
+                       "KKSF",
+                       "LOCF",
+                       "NOCB", 
+                       "SMA", 
+                       "LWMA",
+                       "EWMA",
+                       "RMEA",
+                       "RMED", 
+                       "RMOD",
+                       "RRND",
+                       "HWI")
   algorithm_calls <- c("nearestNeighbor(", 
                        "na.approx(", 
                        "na.spline(method = 'natural', object = ",
