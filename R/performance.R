@@ -6,24 +6,6 @@
 #' @param GappyData A list object of dimension DxPxGxKxN of the gappy original time series (output of simulateGaps.R)
 #' 
 performance <- function(OriginalData,IntData,GappyData){
-  algorithm_names <- c("Nearest.Neighbor",
-                       "Linear.Interpolation", 
-                       "Natural.Cubic.Spline",
-                       "FMM Cubic.Spline", 
-                       "Hermite.Cubic.Spline",
-                       "Stineman.Interpolation",
-                       "Kalman.ARIMA",
-                       "Kalman.StructTS", 
-                       "Last.Observation.Carried.Forward",
-                       "Next.Observation.Carried.Backward", 
-                       "Simple.Moving.Average", 
-                       "Linear.Weighted.Moving.Average",
-                       "Exponential.Weighted.Moving.Average",
-                       "Replace.with.Mean",
-                       "Replace.with.Median", 
-                       "Replace.with.Mode",
-                       "Replace.with.Random",
-                       "Hybrid.Wiener.Interpolator")
   
   D <- length(IntData)
   M <- length(IntData[[1]])
@@ -45,7 +27,7 @@ performance <- function(OriginalData,IntData,GappyData){
   # Evaluate the performance criteria for each sample in each (d,m,p,g) specification
   for(d in 1:D){
     for(m in 1:M){
-      method_names[m] <- algorithm_names[methods[m]]
+      method_names[m] <- names(IntData[[1]])[m] 
       for(p in 1:P){
         prop_vec_names[p] <- c(paste("p", prop_vec[p],sep="")) # vector of names
         for(g in 1:G){
