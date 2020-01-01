@@ -1,11 +1,12 @@
 #' Plot Cross Section
 #' 
 #' Function to generate cross-sectional plots to visualize changes in the performance metrics of interest
-#' as the proportion of missing data and gap width increase. 
+#' as the proportion of missing data and gap width increase. \cr
 #' Metrics are aggregated across K simulations in each p,g,d,m specification, and plotted with respect to 
-#' a particular variable (p or g), collapsing across the other.  Middle line is the median with respect to f, upper
-#' and lower ribbon limits are Q1 and Q3, respectively. \cr
-#' The x-axis represents p or g, the proportion of missing data, or gap width.\cr 
+#' a particular variable (p or g), collapsing across the other.  \cr
+#' Middle line is the median with respect to \code{f}, upper
+#' and lower ribbon limits are \code{min} and \code{max}, respectively. \cr
+#' The x-axis represents \code{p} or \code{g}, the proportion of missing data, or gap width.\cr 
 #' The y-axis represents the value of the performance metric of interest, collapsed (median) across the `other variable'.
 #' The user decides which variable to show on the x-axis.
 #' 
@@ -14,7 +15,7 @@
 #' @param crit A character vector describing the performance metrics of interest
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
 #' @param layer_type "method" (default) or "dataset"; how to slice the data
-#' @param f "mean" or "median" (default); which statistic to use for f(p,g)
+#' @param f "median" (default); which statistic to use for f(p,g)
 #' @param cross_section "p" or "g"; which axis to show against criterion value 
 
 plotCS <- function(d=1:length(agEval), 
@@ -63,16 +64,18 @@ plotCS <- function(d=1:length(agEval),
     colorList <- c("grey90","grey70","grey50","grey30","grey10","grey0")
 
     if(cross_section == "p"){
-    axx <- prop_vec
+    axx <- as.numeric(gsub("p","", rownames(z_list[[1]][[1]][[1]]), fixed = TRUE)) #prop_vec
     data <- z_list
     axxTitle <- "proportion missing"
     fun <- function(x){return(x)} 
     }
     else if(cross_section == "g"){
-    axx <- gap_vec
+    axx <- as.numeric(gsub("g","", colnames(z_list[[1]][[1]][[1]]), fixed = TRUE)) #gap_vec
     axxTitle <- "gap width" 
     data <- z_list
     fun <- function(x){return(t(x))} 
+
+
     }
     
     plotList <- lapply(plotList <- vector(mode = 'list', C), function(x)
@@ -84,26 +87,26 @@ plotCS <- function(d=1:length(agEval),
         z <- numeric(M)
         for(vm in 1:(M-1)){
           z[vm] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]])), 
-                                                   aes(x = axx, ymin = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,min),
+                                                   aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,max),
                                                                                 group = ",vm,"), 
                                                    fill = colorList[",vm,"], alpha = 0.4) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]])),
                             colour = colorList[",vm,"],
-                            aes(x = axx, y = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,median),
+                            aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,median),
                             col = names(data[['",crit[s],"']])[",m[vm],"], group = ",vm,")) + ",sep="") 
         }
         
         z[M] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][[",m[M],"]][[",d[vd],"]])), 
-                                                   aes(x = axx, ymin = apply(fun(data[['",crit[s],"']][[",m[M],"]][[",d[vd],"]]),1,min),
+                                                   aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][[",m[M],"]][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][[",m[M],"]][[",d[vd],"]]),1,max),
                                                                               group = ",M,"), 
                                                    fill = colorList[",M,"], alpha = 0.4) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][[",m[M],"]][[",d[vd],"]])),
                       colour = colorList[",M,"],
-                      aes(x = axx, y = apply(fun(data[['",crit[s],"']][[",m[M],"]][[",d[vd],"]]),1,median), 
+                      aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][[",m[M],"]][[",d[vd],"]]),1,median), 
                       col = names(data[['",crit[s],"']])[",m[M],"], group = ",M,"))",sep="")
       
         z <- paste(z, collapse = "")
@@ -129,13 +132,13 @@ plotCS <- function(d=1:length(agEval),
     colorList <- c("grey90","grey70","grey50","grey30","grey10","grey0")
     
     if(cross_section == "p"){
-      axx <- prop_vec
+      axx <- rownames(z_list[[1]][[1]][[1]]) #prop_vec
       data <- z_list
       axxTitle <- "proportion missing"
       fun <- function(x){return(x)} 
     }
     else if(cross_section == "g"){
-      axx <- gap_vec
+      axx <- colnames(z_list[[1]][[1]][[1]]) #gap_vec
       axxTitle <- "gap width" 
       data <- z_list
       fun <- function(x){return(t(x))} 
@@ -150,26 +153,26 @@ plotCS <- function(d=1:length(agEval),
         z <- numeric(D)
         for(vd in 1:(D-1)){
           z[vd] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]])), 
-                                                   aes(x = axx, ymin = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,min),
+                                                   aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,max),
                                                                   group = ",vd,"), 
                                                    fill = colorList[",vd,"], alpha = 0.4) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]])),
                           colour = colorList[",vd,"],
-                          aes(x = axx, y = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,median),
+                          aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]]),1,median),
                           col = names(data[['",crit[s],"']][[",m[vm],"]])[",d[vd],"], group = ",vd,")) + ",sep="") 
         }
         
         z[D] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[D],"]])), 
-                                                     aes(x = axx, ymin = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[D],"]]),1,min),
+                                                     aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[D],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[D],"]]),1,max),
                                                                   group = ",D,"), 
                                                    fill = colorList[",D,"], alpha = 0.4) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[D],"]])),
                       colour = colorList[",D,"],
-                      aes(x = axx, y = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[D],"]]),1,median), 
+                      aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][[",m[vm],"]][[",d[D],"]]),1,median), 
                       col = names(data[['",crit[s],"']][[",m[vm],"]])[",d[D],"], group = ",D,"))",sep="")
         
         z <- paste(z, collapse = "")
