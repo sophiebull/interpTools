@@ -2,8 +2,8 @@
 #'  
 #' Function to define and store performance criteria for the comparison of a single interpolated series with its original.
 #' Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:\cr
-#' R = 1\cr
-#' R^2 = 1\cr
+#' pearson_r = 1\cr
+#' r_squared = 1\cr
 #' abs_differences = 0\cr
 #' MBE = 0\cr
 #' ME = 0\cr
