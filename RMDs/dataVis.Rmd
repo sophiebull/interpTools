@@ -140,48 +140,52 @@ grid.arrange(pm1,pm2,pm3,pm4,pm5,pm6)
 ## LAYER_TYPE = METHOD
 LEGEND (WITH SPLINES, PLOTLY)
 ```{r}
-greyList <- c("grey90", "grey70", "grey50","grey30","grey10", "grey0")
+greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
+highlight = "HWI"
+highlight_colour =  "#EE5C42"
 
 # get z_list
 z_list <- compileMatrix(agEval=testag)[["median"]]
 
+method_list_names <- names(z_list[[1]])
+M <- length(method_list_names)
+
+greyListMatch <- greyList[1:M]
+names(greyListMatch) <- method_list_names
+greyListMatch[[highlight]] <- highlight_colour
   
-manualLegend <- data.frame(color = as.character(greyList), 
-                           nameSurface = gsub("Average","Avg",rev(gsub("."," ",names(z_list[[1]]),fixed = TRUE))), 
-                           x = rep(0,length(names(z_list[[1]]))), 
-                           y = seq(0.20,0.80,length.out = length(names(z_list[[1]]))), 
-                           textcol = rep(toRGB("black"),length(greyList)),
+manualLegend <- data.frame(color = as.character(greyListMatch), 
+                           nameSurface = method_list_names, 
+                           x = rep(0,M), 
+                           y = seq(0.20,0.80,length.out = M), 
+                           textcol = as.character(greyListMatch),
                            stringsAsFactors = FALSE)
-  
+
 theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
   
-                    add_trace(
-                      x = manualLegend$x, 
-                      y = manualLegend$y, 
-                      color = manualLegend$color, 
-                      colors = manualLegend$color,
-                      showlegend = F,
-                      marker=list(size = 20)) %>%
-
-              add_text(x = manualLegend$x+0.03, 
-                        y = manualLegend$y,
-                        text = manualLegend$nameSurface,
-                        color = manualLegend$textcol,
-                        textposition = "right") %>% 
+  add_markers(x = manualLegend$x,
+              y = manualLegend$y, 
+              size = 50, 
+              name = manualLegend$nameSurface,
+              color = I(manualLegend$color)) %>%
+  
+  add_text(x = manualLegend$x + 0.03,
+           y = manualLegend$y,
+           text = manualLegend$nameSurface,
+           color = I(manualLegend$textcol),
+           textposition = "right") %>% 
   
               layout(xaxis = list(title = "", 
                                   showgrid = F, 
                                   showticklabels = F,
                                   zeroline = F,
-                                  range = c(-0.05,0.3)), 
+                                  range = c(-0.15,0.3)), 
                      yaxis = list(title = "", 
                                   showgrid = F, 
                                   showticklabels = F,
                                   zeroline = F,
-                                  range = c(0,1.05))
-                     )
+                                  range = c(0,1.05)))
 
-   
 ```
 
 SURFACE PLOTS (WITH SPLINES)
@@ -277,87 +281,108 @@ sub2  <- subplot(pp1NRMSD,pp2NRMSD,pp3NRMSD,pp4NRMSD,pp5NRMSD,theLegend, nrows =
                            aspectratio=list(x=1,y=1,z=0.5),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
-             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
+                          scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
              )
 ```
 
-Showing how bad cubic splines are (D1,MAPE)
+Showing how bad cubic splines are (D1,NRMSD,MAPE)
 ```{r}
-psC <- plotSurface(d=1,crit=c("MAPE","NRMSD"),agEval=testag, layer_type="method")
-title = list(
-        text = "Dataset 1",
+## THIS IS BROKEN AND I HAVE NO IDEA HOW TO FIX IT.
+titleList <- list()
+
+for(i in 1:length(ps)){
+      titleList[[i]] <- list(
+        text = names(ps)[i],
         xref = "paper",
         yref = "paper",
         yanchor = "bottom",
         xanchor = "center",
         align = "center",
         x = 0.5,
-        y = 0.9,
+        y = 0.75,
         showarrow = FALSE
       )
+}
 
-psCMAPE <- psC[[1]][[1]] %>% layout(annotations = title)
+pp1MAPEb <- ps[[1]][[1]]
+pp1NRMSDb <- ps[[2]][[1]]
 
-sub1b <- subplot(psCMAPE,theLegend) %>%
-          layout(title = names(psC)[1],
+sub1b  <- subplot(pp1MAPEb,pp1NRMSDb, theLegend) %>%
+          layout(title = "Dataset 1",
                  
-            scene = list(domain=list(x=c(0,1/2), y=c(1/3,1)), 
+            scene = list(domain=list(x=c(0,1/3), y=c(1/3,2/3)), 
+                           aspectmode = 'manual', 
+                           aspectratio=list(x=0.6,y=0.6,z=1),
+                           camera = list(eye=list(x=1.65,y=-1.15,z=0.40))),
+            
+            scene2 = list(domain=list(x=c(1/3,2/3), y=c(1/3,2/3)), 
                            aspectmode = 'manual', 
                            aspectratio=list(x=0.6,y=0.6,z=1),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.40))),
              
-             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)))
+            scene3 = list(domain=list(x=c(2/3,1), y=c(1/3,2/3)))
   )      
+
+
+
+
 ```
 
 LEGEND (WITHOUT SPLINES, PLOTLY)
 ```{r}
-greyList <- c("grey90", "grey70", "grey50")
+greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
+highlight = "HWI"
+highlight_colour = "#EE5C42"
 
 # get z_list
 z_list <- compileMatrix(agEval=testag)[["median"]]
 
-manualLegend <- data.frame(color = as.character(greyList), 
-                           nameSurface = gsub("Average","Avg",rev(gsub("."," ",names(z_list[[1]])[4:6],fixed = TRUE))), 
-                           x = rep(0,length(names(z_list[[1]])[4:6])), 
-                           y = seq(0.4,0.65,length.out = length(names(z_list[[1]])[4:6])), 
-                           textcol = rep(toRGB("black"),length(greyList)),
+method_list_names <- names(z_list[[1]])[4:6]
+M <- length(method_list_names)
+
+greyListMatch <- greyList[1:M]
+names(greyListMatch) <- method_list_names
+greyListMatch[[highlight]] <- highlight_colour
+
+  
+manualLegend <- data.frame(color = as.character(greyListMatch), 
+                           nameSurface = method_list_names, 
+                           x = rep(0,M), 
+                           y = seq(0.20,0.80,length.out = M), 
+                           textcol = as.character(greyListMatch),
                            stringsAsFactors = FALSE)
   
 theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
   
-                    add_trace(
-                      x = manualLegend$x, 
-                      y = manualLegend$y, 
-                      color = manualLegend$color, 
-                      colors = manualLegend$color,
-                      showlegend = F,
-                      marker=list(size = 20)) %>%
-
-              add_text(x = manualLegend$x+0.03, 
-                        y = manualLegend$y,
-                        text = manualLegend$nameSurface,
-                        color = manualLegend$textcol,
-                        textposition = "right") %>% 
+              add_markers(x = manualLegend$x,
+              y = manualLegend$y, 
+              size = 50, 
+              name = manualLegend$nameSurface,
+              color = I(manualLegend$color)) %>%
+  
+                 add_text(x = manualLegend$x + 0.03,
+                 y = manualLegend$y,
+                 text = manualLegend$nameSurface,
+                 color = I(manualLegend$textcol),
+                 textposition = "right") %>% 
   
               layout(xaxis = list(title = "", 
                                   showgrid = F, 
                                   showticklabels = F,
                                   zeroline = F,
-                                  range = c(-0.05,0.3)), 
+                                  range = c(-0.15,0.3)), 
                      yaxis = list(title = "", 
                                   showgrid = F, 
                                   showticklabels = F,
                                   zeroline = F,
-                                  range = c(0,1))
+                                  range = c(0,1.05))
                      )
-
    
 ```
 
 SURFACE PLOTS (WITHOUT SPLINES)
 ```{r}
-ps<- plotSurface(crit=c("MAPE","NRMSD"), m=4:6, agEval = testag, layer_type = "method", f="median")
+ps<- plotSurface(crit=c("MAPE","NRMSD"), m=4:6, agEval = testag, layer_type = "method", f="median", highlight = "HWI", highlight_colour = "#EE5C42")
 
 titleList <- list()
 
@@ -393,27 +418,27 @@ sub3  <- subplot(pp1MAPEb,pp2MAPEb,pp3MAPEb,pp4MAPEb,pp5MAPEb,theLegend, nrows =
              
              scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
                           aspectmode = 'manual', 
-                          aspectratio=list(x=1,y=1,z=0.5),
+                          aspectratio=list(x=1,y=1,z=0.68),
                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
                            aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
+                           aspectratio=list(x=1,y=1,z=0.68),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
                            aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
+                           aspectratio=list(x=1,y=1,z=0.68),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
                            aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
+                           aspectratio=list(x=1,y=1,z=0.68),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
                            aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
+                           aspectratio=list(x=1,y=1,z=0.68),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
@@ -425,27 +450,27 @@ sub4  <- subplot(pp1NRMSDb,pp2NRMSDb,pp3NRMSDb,pp4NRMSDb,pp5NRMSDb,theLegend, nr
              
              scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
                           aspectmode = 'manual', 
-                          aspectratio=list(x=1,y=1,z=0.5),
+                          aspectratio=list(x=1,y=1,z=0.68),
                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
                            aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
+                           aspectratio=list(x=1,y=1,z=0.68),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
                            aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
+                           aspectratio=list(x=1,y=1,z=0.68),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
                            aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
+                           aspectratio=list(x=1,y=1,z=0.68),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
                            aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
+                           aspectratio=list(x=1,y=1,z=0.68),
                            camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
              
              scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
@@ -456,54 +481,60 @@ sub4  <- subplot(pp1NRMSDb,pp2NRMSDb,pp3NRMSDb,pp4NRMSDb,pp5NRMSDb,theLegend, nr
 ## LAYER_TYPE = DATASET
 LEGEND (PLOTLY)
 ```{r}
-# WITHOUT SPLINES
-greyList <- c("grey90", "grey70", "grey50","grey30","grey10")
+
+greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
+highlight = 5
+highlight_colour =  "#EE5C42"
 
 # get z_list
 z_list <- compileMatrix(agEval=testag)[["median"]]
 
+data_list_names <- names(z_list[[1]][[1]])
+D <- length(data_list_names)
 
-manualLegend <- data.frame(color = as.character(greyList), 
-                           nameSurface = rev(gsub("D","Dataset ",names(z_list[[1]][[1]]),fixed=TRUE)), 
-                           x = rep(0,length(names(z_list[[1]][[1]]))), 
-                           y = seq(0.20,0.80,length.out = length(names(z_list[[1]][[1]]))), 
-                           textcol = rep(toRGB("black"),length(greyList)),
-                           stringsAsFactors = FALSE)
+greyListMatch <- greyList[1:D]
+names(greyListMatch) <- data_list_names
+greyListMatch[[highlight]] <- highlight_colour
   
+manualLegend <- data.frame(color = as.character(greyListMatch), 
+                           nameSurface = data_list_names, 
+                           x = rep(0,D), 
+                           y = seq(0.20,0.80,length.out = D), 
+                           textcol = as.character(greyListMatch),
+                           stringsAsFactors = FALSE)
+
 theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
   
-                    add_trace(
-                      x = manualLegend$x, 
-                      y = manualLegend$y, 
-                      color = manualLegend$color, 
-                      colors = manualLegend$color,
-                      showlegend = F,
-                      marker=list(size = 20)) %>%
-
-              add_text(x = manualLegend$x+0.03, 
-                        y = manualLegend$y,
-                        text = manualLegend$nameSurface,
-                        color = manualLegend$textcol,
-                        textposition = "right") %>% 
+  add_markers(x = manualLegend$x,
+              y = manualLegend$y, 
+              size = 50, 
+              name = manualLegend$nameSurface,
+              color = I(manualLegend$color)) %>%
+  
+  add_text(x = manualLegend$x + 0.03,
+           y = manualLegend$y,
+           text = manualLegend$nameSurface,
+           color = I(manualLegend$textcol),
+           textposition = "right") %>% 
   
               layout(xaxis = list(title = "", 
                                   showgrid = F, 
                                   showticklabels = F,
                                   zeroline = F,
-                                  range = c(-0.1,0.3)), 
+                                  range = c(-0.15,0.3)), 
                      yaxis = list(title = "", 
                                   showgrid = F, 
                                   showticklabels = F,
                                   zeroline = F,
-                                  range = c(0,1))
-                     )
+                                  range = c(0,1.05)))
 
-   
+
+
 ```
 
 SURFACE PLOTS (WITHOUT SPLINES)
 ```{r}
-PS <- plotSurface(crit=c("MAPE","NRMSD"), m = 4:6, agEval = testag, layer_type = "dataset", f = "median")
+PS <- plotSurface(crit=c("MAPE","NRMSD"), m = 4:6, agEval = testag, layer_type = "dataset", f = "median", highlight = 5)
 
 titleList <- list()
 
@@ -579,17 +610,28 @@ sub6  <- subplot(PP1NRMSD,PP2NRMSD,PP3NRMSD,theLegend, nrows = 3) %>%
 ## LAYER_TYPE = METHOD
 LEGEND (GGPLOT)
 ```{r}
-greyList <- c("grey90", "grey70", "grey50")
+greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9")
+
+highlight = "HWI"
+highlight_colour = "#EE5C42"
+
 # get z_list
 z_list <- compileMatrix(agEval = testag)[["median"]]
 
-manualLegend <- data.frame(color = as.character(greyList), 
-                           nameSurface = gsub("Average","Avg",gsub("."," ",names(z_list[[1]])[4:6],fixed = TRUE)), 
-                           x = rep(0,length(names(z_list[[1]])[4:6])), 
-                           y = seq(0.4,0.65,length.out = length(names(z_list[[1]])[4:6])), 
-                           textcol = rep(toRGB("black"),length(greyList)),
+method_list_names <- names(z_list[[1]])[4:6]
+M <- length(method_list_names)
+
+greyListMatch <- greyList[1:M]
+names(greyListMatch) <- method_list_names
+greyListMatch[[highlight]] <- highlight_colour
+
+manualLegend <- data.frame(color = as.character(greyListMatch), 
+                           nameSurface = method_list_names, 
+                           x = rep(0,M), 
+                           y = seq(0.20,0.80,length.out = M), 
+                           textcol = as.character(greyListMatch),
                            stringsAsFactors = FALSE)
-  
+
 theLegend <- ggplot(data = manualLegend) +
   
               geom_point(
@@ -601,10 +643,10 @@ theLegend <- ggplot(data = manualLegend) +
               geom_text(x = manualLegend$x+0.05, 
                         y = manualLegend$y,
                         label = manualLegend$nameSurface,
-                        color = "black",
+                        color = manualLegend$textcol,
                         hjust = 0, size = 6) +
   
-              xlim(-0.1,0.5) + 
+              xlim(-0.15,0.3) + 
               
               theme_void()
 
@@ -646,33 +688,33 @@ grid.arrange(pCSMAPE1, pCSMAPE2, pCSMAPE3, pCSMAPE4, pCSMAPE5, theLegend, nrow =
 
 dev.off()
 
-# NRMSE
+# NRMSD
 
-pCSNRMSE1 <- plotListCS[[2]][[1]] + theme(axis.title.x = element_blank(),
+pCSNRMSD1 <- plotListCS[[2]][[1]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 1")
-pCSNRMSE2 <- plotListCS[[2]][[2]] + theme(axis.title.x = element_blank(),
+pCSNRMSD2 <- plotListCS[[2]][[2]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 2")
-pCSNRMSE3 <- plotListCS[[2]][[3]] + theme(axis.title.x = element_blank(),
+pCSNRMSD3 <- plotListCS[[2]][[3]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 3")
-pCSNRMSE4 <- plotListCS[[2]][[4]] + theme(axis.title.x = element_blank(),
+pCSNRMSD4 <- plotListCS[[2]][[4]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 4")
-pCSNRMSE5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
+pCSNRMSD5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 5")
 
 setwd("/home/sophie/sophTools/files/plots")
-png("NRMSECSbyMethod_p.png", width = 875, height = 965)
+png("NRMSDCSbyMethod_p.png", width = 875, height = 965)
 
-grid.arrange(pCSNRMSE1, pCSNRMSE2, pCSNRMSE3, pCSNRMSE4, pCSNRMSE5, theLegend, nrow = 3,
+grid.arrange(pCSNRMSD1, pCSNRMSD2, pCSNRMSD3, pCSNRMSD4, pCSNRMSD5, theLegend, nrow = 3,
              top=textGrob(names(plotListCS)[2],gp=gpar(fontsize=18,font=1)), 
              bottom = textGrob("proportion missing", gp = gpar(fontsize = 14, font = 1)))
 
@@ -683,34 +725,34 @@ BREAKING IT DOWN FURTHER
 ```{r}
 
 setwd("/home/sophie/sophTools/files/plots")
-png("D1NRMSECSunbyMethod_p.png", width = 655, height = 965)
+png("D1NRMSDCSunbyMethod_p.png", width = 655, height = 965)
 plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=1, m=4:6, f = "median", layer_type = "method")
 dev.off()
 
 
 setwd("/home/sophie/sophTools/files/plots")
-png("D2NRMSECSunbyMethod_p.png", width = 655, height = 965)
+png("D2NRMSDCSunbyMethod_p.png", width = 655, height = 965)
 plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=2, m=4:6, f = "median", layer_type = "method")
 dev.off()
 
 
 
 setwd("/home/sophie/sophTools/files/plots")
-png("D3NRMSECSunbyMethod_p.png", width = 655, height = 965)
+png("D3NRMSDCSunbyMethod_p.png", width = 655, height = 965)
 plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=3, m=4:6, f = "median", layer_type = "method")
 dev.off()
 
  
 
 setwd("/home/sophie/sophTools/files/plots")
-png("D4NRMSECSunbyMethod_p.png", width = 655, height = 986)
+png("D4NRMSDCSunbyMethod_p.png", width = 655, height = 986)
 plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=4, m=4:6, f = "median", layer_type = "method")
 dev.off()
 
 
 
 setwd("/home/sophie/sophTools/files/plots")
-png("D5NRMSECSunbyMethod_p.png", width = 655, height = 986)
+png("D5NRMSDCSunbyMethod_p.png", width = 655, height = 986)
 plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=5, m=4:6, f = "median", layer_type = "method")
 dev.off()
 
@@ -786,4 +828,111 @@ grid.arrange(pCSNRMSE1, pCSNRMSE2, pCSNRMSE3, pCSNRMSE4, pCSNRMSE5, theLegend, n
 
 dev.off()
 ```
+
+
+
+
+# HEATMAP (HW BY DATASET, Z)
+```{r}
+#D1hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 1, type = "z")
+#D2hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 2, type = "z")[[1]]
+#D3hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 3, type = "z")[[1]]
+#D4hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 4, type = "z")[[1]]
+#D5hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 5, type = "z")[[1]]
+# NOTE WE CANNOT USE THE HEATMAPGRID FUNCTION BECAUSE I COULDN'T FIGURE OUT HOW TO GET PLOTS SIDE BY SIDE.
+# WENT WITH A GGPLOT INSTEAD.
+z_list <- compileMatrix(testag)[["median"]]
+
+crit = "pearson_r"
+m = "HWI"
+
+plott <- list()
+for(d in 1:5){
+          rownames(z_list[[crit]][[m]][[d]]) <- gsub("p","",rownames(z_list[[crit]][[m]][[d]]), fixed = TRUE)
+          colnames(z_list[[crit]][[m]][[d]]) <- gsub("g","",colnames(z_list[[crit]][[m]][[d]]), fixed = TRUE)
+
+          
+          plott[[d]] <- melt(z_list[[crit]][[m]][[d]])
+          colnames(plott[[d]]) <- c("p","g", "value")
+}
+          
+rng = range(c(plott[[1]]$value, plott[[2]]$value ,plott[[3]]$value, plott[[4]]$value, plott[[5]]$value))
+col = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50","#EE5C42")
+
+D1 <- ggplot(plott[[1]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colours = col, values = c(0,1),
+                           limits = rng)+
+            
+        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D1") + 
+          theme_minimal() + 
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size = 12))
+
+D2 <- ggplot(plott[[2]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colours = col, values = c(0,1),
+                           limits = rng) +
+            
+        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D2") + 
+          theme_minimal() + 
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size = 12))
+
+D3 <- ggplot(plott[[3]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colours = col, values = c(0,1),
+                           limits = rng) +
+  
+        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D3") + 
+          theme_minimal() + 
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size = 12))
+
+D4 <- ggplot(plott[[4]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colours = col, values = c(0,1),
+                           limits = rng) +
+  
+        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D4") + 
+          theme_minimal() + 
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size = 12))
+
+D5 <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colours = col, values = c(0,1),
+                           limits = rng) +
+            
+        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D5") + 
+          theme_minimal() + 
+  
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size = 12))
+          
+    # get legend
+    g_legend<-function(a.gplot){
+      tmp <- ggplot_gtable(ggplot_build(a.gplot))
+      leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+      legend <- tmp$grobs[[leg]]
+      return(legend)}
+    
+    # make dummy plot to retrieve legend
+    dumPlot <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colours = col, values = c(0,1),
+                           limits = rng) +
+      theme(legend.position = "bottom") + 
+      labs(fill = "NRMSD")
+  
+    myLegend<-g_legend(dumPlot)
+    
+plotWindow <- grid.arrange(D1,D2,D3,D4,D5, ncol = 5, bottom = "proportion missing", left = "gap width")
+plotWindow <- grid.arrange(plotWindow, myLegend, heights = c(10,1))
+```
+
 
