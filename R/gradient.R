@@ -9,7 +9,7 @@
 #' @param f "median" (default): which statistic will be represented by the gradient
  
 
-gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,agEval,f = "median"){
+gradient <- function(d=1:length(agEval),m=names(agEval[[1]][[1]][[1]]),crit,agEval,f = "median"){
   
   stopifnot(f %in% names(agEval[[1]][[1]][[1]][[1]])[1:11], class(agEval) == "agEvaluate",
             crit %in% rownames(agEval[[1]][[1]][[1]][[1]]),
@@ -35,7 +35,7 @@ gradient <- function(d=1:length(agEval),m=1:length(agEval[[1]][[1]][[1]]),crit,a
   z_list <- compileMatrix(agEval)[[f]]
   
   data_list_names <- names(z_list[[1]][[1]])[d]
-  method_list_names <- names(z_list[[1]])[m]
+  method_list_names <- m
   
   # criterion, method, dataset 
   
