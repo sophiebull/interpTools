@@ -13,7 +13,7 @@
 #' 
 bestTable <- function(d=1, 
                       agEval, 
-                      m=1:length(agEval[[1]][[1]][[1]]), 
+                      m=names(agEval[[1]][[1]][[1]]), 
                       crit="MSE",
                       f = "median",
                       cross_section = "g",
@@ -73,7 +73,7 @@ bestTable <- function(d=1,
   max_list <- mat[["q100"]]
   
   data_list_names <- names(z_list[[1]][[1]])[d]
-  method_list_names <- names(z_list[[1]])[m]
+  method_list_names <- m
   
   
   prop_vec <- names(agEval[[1]]) # proportions
@@ -119,15 +119,7 @@ bestTable <- function(d=1,
           theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
         }
         
-        theTable <- cbind(gsub("Kalman ARIMA", "KAF", 
-                               gsub("Hybrid Wiener Interpolator", "HWI", 
-                                    gsub("Exponential Weighted Moving Average", "EWMA",
-                                         gsub("."," ", method_list_names,
-                                              fixed=TRUE),
-                                         fixed = TRUE),
-                                    fixed = TRUE),
-                               fixed = TRUE),
-                          data.frame(theTable))
+        theTable <- cbind(method_list_names,data.frame(theTable))
         
         colnames(theTable) = c("method", 
                                #"min",
@@ -167,15 +159,7 @@ bestTable <- function(d=1,
           theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
         }
         
-        theTable <- cbind(gsub("Kalman ARIMA", "KAF", 
-                               gsub("Hybrid Wiener Interpolator", "HWI", 
-                                    gsub("Exponential Weighted Moving Average", "EWMA",
-                                         gsub("."," ", method_list_names,
-                                              fixed=TRUE),
-                                         fixed = TRUE),
-                                    fixed = TRUE),
-                               fixed = TRUE),
-                          data.frame(theTable))
+        theTable <- cbind(method_list_names,data.frame(theTable))
         
         colnames(theTable) = c("method", 
                                #"min",
@@ -218,15 +202,7 @@ bestTable <- function(d=1,
           theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
         }
         
-        theTable <- cbind(gsub("Kalman ARIMA", "KAF", 
-                               gsub("Hybrid Wiener Interpolator", "HWI", 
-                                    gsub("Exponential Weighted Moving Average", "EWMA",
-                                         gsub("."," ", method_list_names,
-                                              fixed=TRUE),
-                                         fixed = TRUE),
-                                    fixed = TRUE),
-                               fixed = TRUE),
-                          data.frame(theTable))
+        theTable <- cbind(method_list_names,data.frame(theTable))
         
         colnames(theTable) = c("method",
                                #"min",
@@ -267,15 +243,7 @@ bestTable <- function(d=1,
           theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
         }
         
-        theTable <- cbind(gsub("Kalman ARIMA", "KAF", 
-                               gsub("Hybrid Wiener Interpolator", "HWI", 
-                                    gsub("Exponential Weighted Moving Average", "EWMA",
-                                         gsub("."," ", method_list_names,
-                                              fixed=TRUE),
-                                         fixed = TRUE),
-                                    fixed = TRUE),
-                               fixed = TRUE),
-                          data.frame(theTable))
+        theTable <- cbind(method_list_names,data.frame(theTable))
         
         colnames(theTable) = c("method", 
                                #"min",
