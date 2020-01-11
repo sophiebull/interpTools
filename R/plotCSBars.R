@@ -1,4 +1,11 @@
-plotCSBars <- function(agEval, cross_section, crit, d, m, f = "median", layer_type = "method", highlight = "HWI", highlight_colour = "tomato2"){
+plotCSBars <- function(agEval, 
+                       cross_section = "p", 
+                       crit, 
+                       d, 
+                       m = names(agEval[[1]][[1]][[1]]), 
+                       f = "median", 
+                       layer_type = "method", 
+                       highlight = "HWI", highlight_colour = "#EE5C42"){
   
   stopifnot(length(d)==1, length(crit)==1, (cross_section == "p" | cross_section == "g"), 
             class(agEval) == "agEvaluate", (layer_type == "method" | layer_type == "dataset"),
@@ -12,12 +19,13 @@ plotCSBars <- function(agEval, cross_section, crit, d, m, f = "median", layer_ty
   
   prop_vec_names <- gsub("p","",names(agEval[[1]]), fixed = TRUE)
   gap_vec_names <- gsub("g","",names(agEval[[1]][[1]]), fixed = TRUE)
-  method_vec_names <- names(agEval[[1]][[1]][[1]])[m]
+  method_vec_names <- m
 
   if(cross_section == "p"){
     bound = G
     xaxisTitle <- "proportion missing"
     yaxisTitle <- "gap width"
+    y2axisTitle <- "value"
     names <- gap_vec_names
     unfixedNames <- prop_vec_names
     fixedCol <- paste0("sub('\\(', '', substr(names(theTab)[",i,"], 1, regexpr('\\,', names(theTab)[",i,"])-1))")
@@ -27,12 +35,13 @@ plotCSBars <- function(agEval, cross_section, crit, d, m, f = "median", layer_ty
     bound = P
     xaxisTitle <- "gap width"
     yaxisTitle <- "proportion missing"
+    y2axisTitle <- "value"
     names <- prop_vec_names
     unfixedNames <- gap_vec_names
     fixedCol <- paste0("sub('\\)','', gsub('.*,','',names(theTab)[",i,"]))")
   }
   
-  colorList <- c("grey90","grey70","grey50","grey30","grey10","grey0")
+  colorList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
   
   colorListMatch <- colorList[1:M]
   names(colorListMatch) <- method_vec_names
@@ -74,7 +83,17 @@ plotCSBars <- function(agEval, cross_section, crit, d, m, f = "median", layer_ty
   plotListCS[[fi]] <- ggplot() + geom_errorbar(data = theTabList[[fi]], aes(x = unfixed, ymin = Q2.5, ymax = Q97.5, color = method), width = 0.05) + 
                         geom_point(data = theTabList[[fi]], aes(x = unfixed, y = Q50, color = method))+ 
                         geom_line(data = theTabList[[fi]], aes(x = unfixed, y = Q50, color = method, group = method), lwd = 0.3)+ 
+                        
+                        geom_ribbon(data = theTabList[[fi]], 
+                                    aes(x = unfixed, 
+                                        ymin = Q2.5,
+                                        ymax = Q97.5,
+                                        fill = method,
+                                        group = method),
+                                        alpha = 0.1) +
+    
                         scale_colour_manual(values = colorListMatch) + 
+                        scale_fill_manual(values = colorListMatch) + 
 
                         scale_y_continuous(breaks = round(seq(min(theTabList[[fi]]$Q2.5), max(theTabList[[fi]]$Q97.5), length.out = 5),0), 
                                            sec.axis = dup_axis(),
@@ -83,7 +102,7 @@ plotCSBars <- function(agEval, cross_section, crit, d, m, f = "median", layer_ty
                         theme_minimal() + 
                         theme(plot.margin = unit(c(0,0.5,0,0.5),"cm"),
                               panel.background = element_blank(),
-                              #panel.grid.major = element_blank(),
+                              panel.grid.major = element_blank(),
                               panel.grid.minor = element_blank(),
                               axis.text.x = element_blank(),
                               axis.text.y.left = element_blank(),
@@ -97,7 +116,16 @@ plotCSBars <- function(agEval, cross_section, crit, d, m, f = "median", layer_ty
   plotListCS[[bound]] <- ggplot() + geom_errorbar(data = theTabList[[bound]], aes(x = unfixed, ymin = Q2.5, ymax = Q97.5, color = method), width = 0.05) + 
     geom_point(data = theTabList[[bound]], aes(x = unfixed, y = Q50, color = method))+ 
     geom_line(data = theTabList[[bound]], aes(x = unfixed, y = Q50, color = method, group = method), lwd = 0.3)+ 
+    geom_ribbon(data = theTabList[[bound]], 
+                aes(x = unfixed, 
+                    ymin = Q2.5,
+                    ymax = Q97.5,
+                    fill = method,
+                    group = method),
+                alpha = 0.1) +
+    
     scale_colour_manual(values = colorListMatch) + 
+    scale_fill_manual(values = colorListMatch) +
     
     scale_y_continuous(breaks = round(seq(min(theTabList[[bound]]$Q2.5), max(theTabList[[bound]]$Q97.5), length.out = 5),0), 
                        sec.axis = dup_axis(),
@@ -106,7 +134,7 @@ plotCSBars <- function(agEval, cross_section, crit, d, m, f = "median", layer_ty
     theme_minimal() + 
     theme(plot.margin = unit(c(0,0.5,0,0.5),"cm"),
           panel.background = element_blank(),
-          #panel.grid.major = element_blank(),
+          panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           legend.position = "none",
           axis.title.x = element_blank(),
@@ -136,9 +164,10 @@ plotCSBars <- function(agEval, cross_section, crit, d, m, f = "median", layer_ty
   
   plotWindow <- grid.arrange(plotWindow, 
                              left = textGrob(yaxisTitle, rot = 90, vjust = 0.5, gp = gpar(fontsize = 12)),
-                             top = textGrob(crit, gp=gpar(fontsize=15, lineheight = 3)),
-                             bottom = textGrob(xaxisTitle, gp = gpar(fontsize = 12, lineheight = 3)))
-  
+                             top = textGrob(paste(crit,", Dataset ",d,sep=""), gp=gpar(fontsize=15, lineheight = 3)),
+                             bottom = textGrob(xaxisTitle, gp = gpar(fontsize = 12, lineheight = 3)),
+                             right = textGrob(y2axisTitle, rot = 270, vjust = 0.5, gp = gpar(fontsize = 12)))
+
   plotWindow <- grid.arrange(plotWindow, mylegend, heights = c(10,1))
   
   return(plotWindow)
