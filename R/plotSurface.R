@@ -7,18 +7,20 @@
 #' The z-axis represents the value of the performance metric of interest.
 #' 
 #' @param d A vector of the indexes of the datasets of interest
-#' @param m A vector of the interpolation methods of interest (maximum of 5)
+#' @param m character; A vector of the interpolation methods of interest (maximum of 5)
 #' @param crit A character vector describing the performance metrics of interest
 #' @param agEval A list object (result of agEval.R) of aggregated performance metrics
 #' @param layer_type "method" (default) or "dataset"; how to slice the data
 #' @param f "median" (default); which statistic to use for f(p,g)
 
 plotSurface <- function(d=1:length(agEval), 
-                        m=1:length(agEval[[1]][[1]][[1]]), 
+                        m=names(agEval[[1]][[1]][[1]]), 
                         crit, 
                         agEval, 
                         layer_type = "method", 
-                        f = "median"){
+                        f = "median", 
+                        highlight = "HWI", 
+                        highlight_colour = "#EE5C42"){
   require(plotly)
   require(dplyr)
   require(RColorBrewer)
@@ -26,6 +28,16 @@ plotSurface <- function(d=1:length(agEval),
   stopifnot((layer_type == "method" || layer_type == "dataset"),
             f %in% names(agEval[[1]][[1]][[1]][[1]])[1:11], class(agEval) == "agEvaluate",
             length(f) == 1)
+  
+  if(layer_type == "method" && !(is.character(highlight))){
+    warning(paste0("If layer_type is ",layer_type,", highlight must be a method name (character). Choose from: ", paste0(names(agEval[[1]][[1]][[1]])," ", collapse = ""),"."))
+    stop()
+  }
+  
+  else if(layer_type == "dataset" && is.character(highlight)){
+    warning(paste0("If layer_type is ",layer_type,", highlight must be a dataset ID (numeric). Choose from: ", paste0(1:length(d)," ", collapse = ""),"."))
+    stop()
+  }
   
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
@@ -39,7 +51,7 @@ plotSurface <- function(d=1:length(agEval),
  
   z_list <- compileMatrix(agEval)[[f]]
   
-  method_list_names <- names(z_list[[1]])[m]
+  method_list_names <- m
   data_list_names <- names(z_list[[1]][[1]])[d]
   
   ## Generating a list of surfaces 
@@ -53,15 +65,22 @@ plotSurface <- function(d=1:length(agEval),
                     x <- vector(mode = 'list', D))
       
       palette <- list()
-      colorList <- list(c("grey90","grey90"),
-                        c("grey70","grey70"),
-                        c("grey50","grey50"),
-                        c("grey30","grey30"),
-                        c("grey10","grey10"),
-                        c("grey0","grey0"))
+      
+      colorList <- list(c("#EAECEE","#EAECEE"),
+                        c("#D5D8DC","#D5D8DC"),
+                        c("#ABB2B9","#ABB2B9"),
+                        c("#808B96","#808B96"),
+                        c("#566573","#566573"),
+                        c("#2C3E50","#2C3E50"))
+      
+      
+      colorListMatch <- colorList[1:M]
+      names(colorListMatch) <- method_list_names
+      colorListMatch[[highlight]] <- rep(highlight_colour,2)
+      
         
-      for(i in 1:length(colorList)){
-        palette[[i]] <- colorRampPalette(colorList[[i]])(P*G)
+      for(i in 1:length(colorListMatch)){
+        palette[[i]] <- colorRampPalette(colorListMatch[[i]])(P*G)
       }
     
       axx <- list(
@@ -76,19 +95,20 @@ plotSurface <- function(d=1:length(agEval),
         title = "proportion missing"
       )
       
-      axz <- list(title = "value")
+      axz <- list(title = "value",
+                  nticks = 4)
       
     for(s in 1:C){
       for(vd in 1:D){
         z <- numeric(M)
         for(vm in 1:(M-1)){
-          z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]], 
-                         colorscale = list(seq(0,1,length.out=P*G), palette[[",vm,"]]), 
-                         name = names(z_list[[1]])[",m[vm],"], opacity = 1) %>% ",sep="")
+          z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]], 
+                         colorscale = list(seq(0,1,length.out=P*G), palette[[",vm,"]]),
+                         name = method_list_names[",vm,"], opacity = 1) %>% ",sep="")
         }
-        z[M] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][[",m[M],"]][[",d[vd],"]], 
+        z[M] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[M],"']][[",d[vd],"]], 
                       colorscale = list(seq(0,1,length.out=P*G), palette[[",M,"]]),
-                      name = names(z_list[[1]])[",m[M],"], opacity = 1)",sep="")
+                      name = method_list_names[",M,"], opacity = 1)",sep="")
         
         z <- paste(z, collapse = "")
         
@@ -97,7 +117,7 @@ plotSurface <- function(d=1:length(agEval),
                                     layout(",paste("scene",vd,sep=""),"= list(
                                       xaxis = list(title = ''),
                                       yaxis = list(title = ''),
-                                      zaxis = list(title = '')
+                                      zaxis = axz
                                     )) %>%",z,sep="")))
 
         
@@ -120,14 +140,19 @@ plotSurface <- function(d=1:length(agEval),
         x <- vector(mode = 'list', M))
       
       palette <- list()
-      colorList <- list(c("grey90","grey90"),
-                            c("grey70","grey70"),
-                            c("grey50","grey50"),
-                            c("grey30","grey30"),
-                            c("grey10","grey10"))
+      colorList <- list(c("#EAECEE","#EAECEE"),
+                        c("#D5D8DC","#D5D8DC"),
+                        c("#ABB2B9","#ABB2B9"),
+                        c("#808B96","#808B96"),
+                        c("#566573","#566573"))
       
-      for(i in 1:length(colorList)){
-        palette[[i]] <- colorRampPalette(colorList[[i]])(P*G)
+      colorListMatch <- colorList[1:D]
+      names(colorListMatch) <- data_list_names
+      colorListMatch[[which(grepl(highlight,data_list_names))]] <- rep(highlight_colour,2)
+      
+      
+      for(i in 1:length(colorListMatch)){
+        palette[[i]] <- colorRampPalette(colorListMatch[[i]])(P*G)
       }
       
       axx <- list(
@@ -142,18 +167,18 @@ plotSurface <- function(d=1:length(agEval),
         title = "proportion missing"
       )
       
-      axz <- list(title = "value")
+      axz <- list(nticks = 4, title = "value")
       
       
       for(s in 1:C){
         for(vm in 1:M){
           z <- numeric(D)
           for(vd in 1:(D-1)){
-            z[vd] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][[",m[vm],"]][[",d[vd],"]], 
+            z[vd] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]], 
                            colorscale = list(seq(0,1,length.out=P*G), palette[[",vd,"]]),
                            name = names(z_list[[1]][[1]])[",d[vd],"], opacity = 1) %>% ",sep="")
           }
-          z[D] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][[",m[vm],"]][[",d[D],"]], 
+          z[D] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[vm],"']][[",d[D],"]], 
                         colorscale = list(seq(0,1,length.out=P*G), palette[[",D,"]]),
                         name = names(z_list[[1]][[1]])[",d[D],"], opacity = 1)",sep="")
           
@@ -164,11 +189,11 @@ plotSurface <- function(d=1:length(agEval),
                                                          layout(",paste("scene",vm,sep=""),"= list(
                                                          xaxis = list(title = ''),
                                                          yaxis = list(title = ''),
-                                                         zaxis = list(title = '')
+                                                         zaxis = axz
                                                          )) %>%",
                                                          z,sep="")))
           
-          plotList[[s]][[vm]] <- plotList[[s]][[vm]] %>%  layout(title = paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Method = ",method_list_names[m[vm]], sep = ""))
+          plotList[[s]][[vm]] <- plotList[[s]][[vm]] %>%  layout(title = paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Method = ",method_list_names[vm], sep = ""))
           
           plotList[[s]][[vm]] <- hide_colorbar(plotList[[s]][[vm]])
           }
