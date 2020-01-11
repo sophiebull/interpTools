@@ -6,7 +6,7 @@
 #' @param agEval A list object of class "\code{agEvaluate}" (result of \code{agEvaluate()} of aggregated performance metrics
 #' @param f "\code{median}" (default): Which statistic should be used that will be represented in the heatmap
 #' @param crit numeric; a vector of performance criteria
-#' @param m numeric; a vector describing the index positions of desired methods (corresponding to \code{agEval})
+#' @param m character; a vector of interpolation methods
 #' @param d numeric; a vector describing the index positions of desired datasets (corresponding to \code{agEval})
 #' @param type "\code{z}" (default) or "\code{gradient}"; Generate heatmaps of the matrix of PxG values of the performance metrics\cr 
 #'        in \code{crit} (for \code{type} ='\code{z}'), or the values of the slopes between adjacent values in the performance matrices \cr
@@ -16,7 +16,8 @@
 #'        adjacent point in the performance matrix. 
 #' @param col character; A vector of colours to use for the heatmap graphic.
 
-heatmapGrid <- function(agEval, f = "median", crit, m, d, type = "z", output = "graphic", col = c("red","yellow")){
+heatmapGrid <- function(agEval, f = "median", crit, m, d, type = "z", output = "graphic", 
+                        col = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50","#EE5C42")){
   
   stopifnot((output == "graphic" | output == "matrix"),
             (type == "z" | type == "gradient"),
@@ -37,10 +38,10 @@ heatmapGrid <- function(agEval, f = "median", crit, m, d, type = "z", output = "
   M <- length(m)
   D <- length(d)
   
-  data_list_names <- names(agEval)
+  data_list_names <- names(agEval)[d]
   prop_vec_names <- names(agEval[[1]])
   gap_vec_names <- names(agEval[[1]][[1]])
-  method_list_names <- names(agEval[[1]][[1]][[1]])
+  method_list_names <- m
   
   heatmap_matrix <-  lapply(heatmap_matrix <- vector(mode = 'list', C),function(x)
     lapply(heatmap_matrix <- vector(mode = 'list', M),function(x)
@@ -57,16 +58,28 @@ heatmapGrid <- function(agEval, f = "median", crit, m, d, type = "z", output = "
       for(vm in 1:M){
         for(vd in 1:D){
           
-          heatmap_graphic[[s]][[vm]][[vd]] <-  stats::heatmap(z_list[[crit[s]]][[m[vm]]][[d[vd]]], Rowv = NA, Colv = NA, revC = T, scale = "none", 
-                                                              labRow = gsub("p","",prop_vec_names, fixed=TRUE),
-                                                              labCol = gsub("g","",gap_vec_names, fixed=TRUE),
-                                                              xlab = "gap width", ylab = "proportion missing",
-                                                              main =  paste("Criterion = ",crit[s],", f = ",f,", type = ", type,sep=""),
-                                                              col = colorRampPalette(col)(10000))
+          #heatmap_graphic[[s]][[vm]][[vd]] <-  stats::heatmap(z_list[[crit[s]]][[m[vm]]][[d[vd]]], Rowv = NA, Colv = NA, revC = T, scale = "none", 
+          #                                                    labRow = gsub("p","",prop_vec_names, fixed=TRUE),
+          #                                                    labCol = gsub("g","",gap_vec_names, fixed=TRUE),
+          #                                                    xlab = "gap width", ylab = "proportion missing",
+          #                                                    main =  paste("Criterion = ",crit[s],", f = ",f,", type = ", type,sep=""),
+          #                                                    col = colorRampPalette(col)(10000))
+          
+          rownames(z_list[[crit[s]]][[m[vm]]][[d[vd]]]) <- gsub("p","",rownames(z_list[[crit[s]]][[m[vm]]][[d[vd]]]), fixed = TRUE)
+          colnames(z_list[[crit[s]]][[m[vm]]][[d[vd]]]) <- gsub("g","",colnames(z_list[[crit[s]]][[m[vm]]][[d[vd]]]), fixed = TRUE)
+          
+          start <- melt(z_list[[crit[s]]][[m[vm]]][[d[vd]]])
+          colnames(start) <- c("p","g", "value")
+          
+          heatmap_graphic[[s]][[vm]][[vd]] <- ggplot(start, aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+            scale_fill_gradientn(colours = col, values = c(0,1))+
+            
+            labs(x = "proportion missing", y = "gap width", fill = crit) + 
+            theme_minimal()
         }
-        names(heatmap_graphic[[s]][[vm]]) <- data_list_names[d]
+        names(heatmap_graphic[[s]][[vm]]) <- data_list_names
       }
-      names(heatmap_graphic[[s]]) <- method_list_names[m]
+      names(heatmap_graphic[[s]]) <- method_list_names
     }
     names(heatmap_graphic) <- crit
     
@@ -189,11 +202,10 @@ heatmapGrid <- function(agEval, f = "median", crit, m, d, type = "z", output = "
           heatmap_matrix[[s]][[vm]][[vd]] <- heatmap_grid
           
         }
-        data_list_names <- names(agEval)
-        names(heatmap_matrix[[s]][[vm]]) <- data_list_names[d]
+        
+        names(heatmap_matrix[[s]][[vm]]) <- data_list_names
       }
-      method_list_names <- names(agEval[[1]][[1]][[1]])      
-      names(heatmap_matrix[[s]]) <- method_list_names[m]
+      names(heatmap_matrix[[s]]) <- method_list_names
     }
     names(heatmap_matrix) <- crit
     
@@ -208,10 +220,12 @@ heatmapGrid <- function(agEval, f = "median", crit, m, d, type = "z", output = "
                                                                 xlab = "gap width", ylab = "proportion missing",
                                                                 main =  paste("Criterion = ",crit[s],", f = ",f,", type = ", type,sep=""),
                                                                 col = colorRampPalette(col)(10000))
+            
+          
           }
-          names(heatmap_graphic[[s]][[vm]]) <- data_list_names[d]
+          names(heatmap_graphic[[s]][[vm]]) <- data_list_names
         }
-        names(heatmap_graphic[[s]]) <- method_list_names[m]
+        names(heatmap_graphic[[s]]) <- method_list_names
       }
       names(heatmap_graphic) <- crit
       
@@ -226,7 +240,6 @@ heatmapGrid <- function(agEval, f = "median", crit, m, d, type = "z", output = "
     return(heatmap_matrix)
   }
 }
-
 
 
 
