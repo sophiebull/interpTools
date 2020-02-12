@@ -57,7 +57,7 @@
 #'names(IntData) <- names(OriginalData)
 
 
-parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL){
+parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL, numCores = detectCores()){
   # CALLING REQUIRED LIBRARIES
   require(multitaper)
   require(tsinterp)
@@ -174,13 +174,12 @@ parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL){
           function_call <- paste(algorithm_calls[methods[m]], "x", ")", sep = "")
         }
         
-        int_series[[m]] <- mclapply(gappyTS, function(x){
+        int_series[[m]] <- lapply(gappyTS, function(x){
           lapply(x, function(x){
-            lapply(x, function(x){
+            mclapply(x, function(x){
               eval(parse(text = function_call))}
-            )}
-          )}, 
-          mc.cores = detectCores())
+              , mc.cores = numCores)}
+          )})
       }
   }
   
@@ -190,20 +189,22 @@ parInterpolate <- function(gappyTS, methods = NULL, FUN_CALL = NULL){
       FUN_call <- paste(FUN_CALL[l],"x",")",sep="")
       fun_names[l] <- sub("\\(.*", "", FUN_call)
       
-    int_series[[length(methods)+l]] <- mclapply(gappyTS, function(x){
-      lapply(x, function(x){
+      int_series[[length(methods)+l]] <- mclapply(gappyTS, function(x){
         lapply(x, function(x){
-          eval(parse(text = FUN_call))}
-        )}
-      )},
-    mc.cores = detectCores())
-    
+          lapply(x, function(x){
+            eval(parse(text = FUN_call))}
+          )}
+        )},
+        #mc.cores = detectCores())
+        mc.cores = numCores)
     }
   }
   
   names(int_series) <- c(method_names,fun_names)
   return(int_series)
 }
+
+
 
 
 
