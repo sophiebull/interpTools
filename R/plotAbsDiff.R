@@ -14,24 +14,24 @@ plotAbsDiff <- function(OriginalData,IntData,d,p,g,m, output = "plot"){
 
   require(ggplot2)
   
-algorithm_names <- c("Nearest.Neighbor",
-                     "Linear.Interpolation", 
-                     "Natural.Cubic.Spline",
-                     "FMM Cubic.Spline", 
-                     "Hermite.Cubic.Spline",
-                     "Stineman.Interpolation",
-                     "Kalman.ARIMA",
-                     "Kalman.StructTS",
-                     "Last.Observation.Carried.Forward",
-                     "Next.Observation.Carried.Backward",  
-                     "Simple.Moving.Average", 
-                     "Linear.Weighted.Moving.Average",
-                     "Exponential.Weighted.Moving.Average",
-                     "Replace.with.Mean",
-                     "Replace.with.Median", 
-                     "Replace.with.Mode",
-                     "Replace.with.Random",
-                     "Hybrid.Wiener.Interpolator")
+  algorithm_names <- c("NN",
+                       "LI", 
+                       "NCS",
+                       "FMM", 
+                       "HCS",
+                       "SI",
+                       "KAF",
+                       "KKSF",
+                       "LOCF",
+                       "NOCB", 
+                       "SMA", 
+                       "LWMA",
+                       "EWMA",
+                       "RMEA",
+                       "RMED", 
+                       "RMOD",
+                       "RRND",
+                       "HWI")
 
 
 D <- length(d)
