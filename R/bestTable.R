@@ -80,7 +80,7 @@ bestTable <- function(d=1,
   gap_vec <- names(agEval[[1]][[1]]) # gaps
   
   criterion <- rownames(agEval[[1]][[1]][[1]][[1]])
-  maximize <- c(1,1,rep(0,11),1,rep(0,4)) # 1 = yes, 0 = no
+  maximize <- c(1,1,rep(0,11),1,rep(0,5)) # 1 = yes, 0 = no
   optimal <- maximize
   optimal[which(optimal == "1")] <- "max"
   optimal[which(optimal == "0")] <- "min"
