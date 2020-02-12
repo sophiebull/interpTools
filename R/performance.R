@@ -24,6 +24,9 @@ performance <- function(OriginalData,IntData,GappyData){
   gap_vec_names <- numeric(G)
   method_names <- numeric(M)
   
+  prop_vec <- as.numeric(gsub("p","",names(IntData[[1]][[1]])))
+  gap_vec <- as.numeric(gsub("g","",names(IntData[[1]][[1]][[1]])))
+    
   # Evaluate the performance criteria for each sample in each (d,m,p,g) specification
   for(d in 1:D){
     for(m in 1:M){
@@ -43,5 +46,14 @@ performance <- function(OriginalData,IntData,GappyData){
     }
     names(Performance) <- names(IntData)
   }
+  
+  Performance <- lapply(Performance, function(x) 
+                    lapply(x, function(x) 
+                      lapply(x, function(x)
+                        lapply(x, function(x){
+                            logic <- unlist(lapply(x,FUN = function(x) !is.null(x)))
+                            x <-x[logic]
+                      }))))
+  
   return(Performance) 
 }
