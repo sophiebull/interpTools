@@ -726,43 +726,34 @@ BREAKING IT DOWN FURTHER
 
 setwd("/home/sophie/sophTools/files/plots")
 png("D1NRMSDCSunbyMethod_p.png", width = 655, height = 965)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=1, m=4:6, f = "median", layer_type = "method")
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=1, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
 dev.off()
-
 
 setwd("/home/sophie/sophTools/files/plots")
 png("D2NRMSDCSunbyMethod_p.png", width = 655, height = 965)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=2, m=4:6, f = "median", layer_type = "method")
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=2, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
 dev.off()
-
-
 
 setwd("/home/sophie/sophTools/files/plots")
 png("D3NRMSDCSunbyMethod_p.png", width = 655, height = 965)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=3, m=4:6, f = "median", layer_type = "method")
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=3, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
 dev.off()
-
- 
 
 setwd("/home/sophie/sophTools/files/plots")
 png("D4NRMSDCSunbyMethod_p.png", width = 655, height = 986)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=4, m=4:6, f = "median", layer_type = "method")
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=4, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
 dev.off()
-
-
 
 setwd("/home/sophie/sophTools/files/plots")
 png("D5NRMSDCSunbyMethod_p.png", width = 655, height = 986)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=5, m=4:6, f = "median", layer_type = "method")
+plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=5, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
 dev.off()
-
-
 
 ```
 
 CROSS_SECTION = G
 ```{r}
-plotListCS <- plotCS(m = 4:6, agEval = testag, cross_section = "g", layer_type = "method", crit = c("MAPE","NRMSD"))
+plotListCS <- plotCS(agEval = testag, d = 1:5, m = c("KAF","HWI", "EWMA"), highlight = "HWI", cross_section = "g", layer_type = "method", crit = c("MAPE", "NRMSD"))
 
 #MAPE 
 
@@ -796,42 +787,69 @@ grid.arrange(pCSMAPE1, pCSMAPE2, pCSMAPE3, pCSMAPE4, pCSMAPE5, theLegend, nrow =
 
 dev.off()
 
-# NRMSE
+# NRMSD
 
-pCSNRMSE1 <- plotListCS[[2]][[1]] + theme(axis.title.x = element_blank(),
+pCSNRMSD1 <- plotListCS[[2]][[1]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 1")
-pCSNRMSE2 <- plotListCS[[2]][[2]] + theme(axis.title.x = element_blank(),
+pCSNRMSD2 <- plotListCS[[2]][[2]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 2")
-pCSNRMSE3 <- plotListCS[[2]][[3]] + theme(axis.title.x = element_blank(),
+pCSNRMSD3 <- plotListCS[[2]][[3]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 3")
-pCSNRMSE4 <- plotListCS[[2]][[4]] + theme(axis.title.x = element_blank(),
+pCSNRMSD4 <- plotListCS[[2]][[4]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 4")
-pCSNRMSE5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
+pCSNRMSD5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 5")
 
 setwd("/home/sophie/sophTools/files/plots")
-png("NRMSECSbyMethod_g.png", width = 875, height = 965)
+png("NRMSDCSbyMethod_g.png", width = 875, height = 965)
 
-grid.arrange(pCSNRMSE1, pCSNRMSE2, pCSNRMSE3, pCSNRMSE4, pCSNRMSE5, theLegend, nrow = 3,
+grid.arrange(pCSNRMSD1, pCSNRMSD2, pCSNRMSD3, pCSNRMSD4, pCSNRMSD5, theLegend, nrow = 3,
              top=textGrob(names(plotListCS)[2],gp=gpar(fontsize=18,font=1)), 
              bottom = textGrob("gap width", gp = gpar(fontsize = 14, font = 1)))
 
 dev.off()
 ```
+BREAKING IT DOWN FURTHER
+```{r}
 
+setwd("/home/sophie/sophTools/files/plots")
+png("D1NRMSDCSunbyMethod_g.png", width = 655, height = 965)
+plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=1, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+dev.off()
 
+setwd("/home/sophie/sophTools/files/plots")
+png("D2NRMSDCSunbyMethod_g.png", width = 655, height = 965)
+plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=2, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+dev.off()
 
+setwd("/home/sophie/sophTools/files/plots")
+png("D3NRMSDCSunbyMethod_g.png", width = 655, height = 965)
+plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=3, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+dev.off()
+ 
+setwd("/home/sophie/sophTools/files/plots")
+png("D4NRMSDCSunbyMethod_g.png", width = 655, height = 986)
+plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=4, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+dev.off()
 
+setwd("/home/sophie/sophTools/files/plots")
+png("D5NRMSDCSunbyMethod_g.png", width = 655, height = 986)
+plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=5, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+dev.off()
+
+```
+
+# ASSESSING THE HWI ALONE, WRT DATASET
 # HEATMAP (HW BY DATASET, Z)
 ```{r}
 #D1hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 1, type = "z")
@@ -843,7 +861,7 @@ dev.off()
 # WENT WITH A GGPLOT INSTEAD.
 z_list <- compileMatrix(testag)[["median"]]
 
-crit = "pearson_r"
+crit = "NRMSD"
 m = "HWI"
 
 plott <- list()
@@ -857,7 +875,7 @@ for(d in 1:5){
 }
           
 rng = range(c(plott[[1]]$value, plott[[2]]$value ,plott[[3]]$value, plott[[4]]$value, plott[[5]]$value))
-col = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50","#EE5C42")
+col = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
 
 D1 <- ggplot(plott[[1]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
       scale_fill_gradientn(colours = col, values = c(0,1),
@@ -932,7 +950,11 @@ D5 <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_t
     myLegend<-g_legend(dumPlot)
     
 plotWindow <- grid.arrange(D1,D2,D3,D4,D5, ncol = 5, bottom = "proportion missing", left = "gap width")
+
+setwd("/home/sophie/sophTools/files/plots")
+png("NRMSD_Heatmap.png", width = 1136, height = 328)
 plotWindow <- grid.arrange(plotWindow, myLegend, heights = c(10,1))
+dev.off()
 ```
 
 

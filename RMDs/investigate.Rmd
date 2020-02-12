@@ -1,0 +1,622 @@
+---
+title: "Investigate"
+author: "Sophie Castel"
+date: "1/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# TESTING FURTHER
+For this extension, we want to see what happens to the average performance of the HWI as the minimum allowable frequency slides up.  We previously identified an anomaly in Dataset 4 where the performance really broke down.  We suspected this to be due to a lack of low-frequency sinusoids. We want to generate 20 more datasets, this time sliding the minimum allowable frequency up by a slight amount with each simulation.  
+
+GENERATE ORIGINAL DATA
+```{r}
+set.seed(23)
+simData <- new.simData
+# regenerate Tt 
+t <- 0:999
+n <- 1000
+snr = 5
+bandwidth = 2
+
+# Define minimum frequencies
+minFreq <- seq(0.01,(min(simData$Tt_freq[[4]])-0.001),length.out = 20)
+
+# Define empty lists and vectors
+newSNR <- numeric()
+newXt_List <- list()
+newMt_List <- list()
+newWt_List <- list()
+newTt_List <- list()
+new_Tt_freqList <- list()
+  newW_List <- list()
+  
+# Copy D4 frequencies 20 times 
+args <- paste0(rep("simData$Tt_freq[[4]],",19), collapse = "")
+args <- paste0(args,"simData$Tt_freq[[4]]", collapse = "")
+new_Tt_freqList <- eval(parse(text = paste0("list(",args,")")))
+
+# Copy D4 function call 20 times
+args2 <- paste0(rep("simData$Tt_fn[[4]],",19), collapse = "")
+args2 <- paste0(args2,"simData$Tt_fn[[4]]", collapse = "")
+new_fnVec <- eval(parse(text = paste0("c(",args2,")")))
+
+new_D4X_names <- numeric(20)
+
+# For each copy, choose a random frequency (at least greater than the minimum), remove it, and replace with the ith frequency in minFreq
+for(i in 1:20){
+  
+  # Create naming vector
+  new_names[i] <- paste0("D4.",i)
+  
+  repeat{
+    # find index position of random frequency to remove
+      remove <- sample(1:length(new_Tt_freqList[[i]]),1)
+      val <- new_Tt_freqList[[i]][remove]
+      valW <- new_Tt_freqList[[i]][remove]*(2*pi)
+      if(val > min(new_Tt_freqList[[i]])){
+        break
+    }
+  }
+  
+  # Replace with the ith frequency in minFreq
+  new_Tt_freqList[[i]][remove] <- minFreq[i]
+  
+  # Convert to new W values
+  newW_List[[i]] <- new_Tt_freqList[[i]]*(2*pi)
+  newvalW <- newW_List[[i]][remove]
+
+  # Replace the removed W value in Tt_fn with new W
+  new_fnVec[i] <- sub(pattern = valW, replacement = newvalW, x = new_fnVec[i])
+  
+  # Generate new Mt
+  newMt_List[[i]] <- simData$Mt[[4]]
+
+  # Generate new Tt 
+  newTt_List[[i]] <- eval(parse(text = paste(new_fnVec[i],collapse = "")))
+  
+  # Generate new Wt 
+  newWt_List[[i]] <- simWt(n=1000, var = var(newTt_List[[i]])/snr)$value 
+  
+  # Generate new Xt
+  newXt_List[[i]] <- simData$Mt[[4]] + newTt_List[[i]] + newWt_List[[i]]
+  
+  # Generate new SNR vector
+  newSNR[i] <- var(newTt_List[[i]])/var(newWt_List[[i]])
+}
+  # Generate new simData object
+  simData.D4X <- list()
+      simData.D4X$Xt <- newXt_List
+      simData.D4X$Mt <- newMt_List
+      simData.D4X$Mt_mu <- rep(simData$Mt_mu[[4]],20)
+      simData.D4X$Mt_numTrend <- rep(simData$Mt_numTrend[[4]],20)
+      simData.D4X$Wt <- newWt_List
+      simData.D4X$Tt <- newTt_List
+      simData.D4X$Mt_fn <- rep(simData$Mt_fn[[4]],20)
+      simData.D4X$Tt_fn <- new_fnVec
+      simData.D4X$Tt_freq <- new_Tt_freqList
+      simData.D4X$Tt_bandwidth <- rep(simData$Tt_bandwidth[[4]],20)
+      simData.D4X$Wt_p <- rep(simData$Wt_p[[4]],20)
+      simData.D4X$Wt_q <- rep(simData$Wt_q[[4]],20)
+      simData.D4X$SNR <- newSNR
+class(simData.D4X) <- "simList"
+
+# Checking
+# plotXt(simData = simData.D4X,d = 1,cptwise = T)
+
+# Creating list object
+D = 20
+sets <- numeric(D)
+for(d in 1:(D-1)){
+  sets[d] <- paste("D",d,"=simData.D4X$Xt[[",d,"]],",sep="")
+}
+sets[D] <- paste("D",D,"=simData.D4X$Xt[[",D,"]]",sep="")
+list_call <- paste("list(",paste(sets,collapse=""),")")
+      
+OriginalData.D4X = eval(parse(text=list_call))
+```
+
+GENERATE GAPPY DATA
+```{r}
+set.seed(23)
+prop_vec = c(0.05,0.1,0.15,0.2,0.25,0.30)
+gap_vec = c(1,5,10,25)
+K = 200 # number of gappy series to simulate under each p,g specification
+
+GappyData.D4X <- list()
+
+for(d in 1:length(OriginalData.D4X)){
+  GappyData.D4X[[d]] <- simulateGaps(data = as.numeric(OriginalData.D4X[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = K)
+}
+names(GappyData.D4X) <- names(OriginalData.D4X)
+```
+
+SAVING STUFF
+```{r}
+setwd("/home/sophie/sophTools/files/investigate")
+save(simData.D4X, file = "simData.D4X.rda")
+save(OriginalData.D4X, file = "OriginalData.D4X.rda")
+save(GappyData.D4X, file = "GappyData.D4X.rda")
+```
+
+INTERPOLATE GAPPY DATA
+```{r IntData, cache = TRUE}
+set.seed(23)
+IntData.D4X.test <- list()
+setwd("/home/sophie/sophTools/files/investigate")
+
+# Split GappyData.D4X into sets of size K=50
+split = 20
+splitData <- function(GappyData, split = split){
+  D <- length(GappyData)
+  P <- length(GappyData[[1]])
+  G <- length(GappyData[[1]][[1]])
+  K <- length(GappyData[[1]][[1]][[1]])
+  Nind <- 1:split
+  
+  splitList <- lapply(splitList <- vector(mode = 'list',D),function(x)
+    lapply(splitList <- vector(mode = 'list', split),function(x) 
+      lapply(splitList <- vector(mode = 'list',P),function(x) 
+        lapply(splitList <- vector(mode = 'list', G), function(x)
+          x<-vector(mode='list',K)))))
+  
+  splitData = GappyData 
+  
+  Ksplit <- length(GappyData[[1]][[1]][[1]])/split
+  vecSplit <- list()
+  splitK <- list()
+ 
+  for(d in 1:length(GappyData)){ 
+    for(n in 1:split){
+      vecSplit[[n]] <- ((n-1)*Ksplit + 1):(n*Ksplit) 
+      
+        for(p in 1:length(GappyData[[1]])){
+          for(g in 1:length(GappyData[[1]][[1]])){
+            splitK <- GappyData[[d]][[p]][[g]][vecSplit[[n]]]
+            splitData[[d]][[p]][[g]] <- splitK
+            splitList[[d]][[n]][[p]][[g]] <- splitData[[d]][[p]][[g]]
+          }
+          names(splitList[[d]][[n]][[p]]) <- names(GappyData[[1]][[1]])
+        }
+        names(splitList[[d]][[n]]) <- names(GappyData[[1]])
+    }
+    names(splitList[[d]])<- paste0((Nind-1)*Ksplit+1,":",Nind*Ksplit)
+    }
+    names(splitList) <- names(GappyData)
+  
+  return(splitList)
+}
+
+# split gappy data into K = 50 pieces (200/50 = 4 = split)
+splitData.D4X <- splitData(GappyData.D4X, split = split) # dataset, splitId, p, g, length(k) = 50
+
+# Interpolate in chunks
+for(d in 17:20){
+  for(n in 1:split){
+    system.time(
+    splitIntData <- parInterpolate(gappyTS = splitData.D4X[[d]][[n]], methods = 18, numCores = 20))
+    filename <- paste0("D",d,"_",letters[n],".rda")
+    setwd(paste0("/home/sophie/sophTools/files/investigate/D",d))
+    save(splitIntData, file = filename)
+    gc()
+  }
+}
+```
+
+```{r}
+# Stitch together datasets
+    
+  GappyData.D4X <- load_obj("~/sophTools/files/investigate/splitData.D4X.rda")
+  OriginalData.D4X <- load_obj("~/sophTools/files/investigate/OriginalData.D4X.rda")
+  
+  # Compute the performance
+  GappyData.split <- list()
+  splitInt <- list()
+  mean_MAPE_df <- matrix(nrow = 20, ncol = 20)
+  mean_NRMSD_df <- matrix(nrow = 20, ncol = 20)
+  for(j in 1:20){
+    mean_split_NRMSD <- numeric(20)
+    mean_split_MAPE <- numeric(20)
+  for(i in 1:20){
+      # load object
+      data <- load_obj(paste0("~/sophTools/files/investigate/D4x/D",i,"/D",i,"_",letters[j],".rda"))
+      splitInt[[i]] <- data
+      GappyData.split[[i]] <- splitData.D4X[[i]][[j]]
+      }
+    names(splitInt) <- paste0("D",1:20)
+    
+      # get performance
+      splitpmat <- performance(OriginalData = OriginalData.D4X, 
+                               IntData = splitInt, 
+                               GappyData = GappyData.split)
+      # aggregate performance
+      splitag <- agEvaluate(pmats = splitpmat)
+      zsplit.MAPE <- compileMatrix(splitag)[["median"]][["MAPE"]]
+      zsplit.NRMSD <- compileMatrix(splitag)[["median"]][["NRMSD"]]
+  
+  # take the mean
+  mean_split_NRMSD <- lapply(zsplit.NRMSD[["HWI"]], mean)
+  mean_split_MAPE <- lapply(zsplit.MAPE[["HWI"]], mean)
+
+  mean_NRMSD_df[j,] <- as.numeric(mean_split_NRMSD)
+  mean_MAPE_df[j,] <- as.numeric(mean_split_MAPE)
+  }
+  rownames(mean_NRMSD_df) <- letters[1:20]
+  colnames(mean_NRMSD_df) <- paste0("D",1:20)
+  rownames(mean_MAPE_df) <- letters[1:20]
+  colnames(mean_MAPE_df) <- paste0("D",1:20)
+  
+  setwd("/home/sophie/sophTools/files/investigate/D4x")
+  save(mean_NRMSD_df, file = "mean_NRMSD_df.rda")
+  save(mean_MAPE_df, file = "mean_MAPE_df.rda")
+  
+  mean_NRMSD <- apply(mean_NRMSD_df,2,mean)
+  mean_MAPE <- apply(mean_MAPE_df,2,mean)
+```
+
+```{r}
+#PLOTTING
+ NRMSD_P <- ggplot(data = data.frame(d = seq(0.01,0.07,length.out = 20), NRMSD = mean_NRMSD)) + 
+    geom_line(aes(x = d, y = NRMSD), col = "#EE5C42") + 
+        
+                        theme_minimal() + 
+                        theme(panel.background = element_blank(),
+                              panel.grid.minor = element_blank(),
+                              axis.title.x = element_blank(),
+                              axis.ticks.x = element_blank(),
+                              axis.text.x = element_blank() ) +
+                      ylim(3.5,4.5) +
+                      labs(title="NRMSD", x="minimum frequency", y ="mean performance")
+    
+  
+MAPE_P <-  ggplot(data = data.frame(d = seq(0.01,0.07, length.out = 20), MAPE = mean_MAPE)) +
+    geom_line(aes(x = d, y = MAPE), col = "#EE5C42") + 
+        
+                        theme_minimal() + 
+                        theme(panel.background = element_blank(),
+                              panel.grid.minor = element_blank()) +
+                      ylim(100,400)+
+                  
+                      labs(title="MAPE", x="minimum frequency", y ="mean performance")
+  
+  setwd("/home/sophie/sophTools/files/investigate/D4x")
+  png("mean_D4X.png", width = 640, height = 400)
+  grid.arrange(NRMSD_P,MAPE_P, ncol = 1)
+  dev.off()
+    
+```
+
+
+# TESTING FURTHER
+Our initial suspicion of a lack of low-frequency sinusoids was not corroborated by the analysis. For this extension, we want to see what happens to the average performance of the HWI when we shift each frequency by a value $\delta f$.  This would confirm whether low frequencies matter.
+
+```{r}
+t <- 0:999
+n <- 1000
+snr = 5
+
+# Extract D4 frequencies
+simData <- load_obj("/home/sophie/sophTools/files/new_1/new.simData.rda")
+class(simData) = "simList"
+freq.shift <- simData$Tt_freq[[4]] - 0.05
+w.shift <- freq.shift*(2*pi)
+
+# Simulate new, shifted Tt
+# Replace old frequencies with frequencies shifted by df = -0.05
+init <- simData$Tt_fn[[4]]
+Tt_fn.shift <- simData$Tt_fn[[4]]
+
+locStart <- gregexpr("sin\\(", Tt_fn.shift)[[1]][1:40] + 4
+locEnd <- gregexpr("\\*t\\)", Tt_fn.shift)[[1]][1:40] - 1
+for (i in 1:length(w.shift)) {
+  old_freq <- substr(Tt_fn.shift, locStart[i], locEnd[i])
+  new_freq <- paste0(round(w.shift[i], nchar(old_freq)), collapse = "")
+  if(nchar(new_freq) < nchar(old_freq)) {
+    new_freq <- paste0(new_freq, paste0(rep(0, nchar(old_freq) - nchar(new_freq)), collapse = ""), collapse = "")
+  } else if(nchar(new_freq) > nchar(old_freq)) {
+    new_freq <- substr(new_freq, 1, nchar(old_freq))
+  }
+  Tt_fn.shift <- paste(substr(Tt_fn.shift, 1, locStart[i] - 1), new_freq, 
+                 substr(Tt_fn.shift, locEnd[i] + 1, nchar(Tt_fn.shift)), sep = "",
+                 collapse = "")
+}
+
+Tt <- eval(parse(text = Tt_fn.shift))
+Mt <- simData$Mt[[4]]
+Wt <- simWt(n=1000, var = var(Tt)/snr)$value
+
+# Generate new simData object
+  simData.shift <- list()
+      simData.shift$Xt <- list(Mt+Tt+Wt)  
+      simData.shift$Mt <- list(Mt)
+      simData.shift$Mt_mu <- simData$Mt_mu[[4]]
+      simData.shift$Mt_numTrend <- simData$Mt_numTrend[[4]]
+      simData.shift$Wt <- list(Wt)
+      simData.shift$Tt <- list(Tt)
+      simData.shift$Mt_fn <- simData$Mt_fn[[4]]
+      simData.shift$Tt_fn <- Tt_fn.shiftList[[1]] 
+      simData.shift$Tt_freq <- list(freq.shift)
+      simData.shift$Tt_bandwidth <- simData$Tt_bandwidth[[4]]
+      simData.shift$Wt_p <- simData$Wt_p[[4]]
+      simData.shift$Wt_q <- simData$Wt_q[[4]]
+      simData.shift$SNR <- var(Tt)/var(Wt)
+class(simData.shift) <- "simList"
+
+# Creating list object
+OriginalData.shift =list(D1 = simData.shift$Xt[[1]])
+
+# Save data
+setwd("/home/sophie/sophTools/files/investigate/shift")
+save(simData.shift, file = "simData.shift.rda")
+save(OriginalData.shift, file = "OriginalData.shift.rda")
+```
+
+# GENERATE GAPPY DATA
+```{r}
+set.seed(23)
+prop_vec = c(0.05,0.1,0.15,0.2,0.25,0.30)
+gap_vec = c(1,5,10,25)
+K = 1000 # number of gappy series to simulate under each p,g specification
+
+GappyData.shift <- list()
+
+for(d in 1:length(OriginalData.shift)){
+  GappyData.shift[[d]] <- simulateGaps(data = as.numeric(OriginalData.shift[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = K)
+}
+names(GappyData.shift) <- names(OriginalData.shift)
+
+# Save
+setwd("/home/sophie/sophTools/files/investigate/shift")
+save(GappyData.shift, file = "GappyData.shift.rda")
+```
+
+# INTERPOLATE GAPPY DATA
+```{r, cache = TRUE}
+set.seed(23)
+methods <- c(18)
+split = 20
+
+GappyData.shift <- load_obj("/home/sophie/sophTools/files/investigate/shift/GappyData.shift.rda")
+
+# split gappy data into K = 20 pieces
+splitData.shift <- splitData(GappyData.shift, split = split) # dataset, splitId, p, g, length(k) = 50
+
+# Interpolate in chunks
+for(n in 1:split){
+    system.time(
+    splitIntData <- parInterpolate(gappyTS = splitData.shift[[1]][[n]], methods = 18, numCores = 20))
+    filename <- paste0("IntData.shift","_",letters[n],".rda")
+    setwd(paste0("/home/sophie/sophTools/files/investigate/shift/IntData.shift"))
+    save(splitIntData, file = filename)
+    print(n)
+    gc()
+  }
+
+# stitch together dataset
+IntData.shift <- list(D1 = stitchData(directory = "/home/sophie/sophTools/files/investigate/shift/IntData.shift"))
+setwd("/home/sophie/sophTools/files/investigate/shift")
+save(IntData.shift, file = "IntData.shift.rda" )
+```
+
+# Get performance
+
+```{r}
+GappyData.shift <- load_obj("~/sophTools/files/investigate/shift/GappyData.shift.rda")
+OriginalData.shift <- load_obj("~/sophTools/files/investigate/shift/OriginalData.shift.rda")
+IntData.shift <- load_obj("~/sophTools/files/investigate/shift/IntData.shift.rda")
+
+pMats.shift <- performance(GappyData = GappyData.shift, OriginalData = OriginalData.shift, IntData = IntData.shift)
+
+# Aggregating the Performance Metrics
+ag.shift <- agEvaluate(pmats = pMats.shift)
+
+# Plot Surface for shifted data 
+plot.shift <- plotSurface(d = 1, m = "HWI", crit = c("NRMSD","MAPE","TMAPE"), agEval = ag.shift, layer_type = "method", f = "median", highlight = "HWI", highlight_colour = "#EE5C42")
+
+# NRMSD
+pshift.NRMSD <- plot.shift[["NRMSD"]][[1]]
+# TMAPE 
+pshift.MAPE <- plot.shift[["MAPE"]][[1]]
+# MAPE
+pshift.TMAPE <- plot.shift[["TMAPE"]][[1]]
+
+# Plot Surface of unshifted data (D4 from new_1)
+GappyData.unshift <- load_obj("~/sophTools/files/new_1/new.GappyData.rda")
+OriginalData.unshift <- load_obj("~/sophTools/files/new_1/new.OriginalData.rda")
+IntData.unshift <- load_obj("~/sophTools/files/new_1/new.IntData.rda")
+
+pMats.unshift <- performance(GappyData = GappyData.unshift, OriginalData = OriginalData.unshift, IntData = IntData.unshift)
+ag.unshift <- agEvaluate(pmats = pMats.unshift)
+ag.unshift <- convertNames(ag.unshift)
+setwd("/home/sophie/sophTools/files/new_1")
+save(ag.unshift, file = "new.ag.rda")
+
+plot <- plotSurface(d = 4, m = "HWI", crit = c("NRMSD","MAPE","TMAPE"), agEval = ag.unshift, layer_type = "method", f = "median", highlight = "HWI", highlight_colour = "#808B96")
+
+# NRMSD
+p.NRMSD <- plot[["NRMSD"]][[1]]
+# MAPE 
+p.MAPE <- plot[["MAPE"]][[1]]
+# TMAPE
+p.TMAPE <- plot[["TMAPE"]][[1]]
+
+# plot side by side
+# NRMSD
+subplot(pshift.NRMSD, p.NRMSD)
+# MAPE
+subplot(pshift.MAPE, p.MAPE)
+# TMAPE
+subplot(pshift.TMAPE, p.TMAPE)
+
+# double checking that only the frequencies have changed
+simData.unshift <- load_obj("/home/sophie/sophTools/files/new_1/new.simData.rda")
+class(simData.unshift) <- "simList"
+simData.shift <- load_obj("/home/sophie/sophTools/files/investigate/shift/simData.shift.rda")
+class(simData.shift) <- "simList"
+
+plotXt(simData = simData.unshift, cptwise = T)
+plotXt(simData = simData.shift, cptwise = T)
+
+# Wow, the MAPE is really skewed
+plotSkew(agEval = ag.unshift, cptwise = T)
+
+
+## Original
+pmats.unshift <- load_obj("/home/sophie/sophTools/files/new_1/new.pmats.rda")
+ag.unshift <- agEvaluate(pmats.unshift)
+ag.unshift <- convertNames(ag.unshift)
+
+plotlist <- plotSurface(d=1:5, agEval = ag.unshift, crit = c("MAPE", "RMS","pearson_r","MBE","MRE","MARE","SSE"), m = "HWI", highlight  = 4, layer_type = "dataset")
+View(plotlist)
+```
+
+# Check to see whether frequency-shifting has as-much of an impact when the gap configurations are held constant
+```{r}
+# Extract gaps from new_1 
+GappyData.unshift <- load_obj("/home/sophie/sophTools/files/new_1/new.GappyData.rda")
+
+GapLogic <- list(D4 = GappyData.unshift[[4]])
+for(p in 1:length(GapLogic[[1]])){
+    for(g in 1:length(GapLogic[[1]][[1]])){
+      GapLogic[[1]][[p]][[g]] <- lapply(GappyData.unshift[[4]][[p]][[g]], FUN = is.na)
+    }
+}
+
+# Apply gaps to frequency-shifted Original Time series
+OriginalData.shift.2 <- load_obj("/home/sophie/sophTools/files/investigate/shift/OriginalData.shift.rda")
+names(OriginalData.shift.2) <- "D4"
+
+GappyData.shift.2 <- GappyData.shift
+names(GappyData.shift.2) <- "D4"
+
+for(p in 1:length(GappyData.shift.2[[1]])){
+    for(g in 1:length(GappyData.shift.2[[1]][[1]])){
+      listArg <-paste0(c("list(",c(rep("OriginalData.shift[[1]],", 
+                           length(GappyData.shift[[1]][[p]][[g]])-1)),
+                            "OriginalData.shift[[1]])"), collapse = "") 
+      GappyData.shift.2[[1]][[p]][[g]] <- eval(parse(text = listArg))
+      
+      whichNA <- lapply(GapLogic[[1]][[p]][[g]], FUN = which)
+      
+      for(k in 1:length(GappyData.shift.2[[1]][[p]][[g]])){
+        GappyData.shift.2[[1]][[p]][[g]][[k]][whichNA[[k]]] <- NA 
+      }
+    }
+}
+
+setwd("/home/sophie/sophTools/files/investigate/shift2")
+save(OriginalData.shift, file = "OriginalData.shift.2.rda")
+save(GappyData.shift.2, file = "GappyData.shift.2.rda")
+
+# Split and Interpolate the Gappy Data #####
+set.seed(23)
+methods <- c(18)
+split = 25
+
+GappyData.shift.2 <- load_obj("/home/sophie/sophTools/files/investigate/shift2/GappyData.shift.2.rda")
+
+# split gappy data into K = 20 pieces
+splitData.shift.2 <- splitData(GappyData.shift.2, split = split) # dataset, splitId, p, g, length(k) = 50
+
+# Interpolate in chunks
+for(n in 1:split){
+    splitIntData <- parInterpolate(gappyTS = splitData.shift.2[[1]][[n]], methods = 18, numCores = 16)
+    filename <- paste0("IntData.shift.2","_",letters[n],".rda")
+    setwd(paste0("/home/sophie/sophTools/files/investigate/shift2/IntData.shift.2"))
+    save(splitIntData, file = filename)
+    print(n)
+    gc()
+}
+
+# stitch together dataset
+IntData.shift.2 <- list(D4 = stitchData(directory = "/home/sophie/sophTools/files/investigate/shift2/IntData.shift.2"))
+setwd("/home/sophie/sophTools/files/investigate/shift2")
+save(IntData.shift.2, file = "IntData.shift.2.rda" )
+
+
+# check how many null values
+for(p in 1:6){
+  for(g in 1:4){
+   check <- lapply(IntData.shift.2[[1]][[1]][[p]][[g]], FUN = is.null)
+   print(paste0(Reduce("+", check)," of ", length(check), " = ", round(Reduce("+", check)/length(check),3)*100,"%, p=",p,", g = ",g))
+  }
+}
+
+# get performance
+pMats.shift.2 <- performance(OriginalData=OriginalData.shift.2, IntData=IntData.shift.2, GappyData = GappyData.shift.2)
+# get aggregated
+agEval.shift.2 <- agEvaluate(pmats = pMats.shift.2)
+
+setwd("/home/sophie/sophTools/files/investigate/shift2")
+save(pMats.shift.2, file = "pMats.shift.2.rda")
+save(agEval.shift.2, file = "agEval.shift.2.rda")
+
+# plot performance of unshifted vs. true shift
+
+new.GappyData <- load_obj("/home/sophie/sophTools/files/new_1/new.GappyData.rda")
+new.OriginalData <- load_obj("/home/sophie/sophTools/files/new_1/new.OriginalData.rda")
+new.IntData <- load_obj("/home/sophie/sophTools/files/new_1/new.IntData.rda")
+
+pMats.unshift <- performance(GappyData=new.GappyData, OriginalData=new.OriginalData,IntData = new.IntData)
+agEval.unshift <- agEvaluate(pmats = pMats.unshift)
+
+setwd("/home/sophie/sophTools/files/new_1")
+#save(pMats.unshift, file = "new.pmats.rda")
+save(agEval.unshift, file = "new.ag.rda")
+
+plotList.unshift <- plotSurface(agEval = agEval.unshift, m = "HWI", d = 4, highlight = 4, highlight_colour = "skyblue", layer_type = "dataset", crit = c("TMAPE"))
+plotList.shift.2 <- plotSurface(agEval = agEval.shift.2, m = "HWI", d = 1, highlight = 1, layer_type = "dataset", crit = c("TMAPE"))
+
+p <- plotList.unshift[["TMAPE"]][["HWI"]]
+pshift2 <- plotList.shift.2[["TMAPE"]][["HWI"]]
+
+subplot(p,pshift2)
+
+# check to see that gaps were actually fixed
+GappyData.unshift <- load_obj("/home/sophie/sophTools/files/new_1/new.GappyData.rda")
+GappyData.shift.2 <- load_obj("/home/sophie/sophTools/files/investigate/shift2/GappyData.shift.2.rda")
+
+logic.unshift <-  lapply(GappyData.unshift, function(x)
+  lapply(x, function(x)
+    lapply(x, function(x)
+      lapply(x, function(x){
+       logic <- which(is.na(x))
+       x <- logic
+      }
+       ))))
+
+logic.shift.2 <-  lapply(GappyData.shift.2, function(x)
+  lapply(x, function(x)
+    lapply(x, function(x)
+      lapply(x, function(x){
+       logic <- which(is.na(x))
+       x <- logic
+      }
+       ))))
+
+all.equal(logic.unshift[[4]],logic.shift.2[[1]])
+
+GappyData.shift <- load_obj("/home/sophie/sophTools/files/investigate/shift/GappyData.shift.rda")
+IntData.shift <- load_obj("/home/sophie/sophTools/files/investigate/shift/IntData.shift.rda")
+OriginalData.shift <- load_obj("/home/sophie/sophTools/files/investigate/shift/OriginalData.shift.rda")
+
+pMats.shift <- performance(OriginalData = OriginalData.shift, GappyData = GappyData.shift, IntData = IntData.shift)
+agEval.shift <- agEvaluate(pMats.shift)
+names(agEval.shift) <- "D4"
+
+setwd("/home/sophie/sophTools/files/investigate/shift")
+save(pMats.shift, file = "pMats.shift.rda")
+save(agEval.shift, file = "agEval.shift.rda")
+
+# plotting true shift vs shift
+plotList.shift <- plotSurface(agEval = agEval.shift, m = "HWI", d = 1, highlight = 1, highlight_colour = "skyblue",layer_type = "dataset", crit = c("TMAPE"))
+pshift <- plotList.shift[["TMAPE"]][["HWI"]]
+
+subplot(pshift,pshift2)
+
+
+```
+

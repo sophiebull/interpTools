@@ -1,0 +1,98 @@
+---
+title: "High Resolution, by Dataset, HWI"
+author: "Sophie Castel"
+date: "2/11/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# test interpolation at very high resolution
+
+#INITIALIZATION
+```{r}
+gap_vec <- seq(1,30, by = 2)
+prop_vec <- seq(0.10,0.30, length.out=20)
+K = 100
+```
+
+#SIMULATE DATA
+```{r}
+OriginalData <- load_obj("/home/sophie/sophTools/files/new_2/testOriginalData.rda")
+```
+
+#GAPIFY             
+```{r}
+set.seed(23)
+
+GappyData <- list()
+
+for(d in 1:length(OriginalData)){
+  GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = K)
+}
+names(GappyData) <- names(OriginalData)
+
+# dimension (d, p, g, k) 
+```
+
+# Check to see how many observations were removed; and if somewhat linear
+```{r}
+p=20
+actual.gaps <- numeric()
+expected.gaps <- numeric()
+
+for(g in 1:length(GappyData[[1]][[1]])){
+    actual.gaps[g] <- sum(is.na(GappyData[[1]][[p]][[g]][[1]]))
+    expected.gaps[g] <- g
+  }
+names(actual.gaps) <- paste0("p",round(prop_vec[p],2),", g",gap_vec)
+plot <- ggplot() + geom_line(aes(x = 1:length(gap_vec), y = actual.gaps)) + labs(x = "expected gaps", y = "actual gaps", title= paste0("mean = ",round(mean(actual.gaps),2),", expected = ", round(prop_vec[p]*1000),2)) + theme_minimal()
+
+setwd("/home/sophie/sophTools/files/highRes/actualGaps")
+png(paste0("p",p,".png"))
+plot
+dev.off()
+
+
+mean.actual <- numeric()
+
+for(p in 1:length(prop_vec)){
+  actual.gaps <- numeric()
+  for(g in 1:length(gap_vec)){
+    actual.gaps[g] <- sum(is.na(GappyData[[1]][[p]][[g]][[2]]))
+  }
+  mean.actual[p] <- round(mean(actual.gaps),2)
+}
+
+result <- data.frame(expected = round(prop_vec*1000), actual = mean.actual, diff = mean.actual-round(prop_vec*1000))
+setwd("/home/sophie/sophTools/files/highRes/actualGaps")
+save(result, file = "result.rda")
+
+setwd("/home/sophie/sophTools/files/highRes/actualGaps")
+png("result.png")
+plot(result$actual, type = "l", main = "Mean Actual Gaps", ylab = "Actual", xlab= "Expected")
+dev.off()
+```
+
+#INTERPOLATION
+```{r IntData, cache = TRUE}
+set.seed(23)
+
+methods <- c(18)
+
+for(d in 1:length(OriginalData)){
+  IntData[[d]] <- parInterpolate(gappyTS = GappyData[[d]], methods = methods)
+  setTxtProgressBar(pb,d)
+  Sys.time()
+}
+names(IntData) <- names(OriginalData)
+```
+
+#PERFORMANCE MATRIX
+```{r}
+pMats <- performance(OriginalData=OriginalData, IntData=IntData, GappyData = GappyData)
+ag <- agEvaluate(pmats = pMats)
+```
+

@@ -25,6 +25,7 @@ IntData <- list()
 for(d in 1:length(OriginalData)){
   IntData[[d]] <- parInterpolate(gappyTS = GappyData[[d]], methods = methods)
   setTxtProgressBar(pb,d)
+  Sys.time()
 }
 names(IntData) <- names(OriginalData)
 ```
@@ -174,6 +175,7 @@ newag4 <- agEvaluate(pmats = pmats4)
 testpMats <- performance(OriginalData=testOriginalData, IntData=testIntt, GappyData = testGappyData)
 
 testag <- agEvaluate(pmats = testpMats)
-
-
 ```
+
+
+
