@@ -96,7 +96,7 @@ plotCS <- function(d=1:length(agEval),
                                                    aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,max),
                                                                                 group = ",vm,"), 
-                                                   fill = colorListMatch['",m[vm],"'], alpha = 0.4) + 
+                                                   fill = colorListMatch['",m[vm],"'], linetype = 1, size = 0.2, alpha = 0.1) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
                             colour = colorListMatch['",m[vm],"'],
@@ -112,7 +112,7 @@ plotCS <- function(d=1:length(agEval),
                                                    aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,max),
                                                                               group = ",M,"), 
-                                                   fill = colorListMatch['",m[M],"'], alpha = 0.4) + 
+                                                   fill = colorListMatch['",m[M],"'], linetype = 1, size = 0.2, alpha = 0.1) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]])),
                       colour = colorListMatch['",m[M],"'],
@@ -173,7 +173,7 @@ plotCS <- function(d=1:length(agEval),
                                                    aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,max),
                                                                   group = ",vd,"), 
-                                                   fill = colorListMatch[",vd,"], alpha = 0.4) + 
+                                                   fill = colorListMatch[",vd,"], linetype = 1, size = 0.2, alpha = 0.1) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
                           colour = colorListMatch[",vd,"],
@@ -186,7 +186,7 @@ plotCS <- function(d=1:length(agEval),
                                                      aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,max),
                                                                   group = ",D,"), 
-                                                   fill = colorListMatch[",D,"], alpha = 0.4) + 
+                                                   fill = colorListMatch[",D,"], linetype = 1, size = 0.2, alpha = 0.1) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]])),
                       colour = colorListMatch[",D,"],
