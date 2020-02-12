@@ -20,6 +20,7 @@
 #' NRMSD = 0\cr
 #' RMSS = 0\cr
 #' MdAPE = 0\cr
+#' TMAPE = 0\cr
 #' @param x The original time series vector
 #' @param X The interpolated time series vector
 #' @param gappyx The gappy original time series vector
@@ -27,8 +28,16 @@
 #best <- data.frame(criterion = criteria, maximize = c(1,1,rep(0,11),1,rep(0,3))) # 1 = yes, 0 = no
 
 eval_performance <- function(x, X, gappyx) {
+
   # x = original , X = interpolated 
-  stopifnot(is.numeric(x), is.numeric(X), length(x) == length(X), is.numeric(gappyx), length(gappyx) == length(x), length(gappyx) == length(X))
+  
+  if(!is.null(X)){
+  stopifnot((is.numeric(x) | is.null(x)),
+            (is.numeric(X) | is.null(X)),
+            (is.numeric(gappyx) | is.null(gappyx)),
+            length(x) == length(X),
+            length(gappyx) == length(x), 
+            length(gappyx) == length(X))
   
   n <- length(x)
   
@@ -117,6 +126,27 @@ eval_performance <- function(x, X, gappyx) {
     return$MdAPE <- NA
   }
   
+  # Trimmed Mean Absolute Percentage Error
+  #if (length(which(x == 0)) == 0) {
+  #  diffs <- abs((x-X)/x)
+  #  qs <- quantile(diffs, probs = c(0.05,0.95))
+    
+  #  logic <- (diffs < qs["5%"]) | (diffs > qs["95%"])
+  #  diffs <- diffs[!logic]
+    
+  #  TMARE <- 1/length(diffs) * sum(diffs)
+    
+  #  return$TMAPE <- 100*TMARE
+    
+  #  } else {
+  #    return$TMAPE <- NA 
+  #  }
+  
   return(return)
+  }
+  
+  else if(is.null(X)){
+    return(NULL)
+  }
 }
 
