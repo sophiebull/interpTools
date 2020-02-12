@@ -104,6 +104,7 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots"){
       my.meds = skewMeds[Cc,]
       my.cols = skewCols[Cc,]
       
+      
       my.data$colour = rep("white",nrow(my.data))
       my.data$colour[!my.data$key %in% symCrit] = "white"
       my.data$colour[my.data$key %in% symCrit] = "grey"
