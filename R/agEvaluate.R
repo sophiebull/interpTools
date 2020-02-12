@@ -48,14 +48,13 @@ agEvaluate <- function(pmats, hist = F){
         gap_vec_names[g] <- c(paste("g", gap_vec[g],sep="")) # vector of names
         for(m in 1:M){
           method_names[m] <- names(pmats[[1]])[m]
-          
+
           # Generate histograms in each subset
           if(hist){
             sqrtC = sqrt(C)
             par(mfrow=c(floor(sqrtC),ceiling(sqrtC)))
             Evaluation[[d]][[p]][[g]][[m]] <- apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,hist)
           }
-          
           
             # compute the mean and distribution of the performance criteria in each (d,m,p,g) specification across all k pairs of (x,X) and 
             # store results in a list of data frames
