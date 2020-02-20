@@ -4,13 +4,14 @@
 \alias{plotSurface}
 \title{Plot Surface}
 \usage{
-plotSurface(d = 1:length(agEval), m = 1:length(agEval[[1]][[1]][[1]]),
-  crit, agEval, layer_type = "method", f = "median")
+plotSurface(d = 1:length(agEval), m = names(agEval[[1]][[1]][[1]]),
+  crit, agEval, layer_type = "method", f = "median",
+  highlight = "HWI", highlight_colour = "#EE5C42")
 }
 \arguments{
 \item{d}{A vector of the indexes of the datasets of interest}
 
-\item{m}{A vector of the interpolation methods of interest (maximum of 5)}
+\item{m}{character; A vector of the interpolation methods of interest (maximum of 5)}
 
 \item{crit}{A character vector describing the performance metrics of interest}
 

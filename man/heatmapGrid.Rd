@@ -5,7 +5,8 @@
 \title{Generate Heatmap Objects}
 \usage{
 heatmapGrid(agEval, f = "median", crit, m, d, type = "z",
-  output = "graphic", col = c("red", "yellow"))
+  output = "graphic", col = c("#EAECEE", "#D5D8DC", "#ABB2B9",
+  "#808B96", "#566573", "#2C3E50", "#EE5C42"))
 }
 \arguments{
 \item{agEval}{A list object of class "\code{agEvaluate}" (result of \code{agEvaluate()} of aggregated performance metrics}
@@ -14,7 +15,7 @@ heatmapGrid(agEval, f = "median", crit, m, d, type = "z",
 
 \item{crit}{numeric; a vector of performance criteria}
 
-\item{m}{numeric; a vector describing the index positions of desired methods (corresponding to \code{agEval})}
+\item{m}{character; a vector of interpolation methods}
 
 \item{d}{numeric; a vector describing the index positions of desired datasets (corresponding to \code{agEval})}
 

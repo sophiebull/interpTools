@@ -4,13 +4,14 @@
 \alias{plotCS}
 \title{Plot Cross Section}
 \usage{
-plotCS(d = 1:length(agEval), m = 1:length(agEval[[1]][[1]][[1]]), crit,
-  agEval, layer_type = "method", f = "median", cross_section = "p")
+plotCS(d = 1:length(agEval), m = names(agEval[[1]][[1]][[1]]), crit,
+  agEval, layer_type = "method", f = "median", cross_section = "p",
+  highlight = "HWI", highlight_colour = "#EE5C42")
 }
 \arguments{
 \item{d}{A vector of the indexes of the datasets of interest}
 
-\item{m}{A vector of the interpolation methods of interest (maximum of 5)}
+\item{m}{character; A vector of the interpolation methods of interest (maximum of 5)}
 
 \item{crit}{A character vector describing the performance metrics of interest}
 
@@ -18,17 +19,18 @@ plotCS(d = 1:length(agEval), m = 1:length(agEval[[1]][[1]][[1]]), crit,
 
 \item{layer_type}{"method" (default) or "dataset"; how to slice the data}
 
-\item{f}{"mean" or "median" (default); which statistic to use for f(p,g)}
+\item{f}{"median" (default); which statistic to use for f(p,g)}
 
 \item{cross_section}{"p" or "g"; which axis to show against criterion value}
 }
 \description{
 Function to generate cross-sectional plots to visualize changes in the performance metrics of interest
-as the proportion of missing data and gap width increase. 
+as the proportion of missing data and gap width increase. \cr
 Metrics are aggregated across K simulations in each p,g,d,m specification, and plotted with respect to 
-a particular variable (p or g), collapsing across the other.  Middle line is the median with respect to f, upper
-and lower ribbon limits are Q1 and Q3, respectively. \cr
-The x-axis represents p or g, the proportion of missing data, or gap width.\cr 
+a particular variable (p or g), collapsing across the other.  \cr
+Middle line is the median with respect to \code{f}, upper
+and lower ribbon limits are \code{min} and \code{max}, respectively. \cr
+The x-axis represents \code{p} or \code{g}, the proportion of missing data, or gap width.\cr 
 The y-axis represents the value of the performance metric of interest, collapsed (median) across the `other variable'.
 The user decides which variable to show on the x-axis.
 }

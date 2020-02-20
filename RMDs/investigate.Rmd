@@ -204,13 +204,59 @@ for(d in 17:20){
     gc()
   }
 }
+
 ```
 
 ```{r}
 # Stitch together datasets
+IntData.D4X1 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D1")
+IntData.D4X2 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D2")
+IntData.D4X3 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D3")
+IntData.D4X4 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D4")
+IntData.D4X5 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D5")
+IntData.D4X6 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D6")
+IntData.D4X7 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D7")
+IntData.D4X8 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D8")
+IntData.D4X9 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D9")
+IntData.D4X10 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D10")
+IntData.D4X11 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D11")
+IntData.D4X12 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D12")
+IntData.D4X13 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D13")
+IntData.D4X14 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D14")
+IntData.D4X15 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D15")
+IntData.D4X16 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D16")
+IntData.D4X17 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D17")
+IntData.D4X18 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D18")
+IntData.D4X19 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D19")
+IntData.D4X20 <- stitchData("/home/sophie/sophTools/files/investigate/D4x/D20")
+
+IntData.D4X <- list(D1 = IntData.D4X1,
+                    D2 = IntData.D4X2,
+                    D3 = IntData.D4X3,
+                    D4 = IntData.D4X4,
+                    D5 = IntData.D4X5,
+                    D6 = IntData.D4X6,
+                    D7 = IntData.D4X7,
+                    D8 = IntData.D4X8,
+                    D9 = IntData.D4X9,
+                    D10 = IntData.D4X10,
+                    D11 = IntData.D4X11,
+                    D12 = IntData.D4X12,
+                    D13 = IntData.D4X13,
+                    D14 = IntData.D4X14,
+                    D15 = IntData.D4X15,
+                    D16 = IntData.D4X16,
+                    D17 = IntData.D4X17,
+                    D18 = IntData.D4X18,
+                    D19 = IntData.D4X19,
+                    D20 = IntData.D4X20)
+
+setwd("/home/sophie/sophTools/files/investigate/D4x")
+save(IntData.D4X, file = "IntData.D4X.rda")
+
     
-  GappyData.D4X <- load_obj("~/sophTools/files/investigate/splitData.D4X.rda")
-  OriginalData.D4X <- load_obj("~/sophTools/files/investigate/OriginalData.D4X.rda")
+  GappyData.D4X <- load_obj("~/sophTools/files/investigate/D4x/splitData.D4X.rda")
+  OriginalData.D4X <- load_obj("~/sophTools/files/investigate/D4x/OriginalData.D4X.rda")
   
   # Compute the performance
   GappyData.split <- list()
@@ -257,6 +303,8 @@ for(d in 17:20){
   mean_MAPE <- apply(mean_MAPE_df,2,mean)
 ```
 
+
+
 ```{r}
 #PLOTTING
  NRMSD_P <- ggplot(data = data.frame(d = seq(0.01,0.07,length.out = 20), NRMSD = mean_NRMSD)) + 
@@ -287,6 +335,60 @@ MAPE_P <-  ggplot(data = data.frame(d = seq(0.01,0.07, length.out = 20), MAPE = 
   grid.arrange(NRMSD_P,MAPE_P, ncol = 1)
   dev.off()
     
+```
+
+# Do this another way. Need to get parametric confidence band around means.
+```{r}
+IntData.D4X <- load_obj("/home/sophie/sophTools/files/investigate/D4x/IntData.D4X.rda")
+GappyData.D4X <- load_obj("/home/sophie/sophTools/files/investigate/D4x/GappyData.D4X.rda")
+OriginalData.D4X <- load_obj("/home/sophie/sophTools/files/investigate/D4x/OriginalData.D4X.rda")
+  
+pMats.D4X <- performance(OriginalData = OriginalData.D4X, GappyData = GappyData.D4X, IntData = IntData.D4X)
+ag.D4X <- agEvaluate(pMats.D4X)
+
+z_list.D4X <- compileMatrix(ag.D4X)
+
+z_list.D4X_q2.5NRMSD <- z_list.D4X[["q2.5"]][["NRMSD"]][["HWI"]]
+z_list.D4X_medianNRMSD <- z_list.D4X[["median"]][["NRMSD"]][["HWI"]]
+z_list.D4X_q97.5NRMSD <- z_list.D4X[["q97.5"]][["NRMSD"]][["HWI"]]
+
+z_list.D4X_q2.5MAPE <- z_list.D4X[["q2.5"]][["MAPE"]][["HWI"]]
+z_list.D4X_medianMAPE <- z_list.D4X[["median"]][["MAPE"]][["HWI"]]
+z_list.D4X_q97.5MAPE <- z_list.D4X[["q97.5"]][["MAPE"]][["HWI"]]
+
+mean_q2.5NRMSD <- unlist(lapply(z_list.D4X_q2.5NRMSD, mean))
+mean_NRMSD <- unlist(lapply(z_list.D4X_medianNRMSD, mean))
+mean_q97.5NRMSD <- unlist(lapply(z_list.D4X_q97.5NRMSD, mean))
+
+mean_q2.5MAPE <- unlist(lapply(z_list.D4X_q2.5MAPE, mean))
+mean_MAPE <- unlist(lapply(z_list.D4X_medianMAPE, mean))
+mean_q97.5MAPE <- unlist(lapply(z_list.D4X_q97.5MAPE, mean))
+
+plot.D4X.NRMSD <- ggplot() + 
+  geom_line(aes(x = seq(0.01,0.07, length.out = length(mean_NRMSD)), y = mean_NRMSD), col = "red") +
+      geom_ribbon(aes(x = seq(0.01,0.07, length.out = length(mean_NRMSD)), 
+                    ymin = mean_q2.5NRMSD,
+                    ymax = mean_q97.5NRMSD),
+                alpha = 0.1)  + 
+  theme_minimal() + 
+  labs(x = "minimum frequency", y = "mean performance", title = "NRMSD")
+
+setwd("/home/sophie/sophTools/files/investigate/D4x")
+png("mean_NRMSDD4X.png", width = 640, height = 400)
+plot.D4X.NRMSD
+dev.off()
+
+plot.D4X.MAPE <- ggplot() + 
+  geom_line(aes(x = seq(0.01,0.07, length.out = length(mean_MAPE)), y = mean_MAPE), col = "red") +
+      geom_ribbon(aes(x = seq(0.01,0.07, length.out = length(mean_MAPE)), 
+                    ymin = mean_q2.5MAPE,
+                    ymax = mean_q97.5MAPE),
+                alpha = 0.1)  + 
+  theme_minimal() + 
+  labs(x = "minimum frequency", y = "mean performance", title = "MAPE")
+
+# What the hell!? D18 is weird!
+
 ```
 
 

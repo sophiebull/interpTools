@@ -140,6 +140,10 @@ grid.arrange(pm1,pm2,pm3,pm4,pm5,pm6)
 ## LAYER_TYPE = METHOD
 LEGEND (WITH SPLINES, PLOTLY)
 ```{r}
+testag <- load_obj("/home/sophie/sophTools/files/new_2/testag.rda")
+testag <- convertNames(testag)
+class(testag) <- "agEvaluate"
+
 greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
 highlight = "HWI"
 highlight_colour =  "#EE5C42"
