@@ -20,7 +20,8 @@ plotSurface <- function(d=1:length(agEval),
                         layer_type = "method", 
                         f = "median", 
                         highlight = "HWI", 
-                        highlight_colour = "#EE5C42"){
+                        highlight_colour = "#EE5C42",
+                        scale = "solid"){
   require(plotly)
   require(dplyr)
   require(RColorBrewer)
@@ -41,8 +42,8 @@ plotSurface <- function(d=1:length(agEval),
   
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
-  prop_vec_names <- names(agEval[[1]])
-  gap_vec_names <- names(agEval[[1]][[1]])
+  prop_vec_names <- substr(names(agEval[[1]]),1,5)
+  gap_vec_names <- substr(names(agEval[[1]][[1]]),1,3)
 
 
   D <- length(d)
@@ -56,8 +57,8 @@ plotSurface <- function(d=1:length(agEval),
   
   ## Generating a list of surfaces 
   
-  prop_vec <- names(agEval[[1]]) # proportions
-  gap_vec <- names(agEval[[1]][[1]]) # gaps
+  prop_vec <- substr(names(agEval[[1]]),1,5) # proportions
+  gap_vec <- substr(names(agEval[[1]][[1]]),1,3) # gaps
   
   if(layer_type == "method"){
   
@@ -98,18 +99,39 @@ plotSurface <- function(d=1:length(agEval),
       axz <- list(title = "value",
                   nticks = 4)
       
+      if(scale == "manual"){
+        colorscale = "list(seq(0,1,length.out = P*G), palette[["
+      }
+      else if(scale != "manual"){
+        colorscale = scale
+      }
+      
     for(s in 1:C){
       for(vd in 1:D){
         z <- numeric(M)
-        for(vm in 1:(M-1)){
-          z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]], 
+        if(scale == "solid"){
+          for(vm in 1:(M-1)){
+          
+            z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]], 
                          colorscale = list(seq(0,1,length.out=P*G), palette[[",vm,"]]),
+                         name = method_list_names[",vm,"], opacity = 1) %>% ",sep="")
+            }
+          z[M] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[M],"']][[",d[vd],"]], 
+                      colorscale = list(seq(0,1,length.out=P*G), palette[[",M,"]]),
+                      name = method_list_names[",M,"], opacity = 1)",sep="")
+        }
+        
+        else if(scale != " solid"){
+          for(vm in 1:(M-1)){
+          z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]], 
+                         colorscale ='",scale,"',
                          name = method_list_names[",vm,"], opacity = 1) %>% ",sep="")
         }
         z[M] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[M],"']][[",d[vd],"]], 
-                      colorscale = list(seq(0,1,length.out=P*G), palette[[",M,"]]),
+                      colorscale ='",scale,"',
                       name = method_list_names[",M,"], opacity = 1)",sep="")
-        
+        }
+      
         z <- paste(z, collapse = "")
         
         plotList[[s]][[vd]] <-  eval(parse(text = paste('plot_ly(scene="',paste("scene",vd,sep=""),'") %>%',
