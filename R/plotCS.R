@@ -25,7 +25,9 @@ plotCS <- function(d=1:length(agEval),
                         layer_type = "method", 
                         f = "median", 
                         cross_section = "p",
-                        highlight = "HWI", highlight_colour = "#EE5C42"){
+                        highlight = "HWI", highlight_colour = "#EE5C42",
+                        colors = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")){
+  
   require(plotly)
   require(dplyr)
   require(RColorBrewer)
@@ -62,7 +64,7 @@ plotCS <- function(d=1:length(agEval),
   ## z_list[[criterion]][[method]][[dataset]]
   
   if(layer_type == "method"){ 
-    colorList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
+    colorList <- colors
     
     colorListMatch <- colorList[1:M]
     names(colorListMatch) <- method_list_names
@@ -91,15 +93,14 @@ plotCS <- function(d=1:length(agEval),
       for(vd in 1:D){
         z <- numeric(M)
         for(vm in 1:(M-1)){
-          z[vm] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])), 
-                                                   color = colorListMatch['",m[vm],"'],
+          z[vm] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
                                                    aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,max),
                                                                                 group = ",vm,"), 
-                                                   fill = colorListMatch['",m[vm],"'], linetype = 1, size = 0.2, alpha = 0.1) + 
+                                                   fill = colorListMatch['",m[vm],"'], alpha = 0.2) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
-                            colour = colorListMatch['",m[vm],"'],
+                            colour = colorListMatch['",m[vm],"'], alpha = 1,
                             aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,median),
                             col = names(data[['",crit[s],"']])['",m[vm],"'], group = ",vm,")) +",
                          sep="")  
@@ -107,15 +108,14 @@ plotCS <- function(d=1:length(agEval),
             
         }
         
-        z[M] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]])), 
-                                                   color = colorListMatch['",m[M],"'],
+        z[M] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]])),
                                                    aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,max),
                                                                               group = ",M,"), 
-                                                   fill = colorListMatch['",m[M],"'], linetype = 1, size = 0.2, alpha = 0.1) + 
+                                                   fill = colorListMatch['",m[M],"'], alpha = 0.2) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]])),
-                      colour = colorListMatch['",m[M],"'],
+                      colour = colorListMatch['",m[M],"'], alpha = 1,
                       aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,median), 
                       col = names(data[['",crit[s],"']])['",m[M],"'], group = ",M,"))",sep="")
       
@@ -141,7 +141,7 @@ plotCS <- function(d=1:length(agEval),
   
   
   else if(layer_type == "dataset"){ 
-    colorList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573")
+    colorList <- colors
     
     colorListMatch <- colorList[1:D]
     names(colorListMatch) <- data_list_names
@@ -169,27 +169,25 @@ plotCS <- function(d=1:length(agEval),
         z <- numeric(D)
         for(vd in 1:(D-1)){
           z[vd] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])), 
-                                                   colour = colorListMatch[",vd,"],
                                                    aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,max),
                                                                   group = ",vd,"), 
-                                                   fill = colorListMatch[",vd,"], linetype = 1, size = 0.2, alpha = 0.1) + 
+                                                   fill = colorListMatch[",vd,"], alpha = 0.2) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
-                          colour = colorListMatch[",vd,"],
+                          colour = colorListMatch[",vd,"], alpha = 1,
                           aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,median),
                           col = names(data[['",crit[s],"']][['",m[vm],"']])[",d[vd],"], group = ",vd,")) + ",sep="") 
         }
         
         z[D] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]])), 
-                                                     colour = colorListMatch[",D,"],
                                                      aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,max),
                                                                   group = ",D,"), 
-                                                   fill = colorListMatch[",D,"], linetype = 1, size = 0.2, alpha = 0.1) + 
+                                                   fill = colorListMatch[",D,"], alpha = 0.2) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]])),
-                      colour = colorListMatch[",D,"],
+                      colour = colorListMatch[",D,"], alpha = 1,
                       aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,median), 
                       col = names(data[['",crit[s],"']][['",m[vm],"']])[",d[D],"], group = ",D,"))",sep="")
         
