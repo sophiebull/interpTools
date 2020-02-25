@@ -5,7 +5,8 @@ plotCSBars <- function(agEval,
                        m = names(agEval[[1]][[1]][[1]]), 
                        f = "median", 
                        layer_type = "method", 
-                       highlight = "HWI", highlight_colour = "#EE5C42"){
+                       highlight = "HWI", highlight_colour = "#FA4032",
+                       colors = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")){
   
   stopifnot(length(d)==1, length(crit)==1, (cross_section == "p" | cross_section == "g"), 
             class(agEval) == "agEvaluate", (layer_type == "method" | layer_type == "dataset"),
@@ -41,7 +42,7 @@ plotCSBars <- function(agEval,
     fixedCol <- paste0("sub('\\)','', gsub('.*,','',names(theTab)[",i,"]))")
   }
   
-  colorList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
+  colorList <- colors
   
   colorListMatch <- colorList[1:M]
   names(colorListMatch) <- method_vec_names
@@ -90,7 +91,7 @@ plotCSBars <- function(agEval,
                                         ymax = Q97.5,
                                         fill = method,
                                         group = method),
-                                        alpha = 0.1) +
+                                        alpha = 0.2) +
     
                         scale_colour_manual(values = colorListMatch) + 
                         scale_fill_manual(values = colorListMatch) + 
@@ -122,7 +123,7 @@ plotCSBars <- function(agEval,
                     ymax = Q97.5,
                     fill = method,
                     group = method),
-                alpha = 0.1) +
+                alpha = 0.2) +
     
     scale_colour_manual(values = colorListMatch) + 
     scale_fill_manual(values = colorListMatch) +
