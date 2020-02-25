@@ -40,6 +40,9 @@ agEvaluate <- function(pmats, hist = F){
   gap_vec_names <- numeric(G)
   method_names <- numeric(M)
   
+  prop_vec <- as.numeric(gsub("p","",names(pmats[[1]][[1]])))
+  gap_vec <- as.numeric(gsub("g","",names(pmats[[1]][[1]][[1]])))
+  
   
   for(d in 1:D){
     for(p in 1:P){
