@@ -170,7 +170,7 @@ pMats.hr <- performance(OriginalData=OriginalData.hr, IntData=IntData.hr, GappyD
 ag.hr <- agEvaluate(pmats = pMats.hr)
 setwd("/home/sophie/sophTools/files/highRes")
 save(pMats.hr, file = "pMats.hr.rda")
-save(ag.hr, file = "pMats.hr.rda")
+save(ag.hr, file = "ag.hr.rda")
 ```
 
 ```{r}
@@ -181,10 +181,11 @@ save(ag.hr, file = "pMats.hr.rda")
 #D5hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 5, type = "z")[[1]]
 # NOTE WE CANNOT USE THE HEATMAPGRID FUNCTION BECAUSE I COULDN'T FIGURE OUT HOW TO GET PLOTS SIDE BY SIDE.
 # WENT WITH A GGPLOT INSTEAD.
+ag.hr <- load_obj("/home/sophie/sophTools/files/highRes/ag.hr.rda")
 
 z_list <- compileMatrix(ag.hr)[["median"]]
 
-crit = "pearson_r"
+crit = "NRMSD"
 m = "HWI"
 
 plott <- list()
@@ -198,7 +199,7 @@ for(d in 1:5){
 }
           
 rng = range(c(plott[[1]]$value, plott[[2]]$value ,plott[[3]]$value, plott[[4]]$value, plott[[5]]$value))
-col = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
+col = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")
 
 
 D1 <- ggplot(plott[[1]], aes(as.numeric(p), as.numeric(g), fill = value)) + geom_tile() + 
@@ -280,9 +281,20 @@ D5 <- ggplot(plott[[5]], aes(as.numeric(p), as.numeric(g), fill = value)) + geom
 plotWindow <- grid.arrange(D1,D2,D3,D4,D5, ncol = 5, bottom = "proportion missing", left = "gap width")
 
 setwd("/home/sophie/sophTools/files/highRes")
-png(paste0(crit,"_Heatmap.png"), width = 1136, height = 328)
+png(paste0(crit,"_Heatmap_hr.png"), width = 1136, height = 328)
 plotWindow <- grid.arrange(plotWindow, myLegend, heights = c(10,2))
 dev.off()
+```
+
+# Side-by-side metrics (Heatmaps)
+```{r}
+ag.hr <- load_obj("/home/sophie/sophTools/files/highRes/ag.hr.rda")
+
+setwd("/home/sophie/sophTools/files/highRes")
+png("Heatmaps_hr.png", width = 1100, height = 1100)
+multiHeatmap(crit = c("NRMSD","MAPE","MRE","RMSS"), m = "KAF", agEval = new.ag)
+dev.off()
+
 ```
 
 # SURFACE PLOTS

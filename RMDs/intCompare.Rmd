@@ -41,7 +41,14 @@ $n = 1, ... , N$ = length of each time series
 # Computing the Performance Metrics
 Applying the function to our Original and Interpolated Data:
 ```{r pmats, cache = TRUE}
+OriginalData <- load_obj("/home/sophie/sophTools/files/new_1/new.OriginalData.rda")
+IntData <- load_obj("/home/sophie/sophTools/files/new_1/new.IntData.rda")
+GappyData <- load_obj("/home/sophie/sophTools/files/new_1/new.GappyData.rda")
+
 pMats <- performance(OriginalData=OriginalData, IntData=IntData, GappyData = GappyData)
+
+setwd("/home/sophie/sophTools/files/new_1")
+save(pMats, file = "new.pMats.rda")
 ```
 
 So, we have a list: $D \times M \times P \times G \times N \times C$ where $M$ is the number of interpolation methods used and $C=18$ is the number of performance criteria computed.
@@ -51,22 +58,13 @@ Thus, we want to compute the mean of each of the 17 performance criteria in each
 
 # Aggregating the Performance Metrics
 ```{r Evaluation, cache = TRUE}
+pMats <- load_obj("/home/sophie/sophTools/files/new_1/new.pMats.rda")
+
 ag <- agEvaluate(pmats = pMats)
+setwd("/home/sophie/sophTools/files/new_1")
+save(ag, file = "new.ag.rda")
 ```
 
-# Showing the Distribution (Skewness) for Each Criterion
-Skewness measures the relative size of the two tails. We determine the best representative statistic (mean or median) for each criterion by looking at the distribution of the skewness measures across all simulations.  Distributions of skewness values with a mean roughly centered at zero indicate that on average the criterion has a reliably symmetric distribution, and the mean will be used as the best measure.  Distributions of skewness values with a mean not in the neighbourhood of zero indicate that on average the criterion has a skewed distribution, and the median will be used as the best measure.
-
-Collect and visualize the distribution of the skewness values for each criterion across all simulations: 
-```{r Skewness}
-plotSkew(agEval = testag, cptwise = T)
-
-# Creating a table:
-tab <- xtable()
-
-```
-
-# Non-Parametric Confidence Intervals for C
 
 
 ### REDOING DATA SET 4 

@@ -377,18 +377,6 @@ setwd("/home/sophie/sophTools/files/investigate/D4x")
 png("mean_NRMSDD4X.png", width = 640, height = 400)
 plot.D4X.NRMSD
 dev.off()
-
-plot.D4X.MAPE <- ggplot() + 
-  geom_line(aes(x = seq(0.01,0.07, length.out = length(mean_MAPE)), y = mean_MAPE), col = "red") +
-      geom_ribbon(aes(x = seq(0.01,0.07, length.out = length(mean_MAPE)), 
-                    ymin = mean_q2.5MAPE,
-                    ymax = mean_q97.5MAPE),
-                alpha = 0.1)  + 
-  theme_minimal() + 
-  labs(x = "minimum frequency", y = "mean performance", title = "MAPE")
-
-# What the hell!? D18 is weird!
-
 ```
 
 
@@ -721,4 +709,129 @@ subplot(pshift,pshift2)
 
 
 ```
+
+
+# Distribution of Original D4 Frequencies v.s. Frequency-shifted D4
+```{r}
+new.simData <- load_obj("/home/sophie/sophTools/files/new_1/new.simData.rda")
+shift.simData <- load_obj("/home/sophie/sophTools/files/investigate/shift/simData.shift.rda")
+
+freq1 <- plotXt(simData = new.simData, d = 4, cptwise = T, return = "freq", axisLabels = F, plot.title = T)
+freq2 <- plotXt(simData = shift.simData, d = 1, cptwise = T, return = "freq", axisLabels = T, plot.title = F)
+
+setwd("/home/sophie/sophTools/files/investigate/shift2")
+png("DataTt_Freq_shift.png", width = 1000, height = 320)
+grid.arrange(freq1, freq2, nrow = 2)
+dev.off()
+
+```
+
+# Plots comparing frequency-shifted data
+```{r}
+new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+shift.ag <- load_obj("/home/sophie/sophTools/files/investigate/shift2/agEval.shift.2.rda")
+
+new.z_list <- compileMatrix(agEval = new.ag)[["median"]][["NRMSD"]][["HWI"]][["D4"]]
+shift.z_list <- compileMatrix(agEval = shift.ag)[["median"]][["NRMSD"]][["HWI"]][["D1"]]
+
+g <- colnames(new.z_list)
+p <- rownames(new.z_list)
+
+P <- length(p)
+G <- length(g)
+
+# surface plots
+p_both <- plot_ly() %>% 
+  add_surface(x = g, y = p, z = new.z_list, colorscale = list(seq(0,1,length.out=P*G), colorRampPalette("#A6A6A6")(P*G)), name = "unshift") %>% 
+  add_surface(x = g, y = p, z = shift.z_list, colorscale = list(seq(0,1,length.out=P*G), colorRampPalette("#D3D3D3")(P*G)), name = "shift")
+
+p_diff <- plot_ly() %>% 
+  add_surface(x = g, y = p, z = shift.z_list-new.z_list, colorscale = list(seq(0,1,length.out=P*G), colorRampPalette("#A6A6A6")(P*G)), name = "shift-unshift")
+```
+
+# cross section plots
+```{r}
+d = 4
+m = "HWI"
+f = "median"
+cross_section = "p"
+
+colors = "#000000"
+highlight_color = "#FAFAFA"
+highlight = "HWI"
+
+  P <- length(new.ag[[1]])
+  G <- length(new.ag[[1]][[1]])
+  prop_vec_names <- names(new.ag[[1]])
+  gap_vec_names <- names(new.ag[[1]][[1]])
+  
+  
+  D <- length(d)
+  M <- length(m)
+  C <- length(crit)
+  
+  new.mat <- compileMatrix(new.ag)
+  new.z_list <- new.mat[[f]]
+  new.q2.5_list <- new.mat[["q2.5"]]
+  new.q97.5_list <- new.mat[["q97.5"]]
+  
+  shift.mat <- compileMatrix(shift.ag)
+  shift.z_list <- shift.mat[[f]]
+  shift.q2.5_list <- shift.mat[["q2.5"]]
+  shift.q97.5_list <- shift.mat[["q97.5"]]
+  
+  method_list_names <- m
+  data_list_names <- names(new.z_list[[1]][[1]])[d]
+  
+  ## Generating a list of plots
+    colorList <- colors
+    
+    colorListMatch <- colorList[1:M]
+    names(colorListMatch) <- method_list_names
+    colorListMatch[highlight] <- highlight_colour
+
+    if(cross_section == "p"){
+    axx <- as.numeric(gsub("p","", rownames(new.z_list[[1]][[1]][[1]]), fixed = TRUE)) #prop_vec
+    axxTitle <- "proportion missing"
+    fun <- function(x){return(x)}} else if(cross_section == "g"){
+    axx <- as.numeric(gsub("g","", colnames(new.z_list[[1]][[1]][[1]]), fixed = TRUE)) #gap_vec
+    axxTitle <- "gap width" 
+    fun <- function(x){return(t(x))} 
+    }
+    
+    plotList <- lapply(plotList <- vector(mode = 'list', C), function(x)
+      x <- vector(mode = 'list', D)) 
+    #plotList[[criterion]][[dataset]]
+    
+          csp <- ggplot() + 
+            geom_ribbon(data = data.frame(fun(new.z_list[["NRMSD"]][["HWI"]][[4]])),
+                                                   aes(x = as.factor(axx), ymin = apply(fun(new.z_list[["NRMSD"]][["HWI"]][[4]]),1,min),
+                                                   ymax = apply(fun(new.z_list[["NRMSD"]][["HWI"]][[4]]),1,max),
+                                                                                group = 1), 
+                                                   fill = "red", alpha = 0.2) + 
+
+                          geom_line(data = data.frame(fun(new.z_list[["NRMSD"]][["HWI"]][[4]])),
+                            colour = "red", alpha = 1,
+                            aes(x = as.factor(axx), y = apply(fun(new.z_list[["NRMSD"]][["HWI"]][[4]]),1,median),
+                            col = names(data[["NRMSD"]])["HWI"], group = 1)) +
+            
+                        geom_ribbon(data = data.frame(fun(shift.z_list[["NRMSD"]][["HWI"]][[1]])),
+                                                   aes(x = as.factor(axx), ymin = apply(fun(shift.z_list[["NRMSD"]][["HWI"]][[1]]),1,min),
+                                                   ymax = apply(fun(shift.z_list[["NRMSD"]][["HWI"]][[1]]),1,max),
+                                                                                group = 2), 
+                                                   fill = "black", alpha = 0.2) + 
+
+                          geom_line(data = data.frame(fun(shift.z_list[["NRMSD"]][["HWI"]][[1]])),
+                            colour = "black", alpha = 1,
+                            aes(x = as.factor(axx), y = apply(fun(shift.z_list[["NRMSD"]][["HWI"]][[1]]),1,median),
+                            col = names(shift.z_list[["NRMSD"]])["HWI"], group = 2)) 
+```
+
+
+```{r}
+plotCS(agEval = new.ag, d = 4, m = "HWI", layer_type = "method", crit = "NRMSD", cross_section = "p")
+plotCS(agEval = shift.ag, d = 1, m = "HWI", layer_type = "method", crit = "NRMSD", cross_section = "p")
+```
+
+
 

@@ -14,38 +14,36 @@ library(ggplot2)
 library(plotly)
 ```
 
-# LITTLE GRAPHIC
+# ORIGINAL DATA Xt
 ```{r}
-p <- 1:5
-g <- 1:5
-z <- matrix(nrow = length(p), ncol = length(g))
+new.simData <- load_obj("/home/sophie/sophTools/files/new_1/new.simData.rda")
+class(new.simData) <- "simList"
 
+p1 <- plotXt(1, simData = new.simData, cptwise = F, axisLabels = F)
+p2 <- plotXt(2, simData = new.simData, cptwise = F, axisLabels = F)
+p3 <- plotXt(3, simData = new.simData, cptwise = F, axisLabels = F)
+p4 <- plotXt(4, simData = new.simData, cptwise = F, axisLabels = F)
+p5 <- plotXt(5, simData = new.simData, cptwise = F, axisLabels = F)
 
-for(g in 1:length(g)){
-z[,g] = rnorm(5)
-}
-
-
-lg <- plot_ly() %>% add_surface(x=p,y=g,z=z)
-lg
-```
-
-# ORIGINAL DATA
-```{r}
-p1 <- plotXt(1, simData = testsimData, cptwise = F)
-p2 <- plotXt(2, simData = testsimData, cptwise = F)
-p3 <- plotXt(3, simData = testsimData, cptwise = F)
-p4 <- plotXt(4, simData = testsimData, cptwise = F)
-p5 <- plotXt(5, simData = testsimData, cptwise = F)
-
-setwd("/home/sophie/sophTools/files/plots")
-png("dataXt.png", width = 502, height = 596)
-grid.arrange(p1,p2,p3,p4,p5)
+setwd("/home/sophie/sophTools/files/new_1")
+png("dataXt.png", width = 1080, height = 1200)
+grid.arrange(arrangeGrob(p1,p2,p3,p4,ncol = 2, nrow = 2), arrangeGrob(p5, nrow = 1, ncol = 1), heights = c(2,1),
+             bottom = textGrob("time"), left = textGrob("value", rot = 90))
 dev.off()
-
 ```
 
-# FREQUENCY DISTRIBUTION (DATASET 4 ANOMALY, ORIGINAL)
+# MEAN COMPONENT Mt
+```{r}
+new.simData <- load_obj("/home/sophie/sophTools/files/new_1/new.simData.rda")
+class(new.simData) <- "simList"
+
+setwd("/home/sophie/sophTools/files/new_1")
+png("dataMt.png", width = 1080, height = 400)
+plotXt(1, simData = new.simData, cptwise = T, axisLabels = T, return = "Mt")
+dev.off
+```
+
+# FREQUENCY DISTRIBUTION of Tt
 ```{r}
 plotTt_freq <- function(i, simData){
   
@@ -106,32 +104,40 @@ ppTtFreq5 <- plotTt_freq(5, simData = new.simData) + theme(axis.title.y = elemen
                                          plot.title = element_text(hjust = 0),
                                          text=element_text(size=12))
 
-setwd("/home/sophie/sophTools/files/plots")
-png("dataTt_Freq_o.png", width = 502, height = 596)
-grid.arrange(ppTtFreq1,ppTtFreq2,ppTtFreq3,ppTtFreq4,ppTtFreq5, nrow = 5,
+setwd("/home/sophie/sophTools/files/new_1")
+png("dataTt_Freq.png", width = 1000, height = 1100)
+grid.arrange(ppTtFreq1,ppTtFreq2,ppTtFreq3,ppTtFreq4,ppTtFreq5, nrow = 5, heights = c(1,1,1,1,1),
              bottom = textGrob(bquote(f == omega/(2*pi)), hjust = 0.45))
 dev.off()
 
 ```
 
+# Showing the Distribution (Skewness) for Each Criterion
+Skewness measures the relative size of the two tails. We determine the best representative statistic (mean or median) for each criterion by looking at the distribution of the skewness measures across all simulations.  Distributions of skewness values with a mean roughly centered at zero indicate that on average the criterion has a reliably symmetric distribution, and the mean will be used as the best measure.  Distributions of skewness values with a mean not in the neighbourhood of zero indicate that on average the criterion has a skewed distribution, and the median will be used as the best measure.
 
-# SKEWNESS
+Collect and visualize the distribution of the skewness values for each criterion across all simulations: 
+
 ```{r}
-setwd("/home/sophie/sophTools/files/plots")
-png("critSkew.png", height = 700, width = 596)
-plotSkew(agEval = testag, cptwise = T, symmetric = NULL)
+new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+
+crit <- rownames(new.ag[[1]][[1]][[1]][[1]])
+#crit <- crit[-(which(crit == "TMAPE"))]
+
+setwd("/home/sophie/sophTools/files/new_1")
+png("critSkew.png", height = 1000, width = 800)
+plotSkew(agEval = new.ag, cptwise = T, symmetric = NULL, crit = crit)
 dev.off()
 
 ```
 
 Now let's see the corresponding performance metrics across all methods. Coloured bar indicates the "best":
 ```{r}
-pm1 <- plotMetrics(agEval=testag, p = c(3), g=c(1), d=1, crit = c("MAPE"))
-pm2 <- plotMetrics(agEval=testag, p = c(4), g=c(2), d=1, crit = c("MAPE"))
-pm3 <- plotMetrics(agEval=testag, p = c(5), g=c(3), d=1, crit = c("MAPE"))
-pm4 <- plotMetrics(agEval=testag, p = c(6), g=c(4), d=1, crit = c("MAPE"))
-pm5 <- plotMetrics(agEval=testag, p = c(5), g=c(1), d=1, crit = c("MAPE"))
-pm6 <- plotMetrics(agEval=testag, p = c(6), g=c(1), d=1, crit = c("MAPE"))
+pm1 <- plotMetrics(agEval=new.ag, p = c(3), g=c(1), d=1, crit = c("MAPE"))
+pm2 <- plotMetrics(agEval=new.ag, p = c(4), g=c(2), d=1, crit = c("MAPE"))
+pm3 <- plotMetrics(agEval=new.ag, p = c(5), g=c(3), d=1, crit = c("MAPE"))
+pm4 <- plotMetrics(agEval=new.ag, p = c(6), g=c(4), d=1, crit = c("MAPE"))
+pm5 <- plotMetrics(agEval=new.ag, p = c(5), g=c(1), d=1, crit = c("MAPE"))
+pm6 <- plotMetrics(agEval=new.ag, p = c(6), g=c(1), d=1, crit = c("MAPE"))
 
 grid.arrange(pm1,pm2,pm3,pm4,pm5,pm6)
 ```
@@ -140,16 +146,14 @@ grid.arrange(pm1,pm2,pm3,pm4,pm5,pm6)
 ## LAYER_TYPE = METHOD
 LEGEND (WITH SPLINES, PLOTLY)
 ```{r}
-testag <- load_obj("/home/sophie/sophTools/files/new_2/testag.rda")
-testag <- convertNames(testag)
-class(testag) <- "agEvaluate"
+new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
 
 greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
 highlight = "HWI"
 highlight_colour =  "#EE5C42"
 
 # get z_list
-z_list <- compileMatrix(agEval=testag)[["median"]]
+z_list <- compileMatrix(agEval=new.ag)[["median"]]
 
 method_list_names <- names(z_list[[1]])
 M <- length(method_list_names)
@@ -194,7 +198,7 @@ theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
 
 SURFACE PLOTS (WITH SPLINES)
 ```{r}
-ps<- plotSurface(crit=c("MAPE","NRMSD"), agEval = testag, layer_type = "method", f="median")
+ps<- plotSurface(crit=c("MAPE","NRMSD"), agEval = new.ag, layer_type = "method", f="median", highlight = "HWI")
 
 titleList <- list()
 
@@ -327,19 +331,16 @@ sub1b  <- subplot(pp1MAPEb,pp1NRMSDb, theLegend) %>%
             scene3 = list(domain=list(x=c(2/3,1), y=c(1/3,2/3)))
   )      
 
-
-
-
 ```
 
 LEGEND (WITHOUT SPLINES, PLOTLY)
 ```{r}
-greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
+greyList <- c("#FAAF08","#FA812F","#000000")
 highlight = "HWI"
-highlight_colour = "#EE5C42"
+highlight_colour = "#FA4032"
 
 # get z_list
-z_list <- compileMatrix(agEval=testag)[["median"]]
+z_list <- compileMatrix(agEval=new.ag)[["median"]]
 
 method_list_names <- names(z_list[[1]])[4:6]
 M <- length(method_list_names)
@@ -353,7 +354,8 @@ manualLegend <- data.frame(color = as.character(greyListMatch),
                            nameSurface = method_list_names, 
                            x = rep(0,M), 
                            y = seq(0.20,0.80,length.out = M), 
-                           textcol = as.character(greyListMatch),
+                           #textcol = as.character(greyListMatch),
+                           textcol = rep("black",length(greyListMatch)),
                            stringsAsFactors = FALSE)
   
 theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
@@ -386,7 +388,10 @@ theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
 
 SURFACE PLOTS (WITHOUT SPLINES)
 ```{r}
-ps<- plotSurface(crit=c("MAPE","NRMSD"), m=4:6, agEval = testag, layer_type = "method", f="median", highlight = "HWI", highlight_colour = "#EE5C42")
+new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+
+ps<- plotSurface(crit=c("MAPE","NRMSD"), m=c("KAF","EWMA","HWI"), agEval = new.ag, layer_type = "method", f="median", highlight = "HWI", highlight_colour = "#FA4032",
+                 colors = c("#FAAF08","#FA812F","#000000"))
 
 titleList <- list()
 
@@ -484,14 +489,14 @@ sub4  <- subplot(pp1NRMSDb,pp2NRMSDb,pp3NRMSDb,pp4NRMSDb,pp5NRMSDb,theLegend, nr
 
 ## LAYER_TYPE = DATASET
 LEGEND (PLOTLY)
-```{r}
 
+```{r}
 greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
 highlight = 5
 highlight_colour =  "#EE5C42"
 
 # get z_list
-z_list <- compileMatrix(agEval=testag)[["median"]]
+z_list <- compileMatrix(agEval=new.ag)[["median"]]
 
 data_list_names <- names(z_list[[1]][[1]])
 D <- length(data_list_names)
@@ -538,7 +543,7 @@ theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
 
 SURFACE PLOTS (WITHOUT SPLINES)
 ```{r}
-PS <- plotSurface(crit=c("MAPE","NRMSD"), m = 4:6, agEval = testag, layer_type = "dataset", f = "median", highlight = 5)
+PS <- plotSurface(crit=c("MAPE","NRMSD"), m = c("KAF","EWMA","HWI"), agEval = new.ag, layer_type = "dataset", f = "median", highlight = 5)
 
 titleList <- list()
 
@@ -612,15 +617,16 @@ sub6  <- subplot(PP1NRMSD,PP2NRMSD,PP3NRMSD,theLegend, nrows = 3) %>%
 
 # CROSS SECTIONS
 ## LAYER_TYPE = METHOD
-LEGEND (GGPLOT)
+#LEGEND (GGPLOT)
+
 ```{r}
-greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9")
+greyList <- c("#FAAF08","#FA812F","#000000")
 
 highlight = "HWI"
-highlight_colour = "#EE5C42"
+highlight_colour = "#FA4032"
 
 # get z_list
-z_list <- compileMatrix(agEval = testag)[["median"]]
+z_list <- compileMatrix(agEval = new.ag)[["median"]]
 
 method_list_names <- names(z_list[[1]])[4:6]
 M <- length(method_list_names)
@@ -633,7 +639,8 @@ manualLegend <- data.frame(color = as.character(greyListMatch),
                            nameSurface = method_list_names, 
                            x = rep(0,M), 
                            y = seq(0.20,0.80,length.out = M), 
-                           textcol = as.character(greyListMatch),
+                           #textcol = as.character(greyListMatch),
+                           textcol = rep("black",length(greyListMatch)),
                            stringsAsFactors = FALSE)
 
 theLegend <- ggplot(data = manualLegend) +
@@ -658,33 +665,39 @@ theLegend <- ggplot(data = manualLegend) +
 
 CROSS_SECTION = P
 ```{r}
-plotListCS <- plotCS(m = 4:6, agEval = testag, cross_section = "p", layer_type = "method", crit = c("MAPE","NRMSD"), f = "median")
+plotListCS <- plotCS(m = c("KAF","EWMA","HWI"), agEval = new.ag, cross_section = "p", layer_type = "method", crit = c("MAPE","NRMSD"), f = "median",
+                     highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"))
 
 #MAPE 
 
 pCSMAPE1 <- plotListCS[[1]][[1]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 1")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 1")
 pCSMAPE2 <- plotListCS[[1]][[2]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 2")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 2")
 pCSMAPE3 <- plotListCS[[1]][[3]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 3")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 3")
 pCSMAPE4 <- plotListCS[[1]][[4]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 4")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 4")
 pCSMAPE5 <- plotListCS[[1]][[5]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 5")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 5")
 
-setwd("/home/sophie/sophTools/files/plots")
-png("MAPECSbyMethod_p.png", width = 875, height = 965)
+setwd("/home/sophie/sophTools/files/new_1")
+png("MAPECSbyMethod_p.png", width = 1000, height = 1100)
 
 grid.arrange(pCSMAPE1, pCSMAPE2, pCSMAPE3, pCSMAPE4, pCSMAPE5, theLegend, nrow = 3,
              top=textGrob(names(plotListCS)[1],gp=gpar(fontsize=18,font=1)), 
@@ -697,26 +710,31 @@ dev.off()
 pCSNRMSD1 <- plotListCS[[2]][[1]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 1")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 1")
 pCSNRMSD2 <- plotListCS[[2]][[2]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 2")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 2")
 pCSNRMSD3 <- plotListCS[[2]][[3]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 3")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 3")
 pCSNRMSD4 <- plotListCS[[2]][[4]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 4")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 4")
 pCSNRMSD5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
                                          axis.title.y = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 5")
+                                         text=element_text(size=12), 
+                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 5")
 
-setwd("/home/sophie/sophTools/files/plots")
-png("NRMSDCSbyMethod_p.png", width = 875, height = 965)
+setwd("/home/sophie/sophTools/files/new_1")
+png("NRMSDCSbyMethod_p.png", width = 1000, height = 1100)
 
 grid.arrange(pCSNRMSD1, pCSNRMSD2, pCSNRMSD3, pCSNRMSD4, pCSNRMSD5, theLegend, nrow = 3,
              top=textGrob(names(plotListCS)[2],gp=gpar(fontsize=18,font=1)), 
@@ -728,36 +746,42 @@ dev.off()
 BREAKING IT DOWN FURTHER
 ```{r}
 
-setwd("/home/sophie/sophTools/files/plots")
-png("D1NRMSDCSunbyMethod_p.png", width = 655, height = 965)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=1, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D1NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=1, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
 
-setwd("/home/sophie/sophTools/files/plots")
-png("D2NRMSDCSunbyMethod_p.png", width = 655, height = 965)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=2, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D2NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=2, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
 
-setwd("/home/sophie/sophTools/files/plots")
-png("D3NRMSDCSunbyMethod_p.png", width = 655, height = 965)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=3, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D3NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=3, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
 
-setwd("/home/sophie/sophTools/files/plots")
-png("D4NRMSDCSunbyMethod_p.png", width = 655, height = 986)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=4, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D4NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=4, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
 
-setwd("/home/sophie/sophTools/files/plots")
-png("D5NRMSDCSunbyMethod_p.png", width = 655, height = 986)
-plotCSBars(agEval=testag, cross_section="p", crit="NRMSD", d=5, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D5NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=5, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
 
 ```
 
 CROSS_SECTION = G
 ```{r}
-plotListCS <- plotCS(agEval = testag, d = 1:5, m = c("KAF","HWI", "EWMA"), highlight = "HWI", cross_section = "g", layer_type = "method", crit = c("MAPE", "NRMSD"))
+plotListCS <- plotCS(m = c("KAF","EWMA","HWI"), agEval = new.ag, cross_section = "g", layer_type = "method", crit = c("MAPE","NRMSD"), f = "median",
+                     highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"))
 
 #MAPE 
 
@@ -782,8 +806,8 @@ pCSMAPE5 <- plotListCS[[1]][[5]] + theme(axis.title.x = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 5")
 
-setwd("/home/sophie/sophTools/files/plots")
-png("MAPECSbyMethod_g.png", width = 875, height = 965)
+setwd("/home/sophie/sophTools/files/new_1")
+png("MAPECSbyMethod_g.png", width = 1000, height = 1100)
 
 grid.arrange(pCSMAPE1, pCSMAPE2, pCSMAPE3, pCSMAPE4, pCSMAPE5, theLegend, nrow = 3,
              top=textGrob(names(plotListCS)[1],gp=gpar(fontsize=18,font=1)), 
@@ -814,8 +838,8 @@ pCSNRMSD5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
                                          plot.title = element_text(hjust = 0.5),
                                          text=element_text(size=12)) + labs(title = "Dataset 5")
 
-setwd("/home/sophie/sophTools/files/plots")
-png("NRMSDCSbyMethod_g.png", width = 875, height = 965)
+setwd("/home/sophie/sophTools/files/new_1")
+png("NRMSDCSbyMethod_g.png", width = 1000, height = 1100)
 
 grid.arrange(pCSNRMSD1, pCSNRMSD2, pCSNRMSD3, pCSNRMSD4, pCSNRMSD5, theLegend, nrow = 3,
              top=textGrob(names(plotListCS)[2],gp=gpar(fontsize=18,font=1)), 
@@ -826,29 +850,34 @@ dev.off()
 BREAKING IT DOWN FURTHER
 ```{r}
 
-setwd("/home/sophie/sophTools/files/plots")
-png("D1NRMSDCSunbyMethod_g.png", width = 655, height = 965)
-plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=1, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D1NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=1, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
 
-setwd("/home/sophie/sophTools/files/plots")
-png("D2NRMSDCSunbyMethod_g.png", width = 655, height = 965)
-plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=2, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D2NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=2, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
 
-setwd("/home/sophie/sophTools/files/plots")
-png("D3NRMSDCSunbyMethod_g.png", width = 655, height = 965)
-plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=3, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D3NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=3, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
  
-setwd("/home/sophie/sophTools/files/plots")
-png("D4NRMSDCSunbyMethod_g.png", width = 655, height = 986)
-plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=4, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D4NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=4, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
 
-setwd("/home/sophie/sophTools/files/plots")
-png("D5NRMSDCSunbyMethod_g.png", width = 655, height = 986)
-plotCSBars(agEval=testag, cross_section="g", crit="NRMSD", d=5, m=c("KAF","HWI","EWMA"), f = "median", layer_type = "method")
+setwd("/home/sophie/sophTools/files/new_1")
+png("D5NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
+plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=5, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
+           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
 dev.off()
 
 ```
@@ -863,6 +892,8 @@ dev.off()
 #D5hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 5, type = "z")[[1]]
 # NOTE WE CANNOT USE THE HEATMAPGRID FUNCTION BECAUSE I COULDN'T FIGURE OUT HOW TO GET PLOTS SIDE BY SIDE.
 # WENT WITH A GGPLOT INSTEAD.
+
+new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
 z_list <- compileMatrix(testag)[["median"]]
 
 crit = "NRMSD"
@@ -879,13 +910,13 @@ for(d in 1:5){
 }
           
 rng = range(c(plott[[1]]$value, plott[[2]]$value ,plott[[3]]$value, plott[[4]]$value, plott[[5]]$value))
-col = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
+col = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")
 
 D1 <- ggplot(plott[[1]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
       scale_fill_gradientn(colours = col, values = c(0,1),
                            limits = rng)+
             
-        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D1") + 
+        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D1") + 
           theme_minimal() + 
   theme(legend.position = "none",
         axis.title.x = element_blank(),
@@ -896,7 +927,7 @@ D2 <- ggplot(plott[[2]], aes(as.factor(p), as.factor(g), fill = value)) + geom_t
       scale_fill_gradientn(colours = col, values = c(0,1),
                            limits = rng) +
             
-        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D2") + 
+        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D2") + 
           theme_minimal() + 
   theme(legend.position = "none",
         axis.title.x = element_blank(),
@@ -907,7 +938,7 @@ D3 <- ggplot(plott[[3]], aes(as.factor(p), as.factor(g), fill = value)) + geom_t
       scale_fill_gradientn(colours = col, values = c(0,1),
                            limits = rng) +
   
-        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D3") + 
+        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D3") + 
           theme_minimal() + 
   theme(legend.position = "none",
         axis.title.x = element_blank(),
@@ -918,7 +949,7 @@ D4 <- ggplot(plott[[4]], aes(as.factor(p), as.factor(g), fill = value)) + geom_t
       scale_fill_gradientn(colours = col, values = c(0,1),
                            limits = rng) +
   
-        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D4") + 
+        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D4") + 
           theme_minimal() + 
   theme(legend.position = "none",
         axis.title.x = element_blank(),
@@ -929,7 +960,7 @@ D5 <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_t
       scale_fill_gradientn(colours = col, values = c(0,1),
                            limits = rng) +
             
-        labs(x = "proportion missing", y = "gap width", fill = "NRMSD", title = "D5") + 
+        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D5") + 
           theme_minimal() + 
   
   theme(legend.position = "none",
@@ -949,15 +980,15 @@ D5 <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_t
       scale_fill_gradientn(colours = col, values = c(0,1),
                            limits = rng) +
       theme(legend.position = "bottom") + 
-      labs(fill = "NRMSD")
+      labs(fill = crit)
   
     myLegend<-g_legend(dumPlot)
     
 plotWindow <- grid.arrange(D1,D2,D3,D4,D5, ncol = 5, bottom = "proportion missing", left = "gap width")
 
-setwd("/home/sophie/sophTools/files/plots")
-png("NRMSD_Heatmap.png", width = 1136, height = 328)
-plotWindow <- grid.arrange(plotWindow, myLegend, heights = c(10,1))
+setwd("/home/sophie/sophTools/files/new_1")
+png(paste0(crit,"_Heatmap.png"), width = 1136, height = 328)
+plotWindow <- grid.arrange(plotWindow, myLegend, heights = c(10,2))
 dev.off()
 ```
 
