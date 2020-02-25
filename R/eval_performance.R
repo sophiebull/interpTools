@@ -38,15 +38,15 @@ eval_performance <- function(x, X, gappyx) {
             length(x) == length(X),
             length(gappyx) == length(x), 
             length(gappyx) == length(X))
-  
-  n <- length(x)
-  
+
   # identify which values were interpolated
   index <- which(is.na(gappyx))
   
   # only consider values which have been replaced
   X <- X[index]
   x <- x[index]
+  
+  n <- length(x)
   
   return <- list()
   
