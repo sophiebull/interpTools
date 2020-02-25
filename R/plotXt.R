@@ -4,14 +4,41 @@
 #' @param d The index of the original time series of interest
 #' @param cptwise Logical; whether to display Xt componentwise or not
 
-plotXt <- function(d, simData, cptwise = T){
+plotXt <- function(d, simData, cptwise = T, axisLabels = T, plot.title = T, return = NULL){
   require(ggplot2) 
   require(gridExtra)
   
-stopifnot(class(simData) == "simList")
+stopifnot(class(simData) == "simList", (is.null(return) | return == "Mt" | return == "Tt" | return == "freq" | return == "Wt"))
+
 
   t <- 0:(length(simData$Xt[[d]])-1)
-    
+  
+  if(axisLabels){
+    xlab = "time"
+    ylab = "value"
+    axis.title.x = element_text()
+    axis.text.y = element_text()
+    axis.text.x = element_text()
+    axis.text.x.bottom = element_text()
+    axis.title.y = element_text()
+  }  
+  else if(!axisLabels){
+    xlab = ""
+    ylab = ""
+    axis.title.x = element_blank()
+    axis.text.x.bottom = element_blank()
+    axis.title.y = element_blank()
+    axis.text.y = element_blank()
+    axis.text.x = element_blank()
+  }
+  
+  if(plot.title){
+    plot.title = element_text()
+  }
+  else if(!plot.title){
+    plot.title = element_blank()
+  }
+  
   mt <- ggplot()+
     
     ylim(min(simData$Xt[[d]]), max(simData$Xt[[d]])) + 
@@ -23,15 +50,16 @@ stopifnot(class(simData) == "simList")
     
     annotate("text",x=(length(simData$Mt[[d]])+5),y=simData$Mt_mu[[d]], label = expression(mu))+
     
-    labs(x = "time", y = "")+
+    labs(x = xlab, y = ylab)+
     theme_light() +
-    theme(axis.title.x = element_blank(), 
-          axis.text.x.bottom = element_blank(),
+    theme(axis.title.x = axis.title.x, 
+          axis.text.x.bottom = axis.text.x.bottom,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.ticks.x = element_blank(),
           plot.margin = unit(c(1,0.2,1,1),"cm"),
-          axis.title.y = element_blank())
+          axis.title.y = axis.title.y,
+          plot.title = plot.title)
   
   if(is.null(simData$Tt_bandwidth[[d]])){
     bw = "unspecified"
@@ -47,15 +75,16 @@ stopifnot(class(simData) == "simList")
     geom_line(aes(x=t,y=simData$Tt[[d]]), lwd = 0.2) +
     ggtitle(bquote(t[t] == sum(b[i]*sin*"("~omega[i]*t*")",i==1,psi)))+
     
-    labs(x = "time", y = "")+
+    labs(x = xlab, y = ylab)+
     theme_light() +
-    theme(axis.title.x = element_blank(), 
-          axis.text.x.bottom = element_blank(),
+    theme(axis.title.x = axis.title.x, 
+          axis.text.x.bottom = axis.text.x.bottom,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.ticks.x = element_blank(),
           plot.margin = unit(c(0,0.2,1,1),"cm"),
-          axis.title.y = element_blank()) 
+          axis.title.y = axis.title.y,
+          plot.title = plot.title) 
 
   
   wt <- ggplot()+
@@ -64,12 +93,13 @@ stopifnot(class(simData) == "simList")
     
     ggtitle(bquote(xi[t]*"~ ARMA("~.(simData$Wt_p[[d]])*","~.(simData$Wt_q[[d]])*"), SNR ="~.(simData$SNR[[d]]))) + 
     
-    labs(x = "time", y = "")+
+    labs(x = xlab, y = ylab)+
     theme_light()+
     theme(plot.margin = unit(c(0,0.2,1,1),"cm"),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
-          axis.title.y = element_blank())
+          axis.title.y = axis.title.y,
+          plot.title = plot.title)
 
   freq <- ggplot() + 
     
@@ -83,13 +113,15 @@ stopifnot(class(simData) == "simList")
     theme_light()+
     
     theme(axis.text.y = element_blank(),
+          axis.text.x = axis.text.x,
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.ticks.y = element_blank(),
+          axis.title.x = axis.title.x,
+          plot.title = plot.title,
           plot.margin = unit(c(0,0.2,0,1),"cm")) +
     
     coord_fixed(ratio = 0.4)
-  
   
     xt <- ggplot()+
     
@@ -97,14 +129,29 @@ stopifnot(class(simData) == "simList")
     geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2, col = "white")+
       
     ggtitle(bquote(x["t,"~.(d)] == m["t,"~.(d)] + t["t,"~.(d)] + xi["t,"~.(d)]))+
-    
-    labs(x = "time", y = "value")+
+      
+    labs(x = xlab, y = ylab)+
     theme_light() +
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank()) 
   
   if(cptwise){
-    grid.arrange(mt,tt,wt,freq, nrow = 4)
+    if(is.null(return) && axisLabels == F){
+    g1 <- grid.arrange(arrangeGrob(mt,tt,wt, nrow = 3), bottom = textGrob("time", vjust = -3.5, hjust = -0.5), left = textGrob("value", rot = 90, vjust = 2))
+    grid.arrange(g1,freq, ncol = 1, heights = c(3,0.6))
+      }
+    else if(return == "Mt"){
+      mt
+    }
+    else if(return == "Tt"){
+      tt
+    }
+    else if(return == "freq"){
+      freq
+    }
+    else if(return == "Wt"){
+      wt
+    }
   }
     
   else if(!cptwise){
