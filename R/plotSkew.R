@@ -10,17 +10,17 @@
 #' @param symmetric logical; TRUE = Display only symmetric criteria, FALSE = Display only asymmetric criteria, NULL = Display all criteria
 #' @param output character; "plots" (default) or "table".
 
-plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots"){
+plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots", crit = rownames(agEval[[1]][[1]][[1]][[1]])){
   
   D <- length(agEval)
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
   M <- length(agEval[[1]][[1]][[1]])
-  C <- nrow(agEval[[1]][[1]][[1]][[1]])
+  C <- nrow(agEval[[1]][[1]][[1]][[1]][crit,])
 
   stopifnot((is.logical(cptwise) | is.logical(symmetric)), class(agEval) == "agEvaluate")
   
-  skews <- matrix(ncol = D*P*G*M, nrow = nrow(agEval[[1]][[1]][[1]][[1]]))
+  skews <- matrix(ncol = D*P*G*M, nrow = nrow(agEval[[1]][[1]][[1]][[1]][crit,]))
   q1s <- skews
   q3s <- q1s
   
@@ -46,9 +46,9 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots"){
       for(g in 1:G){
         for(m in 1:M){
           
-          skewcol <- agEval[[d]][[p]][[g]][[m]][,"skewness"]
-          q1col <- agEval[[d]][[p]][[g]][[m]][,"q25"]
-          q3col <- agEval[[d]][[p]][[g]][[m]][,"q75"]
+          skewcol <- agEval[[d]][[p]][[g]][[m]][crit,"skewness"]
+          q1col <- agEval[[d]][[p]][[g]][[m]][crit,"q25"]
+          q3col <- agEval[[d]][[p]][[g]][[m]][crit,"q75"]
           skews[,i] <- skewcol
           q1s[,i] <- q1col
           q3s[,i] <- q3col
@@ -59,9 +59,12 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots"){
     }
   }
   
-  rownames(skews) = rownames(agEval[[1]][[1]][[1]][[1]])
-  rownames(q1s) = rownames(agEval[[1]][[1]][[1]][[1]])
-  rownames(q3s) = rownames(agEval[[1]][[1]][[1]][[1]])
+  names <- rownames(agEval[[1]][[1]][[1]][[1]])
+  names <- names[which(names %in% crit)]
+  
+  rownames(skews) = names
+  rownames(q1s) = names
+  rownames(q3s) = names
   
   skews <- data.frame(t(skews))
   
@@ -114,8 +117,14 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots"){
         facet_wrap(~ key, strip.position = "top", scales = "free", ncol = 3) + 
         theme(strip.background = element_rect(fill="white"),
               strip.text = element_text(colour = 'black'),
-              strip.placement = "outside") + 
+              strip.placement = "outside",
+              panel.grid.major.x = element_blank(),
+              panel.grid.minor.x = element_blank(),
+              panel.grid.major.y = element_blank()
+              ) + 
         geom_histogram(aes(y=..density.., col= colour), binwidth = 1, fill = "white", show.legend=FALSE) + 
+        #scale_y_continuous(breaks=c(seq(-30,30, by = 5)))+
+      
         geom_vline(data = my.means, aes(xintercept = value), lty = 1, lwd = 0.25, col = "black") + 
         geom_vline(data = my.meds, aes(xintercept = value), lty = 2, lwd = 0.25, col = "black") +
         labs(x="skewness")+
