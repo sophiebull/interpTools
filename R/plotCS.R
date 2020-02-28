@@ -25,7 +25,7 @@ plotCS <- function(d=1:length(agEval),
                         layer_type = "method", 
                         f = "median", 
                         cross_section = "p",
-                        highlight = "HWI", highlight_colour = "#EE5C42",
+                        highlight = "HWI", highlight_color = "#EE5C42",
                         colors = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")){
   
   require(plotly)
@@ -68,7 +68,7 @@ plotCS <- function(d=1:length(agEval),
     
     colorListMatch <- colorList[1:M]
     names(colorListMatch) <- method_list_names
-    colorListMatch[highlight] <- highlight_colour
+    colorListMatch[highlight] <- highlight_color
 
     if(cross_section == "p"){
     axx <- as.numeric(gsub("p","", rownames(z_list[[1]][[1]][[1]]), fixed = TRUE)) #prop_vec
@@ -100,7 +100,7 @@ plotCS <- function(d=1:length(agEval),
                                                    fill = colorListMatch['",m[vm],"'], alpha = 0.2) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
-                            colour = colorListMatch['",m[vm],"'], alpha = 1,
+                            color = colorListMatch['",m[vm],"'], alpha = 1,
                             aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,median),
                             col = names(data[['",crit[s],"']])['",m[vm],"'], group = ",vm,")) +",
                          sep="")  
@@ -115,7 +115,7 @@ plotCS <- function(d=1:length(agEval),
                                                    fill = colorListMatch['",m[M],"'], alpha = 0.2) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]])),
-                      colour = colorListMatch['",m[M],"'], alpha = 1,
+                      color = colorListMatch['",m[M],"'], alpha = 1,
                       aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,median), 
                       col = names(data[['",crit[s],"']])['",m[M],"'], group = ",M,"))",sep="")
       
@@ -128,7 +128,7 @@ plotCS <- function(d=1:length(agEval),
         plotList[[s]][[vd]] <- plotList[[s]][[vd]] +  
                                 ggtitle(paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Dataset = ",d[vd], sep = "")) + 
                                 xlab(axxTitle) + ylab("value") + 
-                                scale_colour_manual("", breaks = names(data[[crit[s]]]), values = colorListMatch, labels = names(data[[crit[s]]]))  +
+                                scale_color_manual("", breaks = names(data[[crit[s]]]), values = colorListMatch, labels = names(data[[crit[s]]]))  +
                                 theme(panel.grid.major = element_blank(),
                                       panel.grid.minor = element_blank())
         
@@ -145,7 +145,7 @@ plotCS <- function(d=1:length(agEval),
     
     colorListMatch <- colorList[1:D]
     names(colorListMatch) <- data_list_names
-    colorListMatch[which(grepl(highlight,data_list_names))] <- highlight_colour
+    colorListMatch[which(grepl(highlight,data_list_names))] <- highlight_color
     
     if(cross_section == "p"){
       axx <- rownames(z_list[[1]][[1]][[1]]) #prop_vec
@@ -175,7 +175,7 @@ plotCS <- function(d=1:length(agEval),
                                                    fill = colorListMatch[",vd,"], alpha = 0.2) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
-                          colour = colorListMatch[",vd,"], alpha = 1,
+                          color = colorListMatch[",vd,"], alpha = 1,
                           aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,median),
                           col = names(data[['",crit[s],"']][['",m[vm],"']])[",d[vd],"], group = ",vd,")) + ",sep="") 
         }
@@ -187,7 +187,7 @@ plotCS <- function(d=1:length(agEval),
                                                    fill = colorListMatch[",D,"], alpha = 0.2) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]])),
-                      colour = colorListMatch[",D,"], alpha = 1,
+                      color = colorListMatch[",D,"], alpha = 1,
                       aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,median), 
                       col = names(data[['",crit[s],"']][['",m[vm],"']])[",d[D],"], group = ",D,"))",sep="")
         
@@ -200,7 +200,7 @@ plotCS <- function(d=1:length(agEval),
         plotList[[s]][[vm]] <- plotList[[s]][[vm]] +  
           ggtitle(paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Method = ",method_list_names[vm], sep = "")) + 
           xlab(axxTitle) + ylab("value") + 
-          scale_colour_manual("", breaks = names(data[[crit[s]]][[m[vm]]]), 
+          scale_color_manual("", breaks = names(data[[crit[s]]][[m[vm]]]), 
                                   values = colorListMatch, labels = names(data[[crit[s]]][[m[vm]]]))
         
       }
