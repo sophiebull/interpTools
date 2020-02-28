@@ -20,13 +20,9 @@ plotSurface <- function(d=1:length(agEval),
                         layer_type = "method", 
                         f = "median", 
                         highlight = "HWI", 
-                        highlight_colour = "#FA4032",
+                        highlight_color = "#FA4032",
                         colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")){
 
-  names(colors) = letters[1:length(colors)]
-  colorsrep <- rep(colors, each = 2)
-  colorList <- lapply(split(colorsrep, names(colorsrep)), unname)
-  
   require(plotly)
   require(dplyr)
   require(RColorBrewer)
@@ -55,10 +51,34 @@ plotSurface <- function(d=1:length(agEval),
   M <- length(m)
   C <- length(crit)
   
-  z_list <- compileMatrix(agEval)[[f]]
+  method_list_names <- names(z_list[[1]])[names(z_list[[1]]) %in% m]
+  data_list_names = names(z_list[[1]][[1]])[d]
   
-  method_list_names <- m
-  data_list_names <- names(z_list[[1]][[1]])[d]
+  if(layer_type == "method"){
+    colorList <- colorRampPalette(colors)(M)
+    
+    colorListMatch <- colorList[1:M]
+    names(colorListMatch) <- method_list_names
+    colorListMatch[[highlight]] <- highlight_color
+    
+    colorListMatch <- rep(colorListMatch, each = P*G)
+    palette <- lapply(split(colorListMatch, names(colorListMatch)), unname)
+    palette <- palette[method_list_names]
+  }
+  
+  else if(layer_type == "dataset"){
+    colorList <- colorRampPalette(colors)(D)
+
+    colorListMatch <- colorList[1:D]
+    names(colorListMatch) <- data_list_names
+    colorListMatch[grepl(highlight, data_list_names)] <- highlight_color
+    
+    colorListMatch <- rep(colorListMatch, each = P*G)
+    palette <- lapply(split(colorListMatch, names(colorListMatch)), unname)
+    palette <- palette[data_list_names]
+  }
+  
+  z_list <- compileMatrix(agEval)[[f]]
   
   ## Generating a list of surfaces 
   
@@ -69,17 +89,6 @@ plotSurface <- function(d=1:length(agEval),
     
     plotList <- lapply(plotList <- vector(mode = 'list', C), function(x)
       x <- vector(mode = 'list', D))
-    
-    palette <- list()
-    
-    colorListMatch <- colorList[1:M]
-    names(colorListMatch) <- method_list_names
-    colorListMatch[[highlight]] <- rep(highlight_colour,2)
-    
-    
-    for(i in 1:length(colorListMatch)){
-      palette[[i]] <- colorRampPalette(colorListMatch[[i]])(P*G)
-    }
     
     axx <- list(
       nticks = length(gap_vec),
@@ -101,12 +110,12 @@ plotSurface <- function(d=1:length(agEval),
         z <- numeric(M)
         for(vm in 1:(M-1)){
           z[vm] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]], 
-                         colorscale = list(seq(0,1,length.out=P*G), palette[[",vm,"]]),
-                         name = method_list_names[",vm,"], opacity = 1) %>% ",sep="")
+                         colorscale = list(seq(0,1,length.out=P*G), palette[['",m[vm],"']]),
+                         name = method_list_names[grepl('",m[vm],"',method_list_names)], opacity = 1) %>% ",sep="")
         }
         z[M] <- paste("add_surface(x=gap_vec,y=prop_vec,z=z_list[['",crit[s],"']][['",m[M],"']][[",d[vd],"]], 
-                      colorscale = list(seq(0,1,length.out=P*G), palette[[",M,"]]),
-                      name = method_list_names[",M,"], opacity = 1)",sep="")
+                      colorscale = list(seq(0,1,length.out=P*G), palette[['",m[M],"']]),
+                      name = method_list_names[grepl('",m[M],"',method_list_names)], opacity = 1)",sep="")
         
         z <- paste(z, collapse = "")
         
@@ -136,17 +145,6 @@ plotSurface <- function(d=1:length(agEval),
     
     plotList <- lapply(plotList <- vector(mode = 'list', C), function(x)
       x <- vector(mode = 'list', M))
-    
-    palette <- list()
-    
-    colorListMatch <- colorList[1:D]
-    names(colorListMatch) <- data_list_names
-    colorListMatch[[which(grepl(highlight,data_list_names))]] <- rep(highlight_colour,2)
-    
-    
-    for(i in 1:length(colorListMatch)){
-      palette[[i]] <- colorRampPalette(colorListMatch[[i]])(P*G)
-    }
     
     axx <- list(
       nticks = length(gap_vec),
