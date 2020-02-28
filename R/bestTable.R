@@ -79,17 +79,23 @@ bestTable <- function(d=1,
   prop_vec <- names(agEval[[1]]) # proportions
   gap_vec <- names(agEval[[1]][[1]]) # gaps
   
-  criterion <- rownames(agEval[[1]][[1]][[1]][[1]])
+  
+  
+  criteria <- rownames(agEval[[1]][[1]][[1]][[1]])
+  
+  poss_crit <- c("pearson_r","r_squared","abs_differences", "MBE", "ME", "MAE", "MRE", "MARE", "MAPE", "SSE", "MSE", "RMS", "NMSE", "RE", "RMSE", "NRMSD", "RMSS", "MdAPE", "TMAPE")
   maximize <- c(1,1,rep(0,11),1,rep(0,5)) # 1 = yes, 0 = no
   optimal <- maximize
   optimal[which(optimal == "1")] <- "max"
   optimal[which(optimal == "0")] <- "min"
   
-  best <- data.frame(criterion = criterion, 
+  best <- data.frame(criteria = poss_crit, 
                      maximize = maximize,
-                     optimal = optimal) 
+                     optimal = optimal)
   
-  optimize <- best$maximize[best$criterion == crit]
+  best <- best[best$criteria %in% criteria,]
+  
+  optimize <- best$maximize[best$criteria == crit]
   
   theTableList <- list()
   
@@ -110,13 +116,13 @@ bestTable <- function(d=1,
               q97.5_list[[crit]][[m[vm]]][[d]][,fixedIndex][p] - q2.5_list[[crit]][[m[vm]]][[d]][,fixedIndex][p]) # IQR
             ,3), nsmall = 3)
         }
-        
+      
         if(optimize == 0){
-          theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
+          theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}") #change to 4 if including min
         }
         
         else if(optimize == 1){
-          theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
+          theTable[which.max(theTable[,2]),] <- paste0("\\textbf{", theTable[which.max(theTable[,2]),], "}") #change to 4 if including min
         }
         
         theTable <- cbind(method_list_names,data.frame(theTable))
@@ -152,11 +158,11 @@ bestTable <- function(d=1,
         }
         
         if(optimize == 0){
-          theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
+          theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}") #change to 4 if including min
         }
         
         else if(optimize == 1){
-          theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
+          theTable[which.max(theTable[,2]),] <- paste0("\\textbf{", theTable[which.max(theTable[,2]),], "}") #change to 4 if including min
         }
         
         theTable <- cbind(method_list_names,data.frame(theTable))
@@ -195,11 +201,11 @@ bestTable <- function(d=1,
         }
         
         if(optimize == 0){
-          theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
+          theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}") #change to 4 if including min
         }
         
         else if(optimize == 1){
-          theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
+          theTable[which.max(theTable[,2]),] <- paste0("\\textbf{", theTable[which.max(theTable[,2]),], "}") #change to 4 if including min
         }
         
         theTable <- cbind(method_list_names,data.frame(theTable))
@@ -236,11 +242,11 @@ bestTable <- function(d=1,
         }
         
         if(optimize == 0){
-          theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
+          theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}") #change to 4 if including min
         }
         
         else if(optimize == 1){
-          theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
+          theTable[which.max(theTable[,2]),] <- paste0("\\textbf{", theTable[which.max(theTable[,2]),], "}") #change to 4 if including min
         }
         
         theTable <- cbind(method_list_names,data.frame(theTable))
@@ -281,11 +287,11 @@ bestTable <- function(d=1,
           }
           
           if(optimize == 0){
-            theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
+            theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}") #change to 4 if including min
           }
           
           else if(optimize == 1){
-            theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
+            theTable[which.max(theTable[,2]),] <- paste0("\\textbf{", theTable[which.max(theTable[,2]),], "}") #change to 4 if including min
           }
           
           theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
@@ -320,11 +326,11 @@ bestTable <- function(d=1,
           }
           
           if(optimize == 0){
-            theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
+            theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}") #change to 4 if including min
           }
           
           else if(optimize == 1){
-            theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
+            theTable[which.max(theTable[,2]),] <- paste0("\\textbf{", theTable[which.max(theTable[,2]),], "}") #change to 4 if including min
           }
           
           theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
@@ -362,11 +368,11 @@ bestTable <- function(d=1,
           }
           
           if(optimize == 0){
-            theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
+            theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}") #change to 4 if including min
           }
           
           else if(optimize == 1){
-            theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
+            theTable[which.max(theTable[,2]),] <- paste0("\\textbf{", theTable[which.max(theTable[,2]),], "}") #change to 4 if including min
           }
           
           theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
@@ -402,11 +408,11 @@ bestTable <- function(d=1,
           }
           
           if(optimize == 0){
-            theTable[which.min(theTable[,3]),] <- paste0("\\textbf{", theTable[which.min(theTable[,3]),], "}") #change to 4 if including min
+            theTable[which.min(theTable[,2]),] <- paste0("\\textbf{", theTable[which.min(theTable[,2]),], "}") #change to 4 if including min
           }
           
           else if(optimize == 1){
-            theTable[which.max(theTable[,3]),] <- paste0("\\textbf{", theTable[which.max(theTable[,3]),], "}") #change to 4 if including min
+            theTable[which.max(theTable[,2]),] <- paste0("\\textbf{", theTable[which.max(theTable[,2]),], "}") #change to 4 if including min
           }
           
           theTable <- cbind(gsub("."," ", data_list_names,fixed=TRUE), data.frame(theTable))
