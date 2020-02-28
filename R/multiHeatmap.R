@@ -25,7 +25,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
     for(cr in 1:bound){
       
       if(cr == 1){
-        titles <- c("D1","D2","D3","D4","D5")
+        titles <- paste0("bquote(psi ==",(1:5)*10,")")
         titles_theme <- element_text()
         axis.labels.x <- element_blank()
         axis.labels.y <- element_blank()
@@ -66,7 +66,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[1]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[1]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
@@ -83,7 +83,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[2]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[2]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
@@ -100,7 +100,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[3]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[3]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
@@ -117,7 +117,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[4]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[4]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
@@ -134,7 +134,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[5]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[5]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
@@ -179,7 +179,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
     for(cr in 1:bound){
       
       if(cr == 1){
-        titles <- c("D1","D2","D3","D4","D5")
+        titles <- paste0("bquote(psi ==",(1:5)*10,")")
         titles_theme <- element_text()
         axis.labels.x <- element_blank()
         axis.labels.y <- element_blank()
@@ -217,7 +217,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[1]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[1]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
@@ -234,7 +234,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[2]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[2]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
@@ -251,7 +251,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[3]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[3]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
@@ -268,7 +268,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[4]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[4]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
@@ -285,7 +285,7 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = titles[5]) + 
+        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[5]))) + 
         theme_minimal() + 
         
         theme(legend.position = "none",
