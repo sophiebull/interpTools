@@ -5,14 +5,14 @@ plotCSBars <- function(agEval,
                        m = names(agEval[[1]][[1]][[1]]), 
                        f = "median", 
                        layer_type = "method", 
-                       highlight = "HWI", highlight_colour = "#FA4032",
+                       highlight = "HWI", highlight_color = "#FA4032",
                        colors = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")){
   
   stopifnot(length(d)==1, length(crit)==1, (cross_section == "p" | cross_section == "g"), 
             class(agEval) == "agEvaluate", (layer_type == "method" | layer_type == "dataset"),
             length(highlight) == 1,
             highlight %in% names(agEval[[1]][[1]][[1]]),
-            is.character(highlight_colour))
+            is.character(highlight_color))
   
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
@@ -46,7 +46,7 @@ plotCSBars <- function(agEval,
   
   colorListMatch <- colorList[1:M]
   names(colorListMatch) <- method_vec_names
-  colorListMatch[highlight] <- highlight_colour
+  colorListMatch[highlight] <- highlight_color
   
   theTabList <- list()
   
@@ -93,7 +93,7 @@ plotCSBars <- function(agEval,
                                         group = method),
                                         alpha = 0.2) +
     
-                        scale_colour_manual(values = colorListMatch) + 
+                        scale_color_manual(values = colorListMatch) + 
                         scale_fill_manual(values = colorListMatch) + 
 
                         scale_y_continuous(breaks = round(seq(min(theTabList[[fi]]$Q2.5), max(theTabList[[fi]]$Q97.5), length.out = 5),0), 
@@ -125,7 +125,7 @@ plotCSBars <- function(agEval,
                     group = method),
                 alpha = 0.2) +
     
-    scale_colour_manual(values = colorListMatch) + 
+    scale_color_manual(values = colorListMatch) + 
     scale_fill_manual(values = colorListMatch) +
     
     scale_y_continuous(breaks = round(seq(min(theTabList[[bound]]$Q2.5), max(theTabList[[bound]]$Q97.5), length.out = 5),0), 
@@ -154,7 +154,7 @@ plotCSBars <- function(agEval,
     
     # make dummy plot to retrieve legend
     dumPlot <- ggplot() + geom_errorbar(data = theTabList[[1]], aes(x = unfixed, ymin = Q2.5, ymax = Q97.5, color = method), width = 0.05)  + 
-      scale_colour_manual(values = colorListMatch) + 
+      scale_color_manual(values = colorListMatch) + 
       theme_minimal() +
       theme(legend.position = "bottom",
             legend.title = element_blank())
