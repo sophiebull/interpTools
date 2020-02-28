@@ -127,7 +127,6 @@ setwd("/home/sophie/sophTools/files/new_1")
 png("critSkew.png", height = 1000, width = 800)
 plotSkew(agEval = new.ag, cptwise = T, symmetric = NULL, crit = crit)
 dev.off()
-
 ```
 
 Now let's see the corresponding performance metrics across all methods. Coloured bar indicates the "best":
@@ -144,851 +143,151 @@ grid.arrange(pm1,pm2,pm3,pm4,pm5,pm6)
 
 # SURFACE PLOTS
 ## LAYER_TYPE = METHOD
-LEGEND (WITH SPLINES, PLOTLY)
 ```{r}
+# WITH SPLINES
 new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
-
-greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
-highlight = "HWI"
-highlight_colour =  "#EE5C42"
-
-# get z_list
-z_list <- compileMatrix(agEval=new.ag)[["median"]]
-
-method_list_names <- names(z_list[[1]])
-M <- length(method_list_names)
-
-greyListMatch <- greyList[1:M]
-names(greyListMatch) <- method_list_names
-greyListMatch[[highlight]] <- highlight_colour
-  
-manualLegend <- data.frame(color = as.character(greyListMatch), 
-                           nameSurface = method_list_names, 
-                           x = rep(0,M), 
-                           y = seq(0.20,0.80,length.out = M), 
-                           textcol = as.character(greyListMatch),
-                           stringsAsFactors = FALSE)
-
-theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
-  
-  add_markers(x = manualLegend$x,
-              y = manualLegend$y, 
-              size = 50, 
-              name = manualLegend$nameSurface,
-              color = I(manualLegend$color)) %>%
-  
-  add_text(x = manualLegend$x + 0.03,
-           y = manualLegend$y,
-           text = manualLegend$nameSurface,
-           color = I(manualLegend$textcol),
-           textposition = "right") %>% 
-  
-              layout(xaxis = list(title = "", 
-                                  showgrid = F, 
-                                  showticklabels = F,
-                                  zeroline = F,
-                                  range = c(-0.15,0.3)), 
-                     yaxis = list(title = "", 
-                                  showgrid = F, 
-                                  showticklabels = F,
-                                  zeroline = F,
-                                  range = c(0,1.05)))
-
+multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "method", m = c("HWI","KAF","EWMA","FMM", "HCS", "NCS"), f="median", highlight = "HWI", highlight_color = "#F92111", colors = c("#F9E0AA","#FAAF08","#FA812F"), d = 1:5)
 ```
 
-SURFACE PLOTS (WITH SPLINES)
 ```{r}
-ps<- plotSurface(crit=c("MAPE","NRMSD"), agEval = new.ag, layer_type = "method", f="median", highlight = "HWI")
-
-titleList <- list()
-
-for(i in 1:length(ps[[1]])){
-      titleList[[i]] <- list(
-        text = paste("Dataset ",i,sep=""),
-        xref = "paper",
-        yref = "paper",
-        yanchor = "bottom",
-        xanchor = "center",
-        align = "center",
-        x = 0.5,
-        y = 0.75,
-        showarrow = FALSE
-      )
-    }
-
-pp1MAPE <- ps[[1]][[1]] %>% layout(annotations = titleList[[1]]) # criterion, dataset
-pp2MAPE <- ps[[1]][[2]] %>% layout(annotations = titleList[[2]])# criterion, dataset
-pp3MAPE <- ps[[1]][[3]] %>% layout(annotations = titleList[[3]])# criterion, dataset
-pp4MAPE <- ps[[1]][[4]] %>% layout(annotations = titleList[[4]])# criterion, dataset
-pp5MAPE <- ps[[1]][[5]] %>% layout(annotations = titleList[[5]])# criterion, dataset
-
-pp1NRMSD <- ps[[2]][[1]] %>% layout(annotations = titleList[[1]])# criterion, dataset
-pp2NRMSD <- ps[[2]][[2]] %>% layout(annotations = titleList[[2]])# criterion, dataset
-pp3NRMSD <- ps[[2]][[3]] %>% layout(annotations = titleList[[3]])# criterion, dataset
-pp4NRMSD <- ps[[2]][[4]] %>% layout(annotations = titleList[[4]])# criterion, dataset
-pp5NRMSD <- ps[[2]][[5]] %>% layout(annotations = titleList[[5]])# criterion, dataset
-
-sub1  <- subplot(pp1MAPE,pp2MAPE,pp3MAPE,pp4MAPE,pp5MAPE,theLegend, nrows = 3) %>%
-  
-            layout(title = names(ps)[1],
-             
-             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
-                          aspectmode = 'manual', 
-                          aspectratio=list(x=1,y=1,z=0.5),
-                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
-             )
-
-sub2  <- subplot(pp1NRMSD,pp2NRMSD,pp3NRMSD,pp4NRMSD,pp5NRMSD,theLegend, nrows = 3) %>%
-  
-            layout(title = names(ps)[2],
-             
-             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
-                          aspectmode = 'manual', 
-                          aspectratio=list(x=1,y=1,z=0.5),
-                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-                          scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
-             )
-```
-
-Showing how bad cubic splines are (D1,NRMSD,MAPE)
-```{r}
-## THIS IS BROKEN AND I HAVE NO IDEA HOW TO FIX IT.
-titleList <- list()
-
-for(i in 1:length(ps)){
-      titleList[[i]] <- list(
-        text = names(ps)[i],
-        xref = "paper",
-        yref = "paper",
-        yanchor = "bottom",
-        xanchor = "center",
-        align = "center",
-        x = 0.5,
-        y = 0.75,
-        showarrow = FALSE
-      )
-}
-
-pp1MAPEb <- ps[[1]][[1]]
-pp1NRMSDb <- ps[[2]][[1]]
-
-sub1b  <- subplot(pp1MAPEb,pp1NRMSDb, theLegend) %>%
-          layout(title = "Dataset 1",
-                 
-            scene = list(domain=list(x=c(0,1/3), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=0.6,y=0.6,z=1),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.40))),
-            
-            scene2 = list(domain=list(x=c(1/3,2/3), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=0.6,y=0.6,z=1),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.40))),
-             
-            scene3 = list(domain=list(x=c(2/3,1), y=c(1/3,2/3)))
-  )      
-
-```
-
-LEGEND (WITHOUT SPLINES, PLOTLY)
-```{r}
-greyList <- c("#FAAF08","#FA812F","#000000")
-highlight = "HWI"
-highlight_colour = "#FA4032"
-
-# get z_list
-z_list <- compileMatrix(agEval=new.ag)[["median"]]
-
-method_list_names <- names(z_list[[1]])[4:6]
-M <- length(method_list_names)
-
-greyListMatch <- greyList[1:M]
-names(greyListMatch) <- method_list_names
-greyListMatch[[highlight]] <- highlight_colour
-
-  
-manualLegend <- data.frame(color = as.character(greyListMatch), 
-                           nameSurface = method_list_names, 
-                           x = rep(0,M), 
-                           y = seq(0.20,0.80,length.out = M), 
-                           #textcol = as.character(greyListMatch),
-                           textcol = rep("black",length(greyListMatch)),
-                           stringsAsFactors = FALSE)
-  
-theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
-  
-              add_markers(x = manualLegend$x,
-              y = manualLegend$y, 
-              size = 50, 
-              name = manualLegend$nameSurface,
-              color = I(manualLegend$color)) %>%
-  
-                 add_text(x = manualLegend$x + 0.03,
-                 y = manualLegend$y,
-                 text = manualLegend$nameSurface,
-                 color = I(manualLegend$textcol),
-                 textposition = "right") %>% 
-  
-              layout(xaxis = list(title = "", 
-                                  showgrid = F, 
-                                  showticklabels = F,
-                                  zeroline = F,
-                                  range = c(-0.15,0.3)), 
-                     yaxis = list(title = "", 
-                                  showgrid = F, 
-                                  showticklabels = F,
-                                  zeroline = F,
-                                  range = c(0,1.05))
-                     )
-   
-```
-
-SURFACE PLOTS (WITHOUT SPLINES)
-```{r}
+# WITHOUT SPLINES (DEFAULT)
 new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
-
-ps<- plotSurface(crit=c("MAPE","NRMSD"), m=c("KAF","EWMA","HWI"), agEval = new.ag, layer_type = "method", f="median", highlight = "HWI", highlight_colour = "#FA4032",
-                 colors = c("#FAAF08","#FA812F","#000000"))
-
-titleList <- list()
-
-for(i in 1:length(ps[[1]])){
-      titleList[[i]] <- list(
-        text = paste("Dataset ",i,sep=""),
-        xref = "paper",
-        yref = "paper",
-        yanchor = "bottom",
-        xanchor = "center",
-        align = "center",
-        x = 0.5,
-        y = 0.75,
-        showarrow = FALSE
-      )
-    }
-
-pp1MAPEb <- ps[[1]][[1]] %>% layout(annotations = titleList[[1]]) # criterion, dataset
-pp2MAPEb <- ps[[1]][[2]] %>% layout(annotations = titleList[[2]])# criterion, dataset
-pp3MAPEb <- ps[[1]][[3]] %>% layout(annotations = titleList[[3]])# criterion, dataset
-pp4MAPEb <- ps[[1]][[4]] %>% layout(annotations = titleList[[4]])# criterion, dataset
-pp5MAPEb <- ps[[1]][[5]] %>% layout(annotations = titleList[[5]])# criterion, dataset
-
-pp1NRMSDb <- ps[[2]][[1]] %>% layout(annotations = titleList[[1]])# criterion, dataset
-pp2NRMSDb <- ps[[2]][[2]] %>% layout(annotations = titleList[[2]])# criterion, dataset
-pp3NRMSDb <- ps[[2]][[3]] %>% layout(annotations = titleList[[3]])# criterion, dataset
-pp4NRMSDb <- ps[[2]][[4]] %>% layout(annotations = titleList[[4]])# criterion, dataset
-pp5NRMSDb <- ps[[2]][[5]] %>% layout(annotations = titleList[[5]])# criterion, dataset
-
-sub3  <- subplot(pp1MAPEb,pp2MAPEb,pp3MAPEb,pp4MAPEb,pp5MAPEb,theLegend, nrows = 3) %>%
-  
-            layout(title = names(ps)[1],
-             
-             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
-                          aspectmode = 'manual', 
-                          aspectratio=list(x=1,y=1,z=0.68),
-                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.68),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.68),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.68),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.68),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
-             )
-
-sub4  <- subplot(pp1NRMSDb,pp2NRMSDb,pp3NRMSDb,pp4NRMSDb,pp5NRMSDb,theLegend, nrows = 3) %>%
-  
-            layout(title = names(ps)[2],
-             
-             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
-                          aspectmode = 'manual', 
-                          aspectratio=list(x=1,y=1,z=0.68),
-                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.68),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.68),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene4 = list(domain=list(x=c(1/2,1), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.68),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene5 = list(domain=list(x=c(0,1/2), y=c(0,1/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.68),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
-             )
-
+multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "method", m = c("HWI","KAF","EWMA"), f="median", highlight = "HWI", highlight_color = "#F92111", colors = c("#F9E0AA","#FAAF08","#FA812F"), d = 1:5)
 ```
 
 ## LAYER_TYPE = DATASET
-LEGEND (PLOTLY)
-
 ```{r}
-greyList <- c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")
-highlight = 5
-highlight_colour =  "#EE5C42"
-
-# get z_list
-z_list <- compileMatrix(agEval=new.ag)[["median"]]
-
-data_list_names <- names(z_list[[1]][[1]])
-D <- length(data_list_names)
-
-greyListMatch <- greyList[1:D]
-names(greyListMatch) <- data_list_names
-greyListMatch[[highlight]] <- highlight_colour
-  
-manualLegend <- data.frame(color = as.character(greyListMatch), 
-                           nameSurface = data_list_names, 
-                           x = rep(0,D), 
-                           y = seq(0.20,0.80,length.out = D), 
-                           textcol = as.character(greyListMatch),
-                           stringsAsFactors = FALSE)
-
-theLegend <- plot_ly(data = manualLegend, showlegend = F) %>%
-  
-  add_markers(x = manualLegend$x,
-              y = manualLegend$y, 
-              size = 50, 
-              name = manualLegend$nameSurface,
-              color = I(manualLegend$color)) %>%
-  
-  add_text(x = manualLegend$x + 0.03,
-           y = manualLegend$y,
-           text = manualLegend$nameSurface,
-           color = I(manualLegend$textcol),
-           textposition = "right") %>% 
-  
-              layout(xaxis = list(title = "", 
-                                  showgrid = F, 
-                                  showticklabels = F,
-                                  zeroline = F,
-                                  range = c(-0.15,0.3)), 
-                     yaxis = list(title = "", 
-                                  showgrid = F, 
-                                  showticklabels = F,
-                                  zeroline = F,
-                                  range = c(0,1.05)))
-
-
-
+# WITH SPLINES
+new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "dataset", m = c("HWI","KAF","EWMA","FMM", "HCS", "NCS"), f="median", highlight = 1, highlight_color = "#F92111", colors = c("#F9E0AA","#FAAF08","#FA812F"), d = 1:5)
 ```
 
-SURFACE PLOTS (WITHOUT SPLINES)
 ```{r}
-PS <- plotSurface(crit=c("MAPE","NRMSD"), m = c("KAF","EWMA","HWI"), agEval = new.ag, layer_type = "dataset", f = "median", highlight = 5)
+# WITHOUT SPLINES (DEFAULT)
+new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "dataset", m = c("HWI","KAF","EWMA"), f="median", highlight = 1, highlight_color = "#F92111", colors = c("#F9E0AA","#FAAF08","#FA812F"), d = 1:5)
+```
 
-titleList <- list()
+# HEATMAPS
+```{r}
+setwd("/home/sophie/sophTools/files/new_1")
+png("NRMSD_heatmap.png", width = 1000, height = 1000)
+multiHeatmap(crit = "NRMSD", by = "method", m = c("HWI","KAF","EWMA"), agEval = new.ag)
+dev.off()
 
-for(i in 1:length(PS[[1]])){
-      titleList[[i]] <- list(
-        text = gsub("Average","Avg", gsub("."," ", names(PS[[1]])[i],fixed = TRUE)),
-        xref = "paper",
-        yref = "paper",
-        yanchor = "bottom",
-        xanchor = "center",
-        align = "center",
-        x = 0.5,
-        y = 0.75,
-        showarrow = FALSE
-      )
-}
+png("RMSE_heatmap.png", width = 1000, height = 1000)
+multiHeatmap(crit = "RMSE", by = "method", m = c("HWI","KAF","EWMA"), agEval = new.ag)
+dev.off()
 
-PP1MAPE <- PS[[1]][[1]] %>% layout(annotations = titleList[[1]]) # criterion, method
-PP2MAPE <- PS[[1]][[2]] %>% layout(annotations = titleList[[2]]) # criterion, method
-PP3MAPE <- PS[[1]][[3]] %>% layout(annotations = titleList[[3]]) # criterion, method
+png("MAPE_heatmap.png", width = 1000, height = 1000)
+multiHeatmap(crit = "MAPE", by = "method", m = c("HWI","KAF","EWMA"), agEval = new.ag)
+dev.off()
 
-PP1NRMSD <- PS[[2]][[1]] %>% layout(annotations = titleList[[1]]) # criterion, method
-PP2NRMSD <- PS[[2]][[2]] %>% layout(annotations = titleList[[2]]) # criterion, method
-PP3NRMSD <- PS[[2]][[3]] %>% layout(annotations = titleList[[3]]) # criterion, method
-
-sub5  <- subplot(PP1MAPE,PP2MAPE,PP3MAPE,theLegend, nrows = 3) %>%
-  
-            layout(title = names(ps)[2],
-             
-             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
-                          aspectmode = 'manual', 
-                          aspectratio=list(x=1,y=1,z=0.8),
-                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.8),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.8),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
-             )
-
-sub6  <- subplot(PP1NRMSD,PP2NRMSD,PP3NRMSD,theLegend, nrows = 3) %>%
-  
-            layout(title = names(ps)[2],
-             
-             scene = list(domain=list(x=c(0,1/2),  y=c(2/3,1)), 
-                          aspectmode = 'manual', 
-                          aspectratio=list(x=1,y=1,z=0.5),
-                          camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene2 = list(domain=list(x=c(1/2,1), y=c(2/3,1)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene3 = list(domain=list(x=c(0,1/2), y=c(1/3,2/3)), 
-                           aspectmode = 'manual', 
-                           aspectratio=list(x=1,y=1,z=0.5),
-                           camera = list(eye=list(x=1.65,y=-1.15,z=0.30))),
-             
-             scene6 = list(domain=list(x=c(1/2,1), y=c(0,1/3)))
-             )
-
+png("MdAPE_heatmap.png", width = 1000, height = 1000)
+multiHeatmap(crit = "MdAPE", by = "method", m = c("HWI","KAF","EWMA"), agEval = new.ag)
+dev.off()
 ```
 
 # CROSS SECTIONS
-## LAYER_TYPE = METHOD
-#LEGEND (GGPLOT)
-
+## P
 ```{r}
-greyList <- c("#FAAF08","#FA812F","#000000")
-
-highlight = "HWI"
-highlight_colour = "#FA4032"
-
-# get z_list
-z_list <- compileMatrix(agEval = new.ag)[["median"]]
-
-method_list_names <- names(z_list[[1]])[4:6]
-M <- length(method_list_names)
-
-greyListMatch <- greyList[1:M]
-names(greyListMatch) <- method_list_names
-greyListMatch[[highlight]] <- highlight_colour
-
-manualLegend <- data.frame(color = as.character(greyListMatch), 
-                           nameSurface = method_list_names, 
-                           x = rep(0,M), 
-                           y = seq(0.20,0.80,length.out = M), 
-                           #textcol = as.character(greyListMatch),
-                           textcol = rep("black",length(greyListMatch)),
-                           stringsAsFactors = FALSE)
-
-theLegend <- ggplot(data = manualLegend) +
-  
-              geom_point(
-                      x = manualLegend$x, 
-                      y = manualLegend$y, 
-                      color = manualLegend$color,
-                      size = 8) +
-
-              geom_text(x = manualLegend$x+0.05, 
-                        y = manualLegend$y,
-                        label = manualLegend$nameSurface,
-                        color = manualLegend$textcol,
-                        hjust = 0, size = 6) +
-  
-              xlim(-0.15,0.3) + 
-              
-              theme_void()
-
-```  
-
-CROSS_SECTION = P
-```{r}
-plotListCS <- plotCS(m = c("KAF","EWMA","HWI"), agEval = new.ag, cross_section = "p", layer_type = "method", crit = c("MAPE","NRMSD"), f = "median",
-                     highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"))
-
-#MAPE 
-
-pCSMAPE1 <- plotListCS[[1]][[1]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 1")
-pCSMAPE2 <- plotListCS[[1]][[2]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 2")
-pCSMAPE3 <- plotListCS[[1]][[3]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 3")
-pCSMAPE4 <- plotListCS[[1]][[4]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 4")
-pCSMAPE5 <- plotListCS[[1]][[5]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 5")
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("MAPECSbyMethod_p.png", width = 1000, height = 1100)
-
-grid.arrange(pCSMAPE1, pCSMAPE2, pCSMAPE3, pCSMAPE4, pCSMAPE5, theLegend, nrow = 3,
-             top=textGrob(names(plotListCS)[1],gp=gpar(fontsize=18,font=1)), 
-             bottom = textGrob("proportion missing", gp = gpar(fontsize = 14, font = 1)))
-
-dev.off()
-
-# NRMSD
-
-pCSNRMSD1 <- plotListCS[[2]][[1]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 1")
-pCSNRMSD2 <- plotListCS[[2]][[2]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 2")
-pCSNRMSD3 <- plotListCS[[2]][[3]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 3")
-pCSNRMSD4 <- plotListCS[[2]][[4]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 4")
-pCSNRMSD5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12), 
-                                         plot.margin = unit(c(1,1,1,1), "cm")) + labs(title = "Dataset 5")
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("NRMSDCSbyMethod_p.png", width = 1000, height = 1100)
-
-grid.arrange(pCSNRMSD1, pCSNRMSD2, pCSNRMSD3, pCSNRMSD4, pCSNRMSD5, theLegend, nrow = 3,
-             top=textGrob(names(plotListCS)[2],gp=gpar(fontsize=18,font=1)), 
-             bottom = textGrob("proportion missing", gp = gpar(fontsize = 14, font = 1)))
-
-dev.off()
-
-```
-BREAKING IT DOWN FURTHER
-```{r}
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("D1NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=1, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("D2NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=2, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("D3NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=3, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("D4NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=4, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("D5NRMSDCSunbyMethod_p.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="p", crit="NRMSD", d=5, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
-
-```
-
-CROSS_SECTION = G
-```{r}
-plotListCS <- plotCS(m = c("KAF","EWMA","HWI"), agEval = new.ag, cross_section = "g", layer_type = "method", crit = c("MAPE","NRMSD"), f = "median",
-                     highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"))
-
-#MAPE 
-
-pCSMAPE1 <- plotListCS[[1]][[1]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 1")
-pCSMAPE2 <- plotListCS[[1]][[2]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 2")
-pCSMAPE3 <- plotListCS[[1]][[3]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 3")
-pCSMAPE4 <- plotListCS[[1]][[4]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 4")
-pCSMAPE5 <- plotListCS[[1]][[5]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 5")
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("MAPECSbyMethod_g.png", width = 1000, height = 1100)
-
-grid.arrange(pCSMAPE1, pCSMAPE2, pCSMAPE3, pCSMAPE4, pCSMAPE5, theLegend, nrow = 3,
-             top=textGrob(names(plotListCS)[1],gp=gpar(fontsize=18,font=1)), 
-             bottom = textGrob("gap width", gp = gpar(fontsize = 14, font = 1)))
-
-dev.off()
-
-# NRMSD
-
-pCSNRMSD1 <- plotListCS[[2]][[1]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 1")
-pCSNRMSD2 <- plotListCS[[2]][[2]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 2")
-pCSNRMSD3 <- plotListCS[[2]][[3]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 3")
-pCSNRMSD4 <- plotListCS[[2]][[4]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 4")
-pCSNRMSD5 <- plotListCS[[2]][[5]] + theme(axis.title.x = element_blank(),
-                                         axis.title.y = element_blank(),
-                                         plot.title = element_text(hjust = 0.5),
-                                         text=element_text(size=12)) + labs(title = "Dataset 5")
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("NRMSDCSbyMethod_g.png", width = 1000, height = 1100)
-
-grid.arrange(pCSNRMSD1, pCSNRMSD2, pCSNRMSD3, pCSNRMSD4, pCSNRMSD5, theLegend, nrow = 3,
-             top=textGrob(names(plotListCS)[2],gp=gpar(fontsize=18,font=1)), 
-             bottom = textGrob("gap width", gp = gpar(fontsize = 14, font = 1)))
-
-dev.off()
-```
-BREAKING IT DOWN FURTHER
-```{r}
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("D1NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=1, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("D2NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=2, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("D3NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=3, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
- 
-setwd("/home/sophie/sophTools/files/new_1")
-png("D4NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=4, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
-
-setwd("/home/sophie/sophTools/files/new_1")
-png("D5NRMSDCSunbyMethod_g.png", width = 1000, height = 1100)
-plotCSBars(agEval=new.ag, cross_section="g", crit="NRMSD", d=5, m=c("KAF","EWMA","HWI"), f = "median", layer_type = "method", 
-           highlight_colour = "#FA4032", colors = c("#FAAF08","#FA812F","#000000"), highlight = "HWI")
-dev.off()
-
-```
-
-# ASSESSING THE HWI ALONE, WRT DATASET
-# HEATMAP (HW BY DATASET, Z)
-```{r}
-#D1hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 1, type = "z")
-#D2hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 2, type = "z")[[1]]
-#D3hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 3, type = "z")[[1]]
-#D4hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 4, type = "z")[[1]]
-#D5hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 5, type = "z")[[1]]
-# NOTE WE CANNOT USE THE HEATMAPGRID FUNCTION BECAUSE I COULDN'T FIGURE OUT HOW TO GET PLOTS SIDE BY SIDE.
-# WENT WITH A GGPLOT INSTEAD.
-
-new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
-z_list <- compileMatrix(testag)[["median"]]
+agEval <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
 
 crit = "NRMSD"
-m = "HWI"
-
-plott <- list()
-for(d in 1:5){
-          rownames(z_list[[crit]][[m]][[d]]) <- gsub("p","",rownames(z_list[[crit]][[m]][[d]]), fixed = TRUE)
-          colnames(z_list[[crit]][[m]][[d]]) <- gsub("g","",colnames(z_list[[crit]][[m]][[d]]), fixed = TRUE)
-
-          
-          plott[[d]] <- melt(z_list[[crit]][[m]][[d]])
-          colnames(plott[[d]]) <- c("p","g", "value")
-}
-          
-rng = range(c(plott[[1]]$value, plott[[2]]$value ,plott[[3]]$value, plott[[4]]$value, plott[[5]]$value))
-col = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")
-
-D1 <- ggplot(plott[[1]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng)+
-            
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D1") + 
-          theme_minimal() + 
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-
-D2 <- ggplot(plott[[2]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-            
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D2") + 
-          theme_minimal() + 
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-
-D3 <- ggplot(plott[[3]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-  
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D3") + 
-          theme_minimal() + 
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-
-D4 <- ggplot(plott[[4]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-  
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D4") + 
-          theme_minimal() + 
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-
-D5 <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-            
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D5") + 
-          theme_minimal() + 
-  
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-          
-    # get legend
-    g_legend<-function(a.gplot){
-      tmp <- ggplot_gtable(ggplot_build(a.gplot))
-      leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
-      legend <- tmp$grobs[[leg]]
-      return(legend)}
-    
-    # make dummy plot to retrieve legend
-    dumPlot <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-      theme(legend.position = "bottom") + 
-      labs(fill = crit)
-  
-    myLegend<-g_legend(dumPlot)
-    
-plotWindow <- grid.arrange(D1,D2,D3,D4,D5, ncol = 5, bottom = "proportion missing", left = "gap width")
+d = 1:5
+m = c("HWI","KAF","EWMA")
+highlight = "HWI"
+layer_type = "method"
+cross_section = "p"
+f = "median"
+colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")
 
 setwd("/home/sophie/sophTools/files/new_1")
-png(paste0(crit,"_Heatmap.png"), width = 1136, height = 328)
-plotWindow <- grid.arrange(plotWindow, myLegend, heights = c(10,2))
+png(paste0(crit,"CSbyMethod_p.png"), width = 1000, height = 1100)
+multiCS(agEval = agEval, crit = crit, d = d, m = m, highlight = highlight, layer_type = layer_type, cross_section = cross_section, f = f, colors = colors)
+dev.off()
+
+# Uncollapse
+setwd("/home/sophie/sophTools/files/new_1")
+png(paste0("D1",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=1, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+
+png(paste0("D2",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=2, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+
+png(paste0("D3",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=3, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+
+png(paste0("D4",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=4, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+
+png(paste0("D5",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=5, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+```
+
+## G
+```{r}
+agEval <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+
+crit = "NRMSD"
+d = 1:5
+m = c("HWI","KAF","EWMA")
+highlight = "HWI"
+layer_type = "method"
+cross_section = "g"
+f = "median"
+colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")
+
+setwd("/home/sophie/sophTools/files/new_1")
+png(paste0(crit,"CSbyMethod_p.png"), width = 1000, height = 1100)
+multiCS(agEval = agEval, crit = crit, d = d, m = m, highlight = highlight, layer_type = layer_type, cross_section = cross_section, f = f, colors = colors)
+dev.off()
+
+# Uncollapse
+setwd("/home/sophie/sophTools/files/new_1")
+png(paste0("D1",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=1, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+
+png(paste0("D2",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=2, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+
+png(paste0("D3",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=3, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+
+png(paste0("D4",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=4, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+
+png(paste0("D5",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
+plotCSBars(agEval=agEval, cross_section=cross_section, crit=crit, d=5, m=m, f = f, layer_type = layer_type, 
+           highlight_color = highlight_color, colors = colors, highlight = highlight)
+dev.off()
+```
+
+# HEATMAP (HW BY DATASET, Z)
+```{r}
+ag.hr <- load_obj("/home/sophie/sophTools/files/highRes/ag.hr.rda")
+
+setwd("/home/sophie/sophTools/files/highRes")
+png(paste0(crit,"_Heatmap_hr.png"), width = 1136, height = 328)
+heatmapGrid2(agEval = ag.hr, m = "HWI", f = "median", crit = "NRMSD", d = 1:5)
 dev.off()
 ```
 

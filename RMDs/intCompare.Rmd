@@ -65,8 +65,6 @@ setwd("/home/sophie/sophTools/files/new_1")
 save(ag, file = "new.ag.rda")
 ```
 
-
-
 ### REDOING DATA SET 4 
 ```{r}
 methods <- c(3,4,5,7,13,18)
@@ -163,7 +161,6 @@ neworgData4$D4 <- as.numeric(D4$Xt)
 newpmats4 <- performance(OriginalData=neworgData4, IntData=newintData4)
 
 newag4 <- agEvaluate(pmats = pmats4)
-
 
 ```
 

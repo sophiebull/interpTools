@@ -164,6 +164,7 @@ IntData.hr <- list(D1 = IntData.hr.1, D2 = IntData.hr.2, D3 = IntData.hr.3, D4 =
 # PERFORMANCE MATRIX
 ```{r}
 OriginalData.hr <- load_obj("/home/sophie/sophTools/files/new_2/testOriginalData.rda")
+IntData.hr <- load_obj("/home/sophie/sophTools/files/highRes/IntData.hr.rda")
 GappyData.hr <- load_obj("/home/sophie/sophTools/files/highRes/GappyData.hr.rda")
 
 pMats.hr <- performance(OriginalData=OriginalData.hr, IntData=IntData.hr, GappyData = GappyData.hr)
@@ -173,128 +174,26 @@ save(pMats.hr, file = "pMats.hr.rda")
 save(ag.hr, file = "ag.hr.rda")
 ```
 
+# Heatmaps (one metric)
 ```{r}
-#D1hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 1, type = "z")
-#D2hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 2, type = "z")[[1]]
-#D3hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 3, type = "z")[[1]]
-#D4hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 4, type = "z")[[1]]
-#D5hm <- heatmapGrid(agEval = testag, crit = "NRMSD", m = "HWI", d = 5, type = "z")[[1]]
-# NOTE WE CANNOT USE THE HEATMAPGRID FUNCTION BECAUSE I COULDN'T FIGURE OUT HOW TO GET PLOTS SIDE BY SIDE.
-# WENT WITH A GGPLOT INSTEAD.
-ag.hr <- load_obj("/home/sophie/sophTools/files/highRes/ag.hr.rda")
-
-z_list <- compileMatrix(ag.hr)[["median"]]
-
+agEval <- load_obj("/home/sophie/sophTools/files/highRes/ag.hr.rda")
 crit = "NRMSD"
 m = "HWI"
 
-plott <- list()
-for(d in 1:5){
-          rownames(z_list[[crit]][[m]][[d]]) <- gsub("p","",rownames(z_list[[crit]][[m]][[d]]), fixed = TRUE)
-          colnames(z_list[[crit]][[m]][[d]]) <- gsub("g","",colnames(z_list[[crit]][[m]][[d]]), fixed = TRUE)
-
-          
-          plott[[d]] <- melt(z_list[[crit]][[m]][[d]])
-          colnames(plott[[d]]) <- c("p","g", "value")
-}
-          
-rng = range(c(plott[[1]]$value, plott[[2]]$value ,plott[[3]]$value, plott[[4]]$value, plott[[5]]$value))
-col = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")
-
-
-D1 <- ggplot(plott[[1]], aes(as.numeric(p), as.numeric(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-  
-  #scale_x_discrete(limits = c(0,0.30), breaks = c(0,0.05,0.10,0.15,0.2,0.25,0.3)) + 
-  #scale_y_discrete(limits = c(0,30), breaks = c(0,5,10,15,20,25,30)) + 
-            
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D1") + 
-          theme_minimal() + 
-  
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-
-D2 <- ggplot(plott[[2]], aes(as.numeric(p), as.numeric(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-            
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D2") + 
-          theme_minimal() + 
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-
-D3 <- ggplot(plott[[3]], aes(as.numeric(p), as.numeric(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-  
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D3") + 
-          theme_minimal() + 
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-
-D4 <- ggplot(plott[[4]], aes(as.numeric(p), as.numeric(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-  
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D4") + 
-          theme_minimal() + 
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-
-D5 <- ggplot(plott[[5]], aes(as.numeric(p), as.numeric(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-            
-        labs(x = "proportion missing", y = "gap width", fill = crit, title = "D5") + 
-          theme_minimal() + 
-  
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(size = 12))
-          
-    # get legend
-    g_legend<-function(a.gplot){
-      tmp <- ggplot_gtable(ggplot_build(a.gplot))
-      leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
-      legend <- tmp$grobs[[leg]]
-      return(legend)}
-    
-    # make dummy plot to retrieve legend
-    dumPlot <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-      theme(legend.position = "bottom") + 
-      labs(fill = crit)
-  
-    myLegend<-g_legend(dumPlot)
-    
-plotWindow <- grid.arrange(D1,D2,D3,D4,D5, ncol = 5, bottom = "proportion missing", left = "gap width")
-
 setwd("/home/sophie/sophTools/files/highRes")
 png(paste0(crit,"_Heatmap_hr.png"), width = 1136, height = 328)
-plotWindow <- grid.arrange(plotWindow, myLegend, heights = c(10,2))
+heatmapGrid2(crit = crit, m = m, agEval = agEval)
 dev.off()
 ```
 
-# Side-by-side metrics (Heatmaps)
+# Heatmaps (multiple metrics)
 ```{r}
-ag.hr <- load_obj("/home/sophie/sophTools/files/highRes/ag.hr.rda")
+agEval <- load_obj("/home/sophie/sophTools/files/highRes/ag.hr.rda")
 
 setwd("/home/sophie/sophTools/files/highRes")
-png("Heatmaps_hr.png", width = 1100, height = 1100)
-multiHeatmap(crit = c("NRMSD","MAPE","MRE","RMSS"), m = "KAF", agEval = new.ag)
+png("multiHeatmaps_hr.png", width = 1100, height = 1100)
+multiHeatmap(crit = c("NRMSD","MAPE","MRE","RMSS"), m = "HWI", agEval = new.ag)
 dev.off()
-
 ```
 
 # SURFACE PLOTS

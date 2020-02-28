@@ -253,91 +253,9 @@ IntData.D4X <- list(D1 = IntData.D4X1,
 
 setwd("/home/sophie/sophTools/files/investigate/D4x")
 save(IntData.D4X, file = "IntData.D4X.rda")
-
-    
-  GappyData.D4X <- load_obj("~/sophTools/files/investigate/D4x/splitData.D4X.rda")
-  OriginalData.D4X <- load_obj("~/sophTools/files/investigate/D4x/OriginalData.D4X.rda")
-  
-  # Compute the performance
-  GappyData.split <- list()
-  splitInt <- list()
-  mean_MAPE_df <- matrix(nrow = 20, ncol = 20)
-  mean_NRMSD_df <- matrix(nrow = 20, ncol = 20)
-  for(j in 1:20){
-    mean_split_NRMSD <- numeric(20)
-    mean_split_MAPE <- numeric(20)
-  for(i in 1:20){
-      # load object
-      data <- load_obj(paste0("~/sophTools/files/investigate/D4x/D",i,"/D",i,"_",letters[j],".rda"))
-      splitInt[[i]] <- data
-      GappyData.split[[i]] <- splitData.D4X[[i]][[j]]
-      }
-    names(splitInt) <- paste0("D",1:20)
-    
-      # get performance
-      splitpmat <- performance(OriginalData = OriginalData.D4X, 
-                               IntData = splitInt, 
-                               GappyData = GappyData.split)
-      # aggregate performance
-      splitag <- agEvaluate(pmats = splitpmat)
-      zsplit.MAPE <- compileMatrix(splitag)[["median"]][["MAPE"]]
-      zsplit.NRMSD <- compileMatrix(splitag)[["median"]][["NRMSD"]]
-  
-  # take the mean
-  mean_split_NRMSD <- lapply(zsplit.NRMSD[["HWI"]], mean)
-  mean_split_MAPE <- lapply(zsplit.MAPE[["HWI"]], mean)
-
-  mean_NRMSD_df[j,] <- as.numeric(mean_split_NRMSD)
-  mean_MAPE_df[j,] <- as.numeric(mean_split_MAPE)
-  }
-  rownames(mean_NRMSD_df) <- letters[1:20]
-  colnames(mean_NRMSD_df) <- paste0("D",1:20)
-  rownames(mean_MAPE_df) <- letters[1:20]
-  colnames(mean_MAPE_df) <- paste0("D",1:20)
-  
-  setwd("/home/sophie/sophTools/files/investigate/D4x")
-  save(mean_NRMSD_df, file = "mean_NRMSD_df.rda")
-  save(mean_MAPE_df, file = "mean_MAPE_df.rda")
-  
-  mean_NRMSD <- apply(mean_NRMSD_df,2,mean)
-  mean_MAPE <- apply(mean_MAPE_df,2,mean)
 ```
 
-
-
-```{r}
-#PLOTTING
- NRMSD_P <- ggplot(data = data.frame(d = seq(0.01,0.07,length.out = 20), NRMSD = mean_NRMSD)) + 
-    geom_line(aes(x = d, y = NRMSD), col = "#EE5C42") + 
-        
-                        theme_minimal() + 
-                        theme(panel.background = element_blank(),
-                              panel.grid.minor = element_blank(),
-                              axis.title.x = element_blank(),
-                              axis.ticks.x = element_blank(),
-                              axis.text.x = element_blank() ) +
-                      ylim(3.5,4.5) +
-                      labs(title="NRMSD", x="minimum frequency", y ="mean performance")
-    
-  
-MAPE_P <-  ggplot(data = data.frame(d = seq(0.01,0.07, length.out = 20), MAPE = mean_MAPE)) +
-    geom_line(aes(x = d, y = MAPE), col = "#EE5C42") + 
-        
-                        theme_minimal() + 
-                        theme(panel.background = element_blank(),
-                              panel.grid.minor = element_blank()) +
-                      ylim(100,400)+
-                  
-                      labs(title="MAPE", x="minimum frequency", y ="mean performance")
-  
-  setwd("/home/sophie/sophTools/files/investigate/D4x")
-  png("mean_D4X.png", width = 640, height = 400)
-  grid.arrange(NRMSD_P,MAPE_P, ncol = 1)
-  dev.off()
-    
-```
-
-# Do this another way. Need to get parametric confidence band around means.
+# Plot mean performance
 ```{r}
 IntData.D4X <- load_obj("/home/sophie/sophTools/files/investigate/D4x/IntData.D4X.rda")
 GappyData.D4X <- load_obj("/home/sophie/sophTools/files/investigate/D4x/GappyData.D4X.rda")
@@ -377,6 +295,8 @@ setwd("/home/sophie/sophTools/files/investigate/D4x")
 png("mean_NRMSDD4X.png", width = 640, height = 400)
 plot.D4X.NRMSD
 dev.off()
+save(pMats.D4X, file = "pMats.D4X.rda")
+save(ag.D4X, file = "ag.D4X.rda")
 ```
 
 
@@ -634,6 +554,12 @@ for(p in 1:6){
    print(paste0(Reduce("+", check)," of ", length(check), " = ", round(Reduce("+", check)/length(check),3)*100,"%, p=",p,", g = ",g))
   }
 }
+```
+
+```{r}
+OriginalData.shift.2 <- load_obj("/home/sophie/sophTools/files/investigate/shift2/OriginalData.shift.2.rda")
+GappyData.shift.2 <- load_obj("/home/sophie/sophTools/files/investigate/shift2/GappyData.shift.2.rda")
+IntData.shift.2 <- load_obj("/home/sophie/sophTools/files/investigate/shift2/IntData.shift.2.rda")
 
 # get performance
 pMats.shift.2 <- performance(OriginalData=OriginalData.shift.2, IntData=IntData.shift.2, GappyData = GappyData.shift.2)
@@ -643,29 +569,95 @@ agEval.shift.2 <- agEvaluate(pmats = pMats.shift.2)
 setwd("/home/sophie/sophTools/files/investigate/shift2")
 save(pMats.shift.2, file = "pMats.shift.2.rda")
 save(agEval.shift.2, file = "agEval.shift.2.rda")
+```
 
 # plot performance of unshifted vs. true shift
+```{r}
+# Surface plots
+ag.unshift <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+ag.shift.2 <- load_obj("/home/sophie/sophTools/files/investigate/shift2/agEval.shift.2.rda")
 
-new.GappyData <- load_obj("/home/sophie/sophTools/files/new_1/new.GappyData.rda")
-new.OriginalData <- load_obj("/home/sophie/sophTools/files/new_1/new.OriginalData.rda")
-new.IntData <- load_obj("/home/sophie/sophTools/files/new_1/new.IntData.rda")
+crit = "NRMSD"
+plotList.unshift <- plotSurface(agEval = ag.unshift, m = "HWI", d = 4, highlight = 4, highlight_colour = "skyblue", layer_type = "dataset", crit = crit)
+plotList.shift.2 <- plotSurface(agEval = ag.shift.2, m = "HWI", d = 1, highlight = 1, layer_type = "dataset", crit = crit)
 
-pMats.unshift <- performance(GappyData=new.GappyData, OriginalData=new.OriginalData,IntData = new.IntData)
-agEval.unshift <- agEvaluate(pmats = pMats.unshift)
-
-setwd("/home/sophie/sophTools/files/new_1")
-#save(pMats.unshift, file = "new.pmats.rda")
-save(agEval.unshift, file = "new.ag.rda")
-
-plotList.unshift <- plotSurface(agEval = agEval.unshift, m = "HWI", d = 4, highlight = 4, highlight_colour = "skyblue", layer_type = "dataset", crit = c("TMAPE"))
-plotList.shift.2 <- plotSurface(agEval = agEval.shift.2, m = "HWI", d = 1, highlight = 1, layer_type = "dataset", crit = c("TMAPE"))
-
-p <- plotList.unshift[["TMAPE"]][["HWI"]]
-pshift2 <- plotList.shift.2[["TMAPE"]][["HWI"]]
+p <- plotList.unshift[[crit]][["HWI"]]
+pshift2 <- plotList.shift.2[[crit]][["HWI"]]
 
 subplot(p,pshift2)
+```
+
+```{r}
+# Heatmaps
+# need to scale heatmaps so colour runs across both. right now they are individually scaled.
+# Find the range across both. 
+
+crit = "NRMSD"
+zlist_unshift <-  compileMatrix(ag.unshift)[["median"]]
+zlist_shift2 <- compileMatrix(ag.shift.2)[["median"]]
+    
+rownames(zlist_unshift[[crit]][["HWI"]][[4]]) <- gsub("p","",rownames(zlist_unshift[[crit]][["HWI"]][[4]]), fixed = TRUE)
+colnames(zlist_unshift[[crit]][["HWI"]][[4]]) <- gsub("g","",colnames(zlist_unshift[[crit]][["HWI"]][[4]]), fixed = TRUE)
+
+rownames(zlist_shift2[[crit]][["HWI"]][[1]]) <- gsub("p","",rownames(zlist_shift2[[crit]][["HWI"]][[1]]), fixed = TRUE)
+colnames(zlist_shift2[[crit]][["HWI"]][[1]]) <- gsub("g","",colnames(zlist_shift2[[crit]][["HWI"]][[1]]), fixed = TRUE)
+    
+plott.unshift <- melt(zlist_unshift[[crit]][["HWI"]][[4]])
+colnames(plott.unshift) <- c("p","g", "value")
+
+plott.shift2 <- melt(zlist_shift2[[crit]][["HWI"]][[1]])
+colnames(plott.shift2) <- c("p","g", "value")
+
+rngg <- range(plott.shift2$value,plott.unshift$value)
+
+map.unshift <- ggplot(plott.unshift, aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+          scale_fill_gradientn(colours = col, values = c(0,1),
+                               limits = rngg) +
+          
+          labs(x = "proportion missing", y = "gap width", fill = crit, title = "unshifted") + 
+          theme_minimal() + 
+          
+          theme(legend.position = "none",
+                axis.title.x = element_blank(),
+                axis.title.y = element_blank(),
+                plot.title = element_text(size = 12))
+
+map.shift2 <- ggplot(plott.shift2, aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+          scale_fill_gradientn(colours = col, values = c(0,1),
+                               limits = rngg) +
+          
+          labs(x = "proportion missing", y = "gap width", fill = crit, title = "shifted") + 
+          theme_minimal() + 
+          
+          theme(legend.position = "none",
+                axis.title.x = element_blank(),
+                axis.title.y = element_blank(),
+                plot.title = element_text(size = 12))
+
+dumPlot <- ggplot(plott.unshift, aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colours = col, values = c(0,1),
+                           limits = rngg) +
+      theme(legend.position = "bottom") + 
+      labs(fill = crit)
+    
+g_legend<-function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
+  
+myLegend<-g_legend(dumPlot)
+
+plotWindow <- grid.arrange(map.unshift,map.shift2, ncol = 1)
+
+setwd("/home/sophie/sophTools/files/investigate/shift2")
+png(paste0(crit,"_heatmap_shift2.png"), width = 400, height = 1000)
+grid.arrange(plotWindow,myLegend, ncol = 1, heights = c(20,2))
+dev.off()
+```
 
 # check to see that gaps were actually fixed
+```{r}
 GappyData.unshift <- load_obj("/home/sophie/sophTools/files/new_1/new.GappyData.rda")
 GappyData.shift.2 <- load_obj("/home/sophie/sophTools/files/investigate/shift2/GappyData.shift.2.rda")
 
@@ -706,8 +698,6 @@ plotList.shift <- plotSurface(agEval = agEval.shift, m = "HWI", d = 1, highlight
 pshift <- plotList.shift[["TMAPE"]][["HWI"]]
 
 subplot(pshift,pshift2)
-
-
 ```
 
 
