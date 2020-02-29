@@ -1,7 +1,9 @@
-multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
+multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median", d = 1:5, colors){
   
   M <- length(m)
   C <- length(crit)
+  D <- length(d)
+  
   z_list <- compileMatrix(agEval)[[f]]
   
   stopifnot((by == "crit" && length(m) == 1 && length(crit) > 1) | (by == "method" && length(crit) == 1 && length(m)>1))
@@ -12,7 +14,6 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
     leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
     legend <- tmp$grobs[[leg]]
     return(legend)}
-  
   
   heatmapList <- list()
   
@@ -25,133 +26,97 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
     for(cr in 1:bound){
       
       if(cr == 1){
-        titles <- paste0("bquote(psi ==",(1:5)*10,")")
+        titles <- paste0("bquote(psi ==",d*10,")")
         titles_theme <- element_text()
         axis.labels.x <- element_blank()
         axis.labels.y <- element_blank()
+        axis.text.y <- element_text()
         axis.ticks <- element_blank()
         
       }
       else if(cr == bound){
-        titles <- rep("",5)
+        titles <- rep("",D)
         axis.labels.x <- element_text()
+        axis.text.y <- element_blank()
         axis.labels.y <- element_text()
         axis.ticks <- element_blank()
         titles_theme <- element_blank()
       }
       else{
-        titles <- rep("",5)
+        titles <- rep("",D)
         titles_theme <- element_blank()
         axis.labels.x <- element_blank()
         axis.labels.y <- element_blank()
+        axis.text.y <- element_blank()
         axis.ticks <- element_blank()
       }
       
-      
       plott <- list()
       
-      for(d in 1:5){
-        rownames(z_list[[crit[cr]]][[m]][[d]]) <- gsub("p","",rownames(z_list[[crit[cr]]][[m]][[d]]), fixed = TRUE)
-        colnames(z_list[[crit[cr]]][[m]][[d]]) <- gsub("g","",colnames(z_list[[crit[cr]]][[m]][[d]]), fixed = TRUE)
+      for(vd in 1:D){
+        rownames(z_list[[crit[cr]]][[m]][[d[vd]]]) <- gsub("p","",rownames(z_list[[crit[cr]]][[m]][[d[vd]]]), fixed = TRUE)
+        colnames(z_list[[crit[cr]]][[m]][[d[vd]]]) <- gsub("g","",colnames(z_list[[crit[cr]]][[m]][[d[vd]]]), fixed = TRUE)
         
         
-        plott[[d]] <- melt(z_list[[crit[cr]]][[m]][[d]])
-        colnames(plott[[d]]) <- c("p","g", "value")
+        plott[[vd]] <- melt(z_list[[crit[cr]]][[m]][[d[vd]]])
+        colnames(plott[[vd]]) <- c("p","g", "value")
       }
       
-      rng = range(c(plott[[1]]$value, plott[[2]]$value ,plott[[3]]$value, plott[[4]]$value, plott[[5]]$value))
-      col = colorRampPalette(colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111"))(100)
-      
-      D1 <- ggplot(plott[[1]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-        scale_fill_gradientn(colours = col, values = c(0,1),
-                             limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[1]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_text(),
-              plot.title = titles_theme,
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks)
-      
-      D2 <- ggplot(plott[[2]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-        scale_fill_gradientn(colours = col, values = c(0,1),
-                             limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[2]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_blank(),
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks,
-              plot.title = titles_theme)
-      
-      D3 <- ggplot(plott[[3]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-        scale_fill_gradientn(colours = col, values = c(0,1),
-                             limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[3]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_blank(),
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks,
-              plot.title = titles_theme)
-      
-      D4 <- ggplot(plott[[4]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-        scale_fill_gradientn(colours = col, values = c(0,1),
-                             limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[4]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_blank(),
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks,
-              plot.title = titles_theme)
-      
-      D5 <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-        scale_fill_gradientn(colours = col, values = c(0,1),
-                             limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[5]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_blank(),
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks,
-              plot.title = titles_theme)
+      r_string <- paste0("plott[[",2:(D-1),"]]$value, ", collapse = "")
+      r_string <- c("range(c(plott[[1]]$value,", r_string, paste0("plott[[",D,"]]$value))", collapse = ""))
       
       
+      rng = eval(parse(text = r_string))
+      
+      col = colorRampPalette(colors = colors)(100)
+      
+      plotList <- list()
+      
+      for(vd in 1:D){
+        
+        if(vd == 1){
+          plotList[[vd]] <- ggplot(plott[[vd]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+            scale_fill_gradientn(colours = col, values = c(0,1),
+                                 limits = rng) +
+            
+            labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[vd]))) + 
+            theme_minimal() + 
+            
+            theme(legend.position = "none",
+                  
+                  axis.title.x = element_blank(),
+                  axis.title.y = element_blank(),
+                  axis.text.x = axis.labels.x,
+                  axis.text.y = element_text(),
+                  plot.title = titles_theme,
+                  axis.ticks.x = axis.ticks,
+                  axis.ticks.y = axis.ticks)
+        }
+        
+        if(vd != 1){
+          plotList[[vd]] <- ggplot(plott[[vd]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+            scale_fill_gradientn(colours = col, values = c(0,1),
+                                 limits = rng) +
+            
+            labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[vd]))) + 
+            theme_minimal() + 
+            
+            theme(legend.position = "none",
+                  
+                  axis.title.x = element_blank(),
+                  axis.title.y = element_blank(),
+                  axis.text.x = axis.labels.x,
+                  axis.text.y = element_blank(),
+                  plot.title = titles_theme,
+                  axis.ticks.x = axis.ticks,
+                  axis.ticks.y = axis.ticks)
+        }
+        
+      }
       
       # make dummy plot to retrieve legend
       
-      dumPlot <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+      dumPlot <- ggplot(plott[[1]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         theme(legend.position = "right") + 
@@ -159,7 +124,14 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
       
       myLegend <-g_legend(dumPlot)
       
-      myHeatmaps <- grid.arrange(D1,D2,D3,D4,D5, ncol = 5, widths = c(10,10,10,10,10))
+      h_string <- paste0("plotList[[",2:(D-1),"]],", collapse = "")
+      rep_string <- c(paste0(rep("10,",D-1), collapse = ""),"10")
+      rep_string <- paste0(rep_string, collapse = "")
+      
+      h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"))", collapse = ""))
+      
+      myHeatmaps <- eval(parse(text = h_string))
+      
       heatmapList[[cr]] <- grid.arrange(myHeatmaps, myLegend, ncol = 2, widths = c(40,5))
     }
     
@@ -179,147 +151,114 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median"){
     for(cr in 1:bound){
       
       if(cr == 1){
-        titles <- paste0("bquote(psi ==",(1:5)*10,")")
+        titles <- paste0("bquote(psi ==",d*10,")")
         titles_theme <- element_text()
         axis.labels.x <- element_blank()
         axis.labels.y <- element_blank()
+        axis.text.y <- element_text()
         axis.ticks <- element_blank()
       }
       else if(cr == bound){
-        titles <- rep("",5)
+        titles <- rep("",D)
         axis.labels.x <- element_text()
         axis.labels.y <- element_text()
         axis.ticks <- element_blank()
+        axis.text.y <- element_blank()
         titles_theme <- element_blank()
       }
       else{
-        titles <- rep("",5)
+        titles <- rep("",D)
         titles_theme <- element_blank()
         axis.labels.x <- element_blank()
         axis.labels.y <- element_blank()
+        axis.text.y <- element_blank()
         axis.ticks <- element_blank()
       }
       
       plott <- list()
       
-      for(d in 1:5){
-        rownames(z_list[[crit]][[m[cr]]][[d]]) <- gsub("p","",rownames(z_list[[crit]][[m[cr]]][[d]]), fixed = TRUE)
-        colnames(z_list[[crit]][[m[cr]]][[d]]) <- gsub("g","",colnames(z_list[[crit]][[m[cr]]][[d]]), fixed = TRUE)
+      for(vd in 1:D){
+        rownames(z_list[[crit]][[m[cr]]][[d[vd]]]) <- gsub("p","",rownames(z_list[[crit]][[m[cr]]][[d[vd]]]), fixed = TRUE)
+        colnames(z_list[[crit]][[m[cr]]][[d[vd]]]) <- gsub("g","",colnames(z_list[[crit]][[m[cr]]][[d[vd]]]), fixed = TRUE)
         
-        plott[[d]] <- melt(z_list[[crit]][[m[cr]]][[d]])
-        colnames(plott[[d]]) <- c("p","g", "value")
+        plott[[vd]] <- melt(z_list[[crit]][[m[cr]]][[d[vd]]])
+        colnames(plott[[vd]]) <- c("p","g", "value")
       }
       
       rng = range(z_list[[crit]][m])
-      col = colorRampPalette(colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111"))(100)
+      col = colorRampPalette(colors = colors)(100)
       
-      D1 <- ggplot(plott[[1]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+      for(vd in 1:D){
+        
+        if(vd == 1){
+          plotList[[vd]] <- ggplot(plott[[vd]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+            scale_fill_gradientn(colours = col, values = c(0,1),
+                                 limits = rng) +
+            
+            labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[vd]))) + 
+            theme_minimal() + 
+            
+            theme(legend.position = "none",
+                  
+                  axis.title.x = element_blank(),
+                  axis.title.y = element_blank(),
+                  axis.text.x = axis.labels.x,
+                  axis.text.y = element_text(),
+                  plot.title = titles_theme,
+                  axis.ticks.x = axis.ticks,
+                  axis.ticks.y = axis.ticks)
+        }
+        
+        else if(vd != 1){
+          plotList[[vd]] <- ggplot(plott[[vd]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
+            scale_fill_gradientn(colours = col, values = c(0,1),
+                                 limits = rng) +
+            
+            labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[vd]))) + 
+            theme_minimal() + 
+            
+            theme(legend.position = "none",
+                  
+                  axis.title.x = element_blank(),
+                  axis.title.y = element_blank(),
+                  axis.text.x = axis.labels.x,
+                  axis.text.y = element_blank(),
+                  plot.title = titles_theme,
+                  axis.ticks.x = axis.ticks,
+                  axis.ticks.y = axis.ticks)
+        }
+        
+      }
+      
+      # making dummy plot to retrieve legend
+      
+      dumPlot <- ggplot(plott[[1]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[1]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_text(),
-              plot.title = titles_theme,
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks)
+        theme(legend.position = "bottom") + 
+        labs(fill = crit)
       
-      D2 <- ggplot(plott[[2]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-        scale_fill_gradientn(colours = col, values = c(0,1),
-                             limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[2]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_blank(),
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks,
-              plot.title = titles_theme)
+      myLegend <- g_legend(dumPlot)
       
-      D3 <- ggplot(plott[[3]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-        scale_fill_gradientn(colours = col, values = c(0,1),
-                             limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[3]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_blank(),
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks,
-              plot.title = titles_theme)
+      h_string <- paste0("plotList[[",2:(D-1),"]],", collapse = "")
+      rep_string <- c(paste0(rep("10,",D-1), collapse = ""),"10")
+      rep_string <- paste0(rep_string, collapse = "")
       
-      D4 <- ggplot(plott[[4]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-        scale_fill_gradientn(colours = col, values = c(0,1),
-                             limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[4]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_blank(),
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks,
-              plot.title = titles_theme)
+      h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"), right = m[",cr,"])", collapse = ""))
       
-      D5 <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-        scale_fill_gradientn(colours = col, values = c(0,1),
-                             limits = rng) +
-        
-        labs(x = "proportion missing", y = "gap width", fill = by_vec[cr], title = eval(parse(text = titles[5]))) + 
-        theme_minimal() + 
-        
-        theme(legend.position = "none",
-              
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank(),
-              axis.text.x = axis.labels.x,
-              axis.text.y = element_blank(),
-              axis.ticks.x = axis.ticks,
-              axis.ticks.y = axis.ticks,
-              plot.title = titles_theme,
-              axis.title.y.right = element_text())
-      
-      heatmapList[[cr]] <- grid.arrange(D1,D2,D3,D4,D5, ncol = 5, widths = c(10,10,10,10,10), right = m[cr])
+      heatmapList[[cr]] <- eval(parse(text = h_string))
     }
+    
     names(heatmapList) <- by_vec
-    
-    dumPlot <- ggplot(plott[[5]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
-                           limits = rng) +
-      theme(legend.position = "bottom") + 
-      labs(fill = crit)
-    
-    myLegend <- g_legend(dumPlot)
     
     call <- paste0("heatmapList[[",1:(bound-1),"]],")
     call <- c("grid.arrange(",call,paste0("heatmapList[[",bound,"]], nrow = ",bound,", bottom = 'proportion missing', left = 'gap width')"))
     
     plotWindow <- eval(parse(text = call))
-    plotWindow <- grid.arrange(plotWindow, myLegend, ncol = 1, heights = c(50, 10))
+    plotWindow <- grid.arrange(plotWindow, myLegend, ncol = 1, heights = c(D*10, 10))
   }
-  
-  return(plotWindow)
 }
 
-
+return(plotWindow) 
+}
 
