@@ -21,7 +21,7 @@ plotSurface <- function(d=1:length(agEval),
                         f = "median", 
                         highlight = "HWI", 
                         highlight_color = "#FA4032",
-                        colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")){
+                        colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
 
   require(plotly)
   require(dplyr)
@@ -51,6 +51,9 @@ plotSurface <- function(d=1:length(agEval),
   M <- length(m)
   C <- length(crit)
   
+  
+  z_list <- compileMatrix(agEval)[[f]]
+  
   method_list_names <- names(z_list[[1]])[names(z_list[[1]]) %in% m]
   data_list_names = names(z_list[[1]][[1]])[d]
   
@@ -78,7 +81,6 @@ plotSurface <- function(d=1:length(agEval),
     palette <- palette[data_list_names]
   }
   
-  z_list <- compileMatrix(agEval)[[f]]
   
   ## Generating a list of surfaces 
   
@@ -127,9 +129,8 @@ plotSurface <- function(d=1:length(agEval),
                                                         zaxis = axz
                                                         )) %>%",z,sep="")))
 
-        
         plotList[[s]][[vd]] <- plotList[[s]][[vd]] %>%  
-          layout(title = paste("\n Criterion = ", names(z_list[crit[s]])," (",f,")","\n Dataset = ",d[vd], sep = "")) 
+          layout(title = paste0("\n Criterion = ", names(z_list[crit[s]])," (",f,")","\n Dataset = ",d[vd])) 
         
         plotList[[s]][[vd]] <- hide_colorbar(plotList[[s]][[vd]])
         
