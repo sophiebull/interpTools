@@ -26,7 +26,8 @@ plotCS <- function(d=1:length(agEval),
                         f = "median", 
                         cross_section = "p",
                         highlight = "HWI", highlight_color = "#EE5C42",
-                        colors = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")){
+                        colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111"),
+                        showLegend = T){
   
   require(plotly)
   require(dplyr)
@@ -93,37 +94,43 @@ plotCS <- function(d=1:length(agEval),
       for(vd in 1:D){
         z <- numeric(M)
         for(vm in 1:(M-1)){
-          z[vm] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
-                                                   aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,min),
+          z[vm] <- paste0("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
+                                                   aes(x = axx, ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,max),
                                                                                 group = ",vm,"), 
-                                                   fill = colorListMatch['",m[vm],"'], alpha = 0.2) + 
+                                                   fill = colorListMatch['",m[vm],"'], alpha = 0.4) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
                             color = colorListMatch['",m[vm],"'], alpha = 1,
-                            aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,median),
-                            col = names(data[['",crit[s],"']])['",m[vm],"'], group = ",vm,")) +",
-                         sep="")  
+                            aes(x = axx, y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,median),
+                            col = names(data[['",crit[s],"']])['",m[vm],"'], group = ",vm,")) +")  
             
             
         }
         
-        z[M] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]])),
-                                                   aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,min),
+        z[M] <- paste0("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]])),
+                                                   aes(x = axx, ymin = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,max),
                                                                               group = ",M,"), 
-                                                   fill = colorListMatch['",m[M],"'], alpha = 0.2) + 
+                                                   fill = colorListMatch['",m[M],"'], alpha = 0.4) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]])),
                       color = colorListMatch['",m[M],"'], alpha = 1,
-                      aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,median), 
-                      col = names(data[['",crit[s],"']])['",m[M],"'], group = ",M,"))",sep="")
+                      aes(x = axx, y = apply(fun(data[['",crit[s],"']][['",m[M],"']][[",d[vd],"]]),1,median), 
+                      col = names(data[['",crit[s],"']])['",m[M],"'], group = ",M,"))")
       
         z <- paste(z, collapse = "")
         
-        plotList[[s]][[vd]] <-  eval(parse(text = paste("ggplot() +", 
-                                                        "theme_minimal() +",
-                                                        z,sep="")))
+        plotList[[s]][[vd]] <-  eval(parse(text = paste0("ggplot() +", 
+                                                        "theme_light() + ylim(",
+                                                        (1.2^(-1))*min(unlist(
+                                                          lapply(z_list[[crit[s]]][m],function(x) lapply(x, min)))[grepl(d[vd],names(unlist(lapply(z_list[[crit[s]]][m],function(x) lapply(x, min)))))]
+                                                          ),
+                                                        ",",
+                                                        1.2*max(unlist(
+                                                          lapply(z_list[[crit[s]]][m],function(x) lapply(x, max)))[grepl(d[vd],names(unlist(lapply(z_list[[crit[s]]][m],function(x) lapply(x, max)))))]
+                                                        ),") +",
+                                                        z)))
         
         plotList[[s]][[vd]] <- plotList[[s]][[vd]] +  
                                 ggtitle(paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Dataset = ",d[vd], sep = "")) + 
@@ -148,13 +155,13 @@ plotCS <- function(d=1:length(agEval),
     colorListMatch[which(grepl(highlight,data_list_names))] <- highlight_color
     
     if(cross_section == "p"){
-      axx <- rownames(z_list[[1]][[1]][[1]]) #prop_vec
+      axx <- as.numeric(gsub("p","",rownames(z_list[[1]][[1]][[1]]))) #prop_vec
       data <- z_list
       axxTitle <- "proportion missing"
       fun <- function(x){return(x)} 
     }
     else if(cross_section == "g"){
-      axx <- colnames(z_list[[1]][[1]][[1]]) #gap_vec
+      axx <- as.numeric(gsub("g","",colnames(z_list[[1]][[1]][[1]]))) #gap_vec
       axxTitle <- "gap width" 
       data <- z_list
       fun <- function(x){return(t(x))} 
@@ -168,40 +175,45 @@ plotCS <- function(d=1:length(agEval),
       for(vm in 1:M){
         z <- numeric(D)
         for(vd in 1:(D-1)){
-          z[vd] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])), 
-                                                   aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,min),
+          z[vd] <- paste0("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])), 
+                                                   aes(x = axx, ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,max),
                                                                   group = ",vd,"), 
-                                                   fill = colorListMatch[",vd,"], alpha = 0.2) + 
+                                                   fill = colorListMatch[",vd,"], alpha = 0.4) + 
 
                           geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]])),
                           color = colorListMatch[",vd,"], alpha = 1,
-                          aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,median),
-                          col = names(data[['",crit[s],"']][['",m[vm],"']])[",d[vd],"], group = ",vd,")) + ",sep="") 
+                          aes(x = axx, y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[vd],"]]),1,median),
+                          col = names(data[['",crit[s],"']][['",m[vm],"']])[",d[vd],"], group = ",vd,")) + ") 
         }
         
-        z[D] <- paste("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]])), 
-                                                     aes(x = as.factor(axx), ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,min),
+        z[D] <- paste0("geom_ribbon(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]])), 
+                                                     aes(x = axx, ymin = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,min),
                                                    ymax = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,max),
                                                                   group = ",D,"), 
-                                                   fill = colorListMatch[",D,"], alpha = 0.2) + 
+                                                   fill = colorListMatch[",D,"], alpha = 0.4) + 
                       
                       geom_line(data = data.frame(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]])),
                       color = colorListMatch[",D,"], alpha = 1,
-                      aes(x = as.factor(axx), y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,median), 
-                      col = names(data[['",crit[s],"']][['",m[vm],"']])[",d[D],"], group = ",D,"))",sep="")
+                      aes(x = axx, y = apply(fun(data[['",crit[s],"']][['",m[vm],"']][[",d[D],"]]),1,median), 
+                      col = names(data[['",crit[s],"']][['",m[vm],"']])[",d[D],"], group = ",D,"))")
         
         z <- paste(z, collapse = "")
         
-        plotList[[s]][[vm]] <-  eval(parse(text = paste("ggplot() +", 
-                                                        "theme_minimal() +",
-                                                        z,sep="")))
+        plotList[[s]][[vm]] <-  eval(parse(text = paste0("ggplot() +", 
+                                                        "theme_light() + ylim(",
+                                                        (1.2^(-1))*min(unlist(lapply(z_list[[crit[s]]][[m[vm]]], min))),
+                                                        ",",
+                                                        1.2*max(unlist(lapply(z_list[[crit[s]]][[m[vm]]], max))),") +",
+                                                        z)))
         
         plotList[[s]][[vm]] <- plotList[[s]][[vm]] +  
           ggtitle(paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Method = ",method_list_names[vm], sep = "")) + 
           xlab(axxTitle) + ylab("value") + 
           scale_color_manual("", breaks = names(data[[crit[s]]][[m[vm]]]), 
-                                  values = colorListMatch, labels = names(data[[crit[s]]][[m[vm]]]))
+                                  values = colorListMatch, labels = names(data[[crit[s]]][[m[vm]]])) + 
+          theme(panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank())
         
       }
       names(plotList[[s]]) <- method_list_names
