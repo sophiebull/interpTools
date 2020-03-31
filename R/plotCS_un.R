@@ -1,4 +1,4 @@
-plotCSBars <- function(agEval, 
+plotCS_un <- function(agEval, 
                        cross_section = "p", 
                        crit, 
                        d, 
@@ -6,7 +6,7 @@ plotCSBars <- function(agEval,
                        f = "median", 
                        layer_type = "method", 
                        highlight = "HWI", highlight_color = "#FA4032",
-                       colors = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")){
+                       colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
   
   stopifnot(length(d)==1, length(crit)==1, (cross_section == "p" | cross_section == "g"), 
             class(agEval) == "agEvaluate", (layer_type == "method" | layer_type == "dataset"),
@@ -29,7 +29,7 @@ plotCSBars <- function(agEval,
     y2axisTitle <- "value"
     names <- gap_vec_names
     unfixedNames <- prop_vec_names
-    fixedCol <- paste0("sub('\\(', '', substr(names(theTab)[",i,"], 1, regexpr('\\,', names(theTab)[",i,"])-1))")
+    #fixedCol <- paste0("sub('\\(', '', substr(names(theTab)[",i,"], 1, regexpr('\\,', names(theTab)[",i,"])-1))")
   }
   
   else if(cross_section == "g"){
@@ -39,7 +39,7 @@ plotCSBars <- function(agEval,
     y2axisTitle <- "value"
     names <- prop_vec_names
     unfixedNames <- gap_vec_names
-    fixedCol <- paste0("sub('\\)','', gsub('.*,','',names(theTab)[",i,"]))")
+    #fixedCol <- paste0("sub('\\)','', gsub('.*,','',names(theTab)[",i,"]))")
   }
   
   colorList <- colors
