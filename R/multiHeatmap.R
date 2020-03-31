@@ -1,4 +1,4 @@
-multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median", d = 1:5, colors){
+multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median", d = 1:5, colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
   
   M <- length(m)
   C <- length(crit)
@@ -61,11 +61,10 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median", d = 1:5, co
         plott[[vd]] <- melt(z_list[[crit[cr]]][[m]][[d[vd]]])
         colnames(plott[[vd]]) <- c("p","g", "value")
       }
-      
-      r_string <- paste0("plott[[",2:(D-1),"]]$value, ", collapse = "")
-      r_string <- c("range(c(plott[[1]]$value,", r_string, paste0("plott[[",D,"]]$value))", collapse = ""))
-      
-      
+
+        r_string <- paste0("plott[[",2:(D-1),"]]$value, ", collapse = "")
+        r_string <- c("range(c(plott[[1]]$value,", r_string, paste0("plott[[",D,"]]$value))", collapse = ""))
+
       rng = eval(parse(text = r_string))
       
       col = colorRampPalette(colors = colors)(100)
@@ -120,15 +119,15 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median", d = 1:5, co
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         theme(legend.position = "right") + 
-        labs(fill = crit[cr])
+        labs(fill = paste0(crit[cr]," (",f,")"))
       
       myLegend <-g_legend(dumPlot)
-      
-      h_string <- paste0("plotList[[",2:(D-1),"]],", collapse = "")
-      rep_string <- c(paste0(rep("10,",D-1), collapse = ""),"10")
-      rep_string <- paste0(rep_string, collapse = "")
-      
-      h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"))", collapse = ""))
+
+        h_string <- paste0("plotList[[",2:(D-1),"]],", collapse = "")
+        rep_string <- c(paste0(rep("10,",D-1), collapse = ""),"10")
+        rep_string <- paste0(rep_string, collapse = "")
+        
+        h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"))", collapse = ""))
       
       myHeatmaps <- eval(parse(text = h_string))
       
@@ -188,6 +187,8 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median", d = 1:5, co
       rng = range(z_list[[crit]][m])
       col = colorRampPalette(colors = colors)(100)
       
+      plotList <- list()
+      
       for(vd in 1:D){
         
         if(vd == 1){
@@ -236,16 +237,16 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median", d = 1:5, co
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         theme(legend.position = "bottom") + 
-        labs(fill = crit)
+        labs(fill = paste0(crit," (",f,")"))
       
       myLegend <- g_legend(dumPlot)
       
-      h_string <- paste0("plotList[[",2:(D-1),"]],", collapse = "")
-      rep_string <- c(paste0(rep("10,",D-1), collapse = ""),"10")
-      rep_string <- paste0(rep_string, collapse = "")
-      
-      h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"), right = m[",cr,"])", collapse = ""))
-      
+        h_string <- paste0("plotList[[",2:(D-1),"]],", collapse = "")
+        rep_string <- c(paste0(rep("10,",D-1), collapse = ""),"10")
+        rep_string <- paste0(rep_string, collapse = "")
+        
+        h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"), right = m[",cr,"])", collapse = ""))
+
       heatmapList[[cr]] <- eval(parse(text = h_string))
     }
     
@@ -257,7 +258,6 @@ multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median", d = 1:5, co
     plotWindow <- eval(parse(text = call))
     plotWindow <- grid.arrange(plotWindow, myLegend, ncol = 1, heights = c(D*10, 10))
   }
-}
 
 return(plotWindow) 
 }
