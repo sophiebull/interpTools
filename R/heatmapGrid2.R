@@ -1,4 +1,4 @@
-heatmapGrid2 <- function(agEval, f="median", crit, m, colours = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111"), d = 1:5){
+heatmapGrid2 <- function(agEval, f="median", crit, m, colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111"), d = 1:5){
 
   # get legend
   g_legend<-function(a.gplot){
@@ -34,7 +34,7 @@ heatmapGrid2 <- function(agEval, f="median", crit, m, colours = c("#F9E0AA","#F7
   
   rng = eval(parse(text = d_strand))
   
-  col = colours
+  col = colors
   
   mapList <- list()
   
@@ -42,10 +42,10 @@ heatmapGrid2 <- function(agEval, f="median", crit, m, colours = c("#F9E0AA","#F7
     for(vd in 1:D){
       if(vd == 1){
         mapList[[vd]] <- ggplot(plott[[vd]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
-          scale_fill_gradientn(colours = col, values = c(0,1),
+          scale_fill_gradientn(colors = col, values = c(0,1),
                                limits = rng) +
           
-          labs(x = "proportion missing", y = "gap width", fill = crit, title = eval(parse(text = titles[vd]))) + 
+          labs(x = "proportion missing", y = "gap width", fill = paste0(crit," (",f,")"), title = eval(parse(text = titles[vd]))) + 
           theme_minimal() + 
           
           theme(legend.position = "none",
@@ -55,10 +55,10 @@ heatmapGrid2 <- function(agEval, f="median", crit, m, colours = c("#F9E0AA","#F7
       }
       else if(vd != 1 && vd !=D){
         mapList[[vd]] <- ggplot(plott[[vd]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
-          scale_fill_gradientn(colours = col, values = c(0,1),
+          scale_fill_gradientn(colors = col, values = c(0,1),
                                limits = rng) +
           
-          labs(x = "proportion missing", y = "gap width", fill = crit, title = eval(parse(text = titles[vd])) ) + 
+          labs(x = "proportion missing", y = "gap width", fill = paste0(crit," (",f,")"), title = eval(parse(text = titles[vd])) ) + 
           theme_minimal() + 
           
           theme(legend.position = "none",
@@ -69,10 +69,10 @@ heatmapGrid2 <- function(agEval, f="median", crit, m, colours = c("#F9E0AA","#F7
       }
       else if(vd == D){
         mapList[[vd]] <- ggplot(plott[[vd]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
-          scale_fill_gradientn(colours = col, values = c(0,1),
+          scale_fill_gradientn(colors = col, values = c(0,1),
                                limits = rng) +
           
-          labs(x = "proportion missing", y = "gap width", fill = crit, title = eval(parse(text = titles[vd]))) + 
+          labs(x = "proportion missing", y = "gap width", fill = paste0(crit," (",f,")"), title = eval(parse(text = titles[vd]))) + 
           theme_minimal() + 
           
           theme(legend.position = "none",
@@ -86,10 +86,10 @@ heatmapGrid2 <- function(agEval, f="median", crit, m, colours = c("#F9E0AA","#F7
     
     # make dummy plot to retrieve legend
     dumPlot <- ggplot(plott[[D]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
+      scale_fill_gradientn(colors = col, values = c(0,1),
                            limits = rng) +
       theme(legend.position = "bottom") + 
-      labs(fill = crit)
+      labs(fill = paste0(crit," (",f,")"))
     
     myLegend<-g_legend(dumPlot)
     
@@ -99,10 +99,10 @@ heatmapGrid2 <- function(agEval, f="median", crit, m, colours = c("#F9E0AA","#F7
   
   else if(length(d) == 1){
     mapList <- ggplot(plott[[1]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
+      scale_fill_gradientn(colors = col, values = c(0,1),
                            limits = rng) +
       
-      labs(x = "proportion missing", y = "gap width", fill = crit, title = eval(parse(text = titles[1]))) + 
+      labs(x = "proportion missing", y = "gap width", fill = paste0(crit," (",f,")"), title = eval(parse(text = titles[1]))) + 
       theme_minimal() + 
       
       theme(legend.position = "none",
@@ -112,10 +112,10 @@ heatmapGrid2 <- function(agEval, f="median", crit, m, colours = c("#F9E0AA","#F7
     
     # make dummy plot to retrieve legend
     dumPlot <- ggplot(plott[[1]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
-      scale_fill_gradientn(colours = col, values = c(0,1),
+      scale_fill_gradientn(colors = col, values = c(0,1),
                            limits = rng) +
       theme(legend.position = "bottom") + 
-      labs(fill = crit) 
+      labs(fill = paste0(crit," (",f,")"))
     
     myLegend<-g_legend(dumPlot)
     
