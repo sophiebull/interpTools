@@ -18,8 +18,10 @@ Depends: multitaper,
           parallel,
           ggplot2,
           gridExtra,
+          grid,
           plotly,
           dplyr,
           RColorBrewer,
           tidyr,
-          diptest
+          diptest,
+          xtable
