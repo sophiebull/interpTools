@@ -7,7 +7,7 @@ multiCS <- function(agEval,
                     cross_section = "p",
                     highlight = "HWI", 
                     highlight_color = "#EE5C42",
-                    colors = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50")){
+                    colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
   
   stopifnot(length(crit) == 1)
   
