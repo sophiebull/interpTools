@@ -75,6 +75,11 @@ setwd("/home/sophie/sophTools/files/highRes/actualGaps")
 png("result.png")
 plot(result$actual, type = "l", main = "Mean Actual Gaps", ylab = "Actual", xlab= "Expected")
 dev.off()
+
+
+setwd("/home/sophie/sophTools/files/highRes/actualGaps")
+print(xtable(result), file="result.txt", include.rownames = F, sanitize.text.function = function(x) x)
+
 ```
 
 # Split Data
@@ -163,7 +168,7 @@ IntData.hr <- list(D1 = IntData.hr.1, D2 = IntData.hr.2, D3 = IntData.hr.3, D4 =
 
 # PERFORMANCE MATRIX
 ```{r}
-OriginalData.hr <- load_obj("/home/sophie/sophTools/files/new_2/testOriginalData.rda")
+OriginalData.hr <- load_obj("/home/sophie/sophTools/files/new_1/testOriginalData.rda")
 IntData.hr <- load_obj("/home/sophie/sophTools/files/highRes/IntData.hr.rda")
 GappyData.hr <- load_obj("/home/sophie/sophTools/files/highRes/GappyData.hr.rda")
 
@@ -177,7 +182,7 @@ save(ag.hr, file = "ag.hr.rda")
 # Heatmaps (one metric)
 ```{r}
 agEval <- load_obj("/home/sophie/sophTools/files/highRes/ag.hr.rda")
-crit = "NRMSD"
+crit = "abs_differences"
 m = "HWI"
 
 setwd("/home/sophie/sophTools/files/highRes")
@@ -309,5 +314,32 @@ sub1  <- subplot(pp1NRMSD.hr,pp2NRMSD.hr,pp3NRMSD.hr,pp4NRMSD.hr,pp5NRMSD.hr,the
 
 These are ugly ^ :) 
 
+
+```{r}
+OriginalData <- load_obj("/home/sophie/sophTools/files/new_2/testOriginalData.rda")
+GappyData <- load_obj("/home/sophie/sophTools/files/new_2/testGappyData.rda")
+IntData <- load_obj("/home/sophie/sophTools/files/new_2/testIntData.rda")
+
+testpMats <- performance(OriginalData = OriginalData, GappyData = GappyData, IntData = IntData)
+testag <- agEvaluate(testpMats)
+testag <- convertNames(testag)
+
+setwd("/home/sophie/sophTools/files/new_2")
+save(testpMats, file = "testpMats.rda")
+save(testag, file = "testag.rda")
+```
+
+```{r}
+testag <- load_obj("/home/sophie/sophTools/files/new_2/testag.rda")
+newag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+
+heatmapGrid2(agEval = newag, f = "median", crit = "NRMSD", m = "HWI", d = 1:5)
+
+setwd("/home/sophie/sophTools/files/highRes")
+png(paste0(crit,"_Heatmap_lr.png"), width = 1136, height = 328)
+heatmapGrid2(crit = "NRMSD", m = "HWI", agEval = testag)
+dev.off()
+
+```
 
 

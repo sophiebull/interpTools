@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # SKEWS
 ```{r}
 new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
-skewTab <- plotSkew(agEval = new.ag, output = "table")
+skewTab <- plotSkew(agEval = new.ag, crit = crit, output = "table")
 
 setwd("/home/sophie/sophTools/files/new_1")
 print(xtable(skewTab), file="critSkew.txt", include.rownames = F, sanitize.text.function = function(x) x)

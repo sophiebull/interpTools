@@ -26,8 +26,8 @@ p4 <- plotXt(4, simData = new.simData, cptwise = F, axisLabels = F)
 p5 <- plotXt(5, simData = new.simData, cptwise = F, axisLabels = F)
 
 setwd("/home/sophie/sophTools/files/new_1")
-png("dataXt.png", width = 1080, height = 1200)
-grid.arrange(arrangeGrob(p1,p2,p3,p4,ncol = 2, nrow = 2), arrangeGrob(p5, nrow = 1, ncol = 1), heights = c(2,1),
+png("dataXt5.png", width = 1080, height = 1200)
+grid.arrange(arrangeGrob(p1,p2,p3,p4,ncol = 2, nrow = 3), arrangeGrob(p5, nrow = 1, ncol = 1), heights = c(2,1),
              bottom = textGrob("time"), left = textGrob("value", rot = 90))
 dev.off()
 ```
@@ -125,8 +125,9 @@ crit <- rownames(new.ag[[1]][[1]][[1]][[1]])
 
 setwd("/home/sophie/sophTools/files/new_1")
 png("critSkew.png", height = 1000, width = 800)
-plotSkew(agEval = new.ag, cptwise = T, symmetric = NULL, crit = crit)
+plotSkew(agEval = new.ag, cptwise = T, symmetric = NULL, crit = crit, output = "plots")
 dev.off()
+
 ```
 
 Now let's see the corresponding performance metrics across all methods. Coloured bar indicates the "best":
@@ -146,45 +147,59 @@ grid.arrange(pm1,pm2,pm3,pm4,pm5,pm6)
 ```{r}
 # WITH SPLINES
 new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
-multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "method", m = c("HWI","KAF","EWMA","FMM", "HCS", "NCS"), f="median", highlight = "HWI", highlight_color = "#F92111", colors = c("#F9E0AA","#FAAF08","#FA812F"), d = 1:5)
+colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")
+
+multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "method", m = c("HWI","KAF","EWMA","FMM", "HCS", "NCS"), f="median", highlight = "HWI", highlight_color = "#F92111", colors = colors, d = 1:5)
+```
+
+```{r}
+# SHOWING AN EXAMPLE OF HOW BAD SPLINES ARE
+new.ag <-load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")
+
+# NRMSD
+plotSurface(crit="NRMSD", agEval = new.ag, layer_type = "method", m = c("HWI","KAF","EWMA","FMM", "HCS", "NCS"), f="median", highlight = "HWI", highlight_color = "#F92111", colors = colors, d = 1)
+
+#MdAPE
+plotSurface(crit="MdAPE", agEval = new.ag, layer_type = "method", m = c("HWI","KAF","EWMA","FMM", "HCS", "NCS"), f="median", highlight = "HWI", highlight_color = "#F92111", colors = colors, d = 1)
+
 ```
 
 ```{r}
 # WITHOUT SPLINES (DEFAULT)
 new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
-multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "method", m = c("HWI","KAF","EWMA"), f="median", highlight = "HWI", highlight_color = "#F92111", colors = c("#F9E0AA","#FAAF08","#FA812F"), d = 1:5)
+colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")
+
+multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "method", m = c("HWI","KAF","EWMA"), f="median", highlight = "HWI", highlight_color = "#F92111", colors = colors, d = 1:5)
 ```
 
 ## LAYER_TYPE = DATASET
 ```{r}
 # WITH SPLINES
 new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
-multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "dataset", m = c("HWI","KAF","EWMA","FMM", "HCS", "NCS"), f="median", highlight = 1, highlight_color = "#F92111", colors = c("#F9E0AA","#FAAF08","#FA812F"), d = 1:5)
+colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")
+
+multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "dataset", m = c("HWI","KAF","EWMA","FMM", "HCS", "NCS"), f="median", highlight = 1, highlight_color = "#F92111", colors = colors, d = 1:5)
 ```
 
 ```{r}
 # WITHOUT SPLINES (DEFAULT)
 new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
-multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "dataset", m = c("HWI","KAF","EWMA"), f="median", highlight = 1, highlight_color = "#F92111", colors = c("#F9E0AA","#FAAF08","#FA812F"), d = 1:5)
+colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")
+
+multiSurface(crit="NRMSD", agEval = new.ag, layer_type = "dataset", m = c("HWI","KAF","EWMA"), f="median", highlight = 1, highlight_color = "#F92111", colors = colors, d = 1:5)
 ```
 
 # HEATMAPS
 ```{r}
+new.ag <- load_obj("/home/sophie/sophTools/files/new_1/new.ag.rda")
+crit = "NRMSD"
+colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")
+
 setwd("/home/sophie/sophTools/files/new_1")
-png("NRMSD_heatmap.png", width = 1000, height = 1000)
-multiHeatmap(crit = "NRMSD", by = "method", m = c("HWI","KAF","EWMA"), agEval = new.ag)
-dev.off()
 
-png("RMSE_heatmap.png", width = 1000, height = 1000)
-multiHeatmap(crit = "RMSE", by = "method", m = c("HWI","KAF","EWMA"), agEval = new.ag)
-dev.off()
-
-png("MAPE_heatmap.png", width = 1000, height = 1000)
-multiHeatmap(crit = "MAPE", by = "method", m = c("HWI","KAF","EWMA"), agEval = new.ag)
-dev.off()
-
-png("MdAPE_heatmap.png", width = 1000, height = 1000)
-multiHeatmap(crit = "MdAPE", by = "method", m = c("HWI","KAF","EWMA"), agEval = new.ag)
+png(paste0(crit,"_heatmap_m.png"), width = 1000, height = 1000)
+multiHeatmap(crit = crit, by = "method", m = c("HWI","KAF","EWMA"), agEval = new.ag, colors = colors)
 dev.off()
 ```
 
@@ -206,7 +221,9 @@ setwd("/home/sophie/sophTools/files/new_1")
 png(paste0(crit,"CSbyMethod_p.png"), width = 1000, height = 1100)
 multiCS(agEval = agEval, crit = crit, d = d, m = m, highlight = highlight, layer_type = layer_type, cross_section = cross_section, f = f, colors = colors)
 dev.off()
+```
 
+```{r}
 # Uncollapse
 setwd("/home/sophie/sophTools/files/new_1")
 png(paste0("D1",crit,"CSunbyMethod_p.png"), width = 1000, height = 1100)
