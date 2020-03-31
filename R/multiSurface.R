@@ -6,7 +6,7 @@ multiSurface <- function(agEval,
                          f = "median",
                          highlight = "HWI",
                          highlight_color = "#FA4032",
-                         colors = c("#EAECEE","#D5D8DC","#ABB2B9","#808B96","#566573","#2C3E50")
+                         colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")
                          ){
  
   stopifnot(length(crit) == 1)
@@ -106,7 +106,6 @@ multiSurface <- function(agEval,
       )
     }
   }
-  
   
   else if(layer_type == "dataset"){
     
