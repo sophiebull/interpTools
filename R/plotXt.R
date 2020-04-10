@@ -1,15 +1,29 @@
 #' Plot Each Component of Xt
 #' 
-#' A function to generate a triptych to visualize each component of the original time series
-#' @param d The index of the original time series of interest
-#' @param cptwise Logical; whether to display Xt componentwise or not
-
-plotXt <- function(d, simData, cptwise = T, axisLabels = T, plot.title = T, return = NULL){
+#' A function to generate a series of plots to visualize each component of the original time series
+#' @param d \code{numeric}; The index of the original time series to show
+#' @param cptwise \code{logical}; Whether to display Xt componentwise, or not
+#' @param simData \code{simList}; An object containing the information about the original data
+#' @param axisLabels \code{logical}; Set to \code{TRUE} if returning a single plot (i.e. \code{cptwise = TRUE} and \code{return != NULL}), and \code{FALSE} otherwise.
+#' @param plot.title \code{logical}; Whether to include individual plot titles
+#' @param return \code{character}; The particular plot(s) to display.\cr  \cr
+#'                            If \code{cptwise = TRUE} and \code{return = NULL}, all of \code{'Mt'}, \code{'Tt'}, \code{'freq'}, and \code{'Wt'} will be displayed.\cr \cr
+#'                            If \code{cptwise = TRUE} and \code{return = 'Mt' | 'Tt' | 'freq' | 'Wt'}, the specified plot will show. \cr \cr
+#'                            If \code{cptwise = FALSE}, \code{return} must be the default (\code{NULL}) to display the sum total (this is \code{Xt}).
+#'                            
+#'                               
+plotXt <- function(d, simData, cptwise = T, axisLabels = F, plot.title = T, return = NULL){
   require(ggplot2) 
   require(gridExtra)
   
 stopifnot(class(simData) == "simList", (is.null(return) | return == "Mt" | return == "Tt" | return == "freq" | return == "Wt"))
 
+if(cptwise & is.null(return)) stop("Please specify if you wish to return ")
+  
+  
+if(cptwise & axisLabels & is.null(return)){
+  warning("axisLabels should be set to FALSE if the function is to return all cptwise plots")
+}
 
   t <- 0:(length(simData$Xt[[d]])-1)
   
@@ -48,7 +62,7 @@ stopifnot(class(simData) == "simList", (is.null(return) | return == "Mt" | retur
     
     ggtitle(bquote(m[t] == mu[t] + mu*", polynomial of order"~.(simData$Mt_numTrend[[d]]))) + 
     
-    annotate("text",x=(length(simData$Mt[[d]])+5),y=simData$Mt_mu[[d]], label = expression(mu))+
+    annotate("text",x=(length(simData$Mt[[d]])+5),y=simData$Mt_mu[[d]], label = "\U003BC")+
     
     labs(x = xlab, y = ylab)+
     theme_light() +
@@ -125,7 +139,7 @@ stopifnot(class(simData) == "simList", (is.null(return) | return == "Mt" | retur
   
     xt <- ggplot()+
     
-    geom_line(aes(x=t,y=simData$Xt[[d]]), lwd = 0.2) +
+    geom_line(aes(x=t,y=as.numeric(simData$Xt[[d]])), lwd = 0.2) +
     geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2, col = "white")+
       
     ggtitle(bquote(x["t,"~.(d)] == m["t,"~.(d)] + t["t,"~.(d)] + xi["t,"~.(d)]))+
@@ -138,7 +152,7 @@ stopifnot(class(simData) == "simList", (is.null(return) | return == "Mt" | retur
   if(cptwise){
     if(is.null(return) && axisLabels == F){
     g1 <- grid.arrange(arrangeGrob(mt,tt,wt, nrow = 3), bottom = textGrob("time", vjust = -3.5, hjust = -0.5), left = textGrob("value", rot = 90, vjust = 2))
-    grid.arrange(g1,freq, ncol = 1, heights = c(3,0.6))
+    grid.arrange(g1,freq, ncol = 1, heights = c(3,0.6), bottom = textGrob(bquote(f == omega/(2*pi))))
       }
     else if(return == "Mt"){
       mt
