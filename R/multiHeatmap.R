@@ -1,12 +1,60 @@
-multiHeatmap <- function(crit, agEval, m, by = "crit", f = "median", d = 1:5, colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
+#' Arrange Multiple Heatmaps on a Grid
+#' 
+#' Function to generate a grid of heatmaps to compare the performances of particular sets of interpolations across a set of __criteria__ or __methods__.
+#' \itemize{
+#' \item If \code{by = "crit"}, rows of heatmaps for a chosen method are arranged by \strong{criterion}. \cr
+#' \item If \code{by = "method"}, rows of heatmaps for a chosen criterion are arranged by \strong{method}. \cr
+#' }
+#'
+#' @param crit \code{character}; A vector describing the performance metrics of interest
+#' @param agEval \code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})
+#' @param m \code{character}; A vector describing the interpolation methods of interest
+#' @param by \code{character}; Either \code{"crit"} or \code{"method"}
+#' @param f \code{character}; The statistic of interest that will be depicted by the heatmap. Possible choices are listed in \code{?agEvaluate}.
+#' @param d \code{numeric}; A vector to indicate datasets of interest
+#' @param colors \code{character}; A vector of the desired color palette, with entries in HTML format (\code{"#xxxxxx"}) 
+
+multiHeatmap <- function(crit, 
+                         agEval, 
+                         m, 
+                         by = "crit", 
+                         f = "median", 
+                         d = 1:5, 
+                         colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
+  
+  ## LOGICAL CHECKS ############
+  
+  if(sum(duplicated(d) != 0)) stop(paste0("'d' contains redundant elements at position(s): ", paste0(c(1:length(d))[duplicated(d)], collapse = ", ") ))
+  if(sum(duplicated(m) != 0)) stop(paste0("'m' contains redundant elements at position(s): ", paste0(c(1:length(m))[duplicated(m)], collapse = ", ") ))
+  if(sum(duplicated(crit) != 0)) stop(paste0("'crit' contains redundant elements at position(s): ", paste0(c(1:length(crit))[duplicated(crit)], collapse = ", ") ))
+
+  if(by != "crit" & by != "method") stop("'by' must be either 'crit' or 'method'.")
+  if(by == "crit" & length(crit) < 2) stop("Only one criterion was chosen. Please specify at least one more, or use 'heatmapGrid2()' instead.")
+  if(by == "method" & length(m) < 2) stop("Only one method was chosen. Please specify at least one more, or use 'heatmapGrid2()' instead.")
+  
+  if(class(agEval) != "agEvaluate") stop("'agEval' object must be of class 'agEvaluate'. Please use agEvaluate().")
+  
+  if(by == "method" & length(crit) != 1) stop("'crit' must contain only a single character element if you wish to arrange by method.")
+  
+  if(length(f) != 1) stop("'f' must contain only a single character element.")
+  if(length(by) != 1) stop("'by' must contain only a single character element.")
+  
+  if(by == "crit" & length(m) != 1) stop("'m' must contain only a single character element if you wish to arrange by criterion.")
+  
+  if(!all(m %in%  names(agEval[[1]][[1]][[1]]))) stop(paste0("Method(s) '", paste0(m[!m%in% names(agEval[[1]][[1]][[1]])], collapse = ", "), "' not found. Possible choices are: '", paste0(names(agEval[[1]][[1]][[1]]), collapse = "', '"),"'."))
+  if(!all(paste0("D",d) %in% names(agEval))) stop("Dataset(s) ", paste0(d[!paste0("D",d) %in% names(agEval)], collapse = ", ")," not found. Possible choices are: ", paste0(gsub("D", "",names(agEval)), collapse = ", "))
+  if(!all(f %in% names(agEval[[1]][[1]][[1]][[1]])[1:12])) stop(paste0(c("f must be one of: '",paste0(names(agEval[[1]][[1]][[1]][[1]])[1:12], collapse = "', '"),"'."), collapse = ""))
+  if(!all(crit %in% rownames(agEval[[1]][[1]][[1]][[1]]))) stop(paste0("Criterion '",crit,"' must be one of ", paste(rownames(agEval[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
+  
+  if(length(colors) <2) stop("'colors' must contain at least two colors (each in HTML format: '#xxxxxx')")
+  
+  ##################
   
   M <- length(m)
   C <- length(crit)
   D <- length(d)
   
   z_list <- compileMatrix(agEval)[[f]]
-  
-  stopifnot((by == "crit" && length(m) == 1 && length(crit) > 1) | (by == "method" && length(crit) == 1 && length(m)>1))
   
   # get legend
   g_legend<-function(a.gplot){
