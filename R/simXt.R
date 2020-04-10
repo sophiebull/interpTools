@@ -235,6 +235,6 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
     }
     
   }
-  class(simList) == "simList"
+  class(simList) = "simList"
   return(simList)
 }
