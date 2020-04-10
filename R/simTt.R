@@ -5,15 +5,16 @@
 #' @param bandwidth Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If specified, 'bandwidth' must be at least -log10(1/numFreq). If unspecified, freq =  runif(numFreq,0,1)
 #' @param numFreq The number of sinusoids to generate
 
-simTt <- function(n=1000, numFreq = 20, bandwidth = NULL#, ampMod = FALSE
-                  ){  
-
-  #stopifnot(n%%1 == 0, n > 0, numFreq%%2 == 0, numFreq > 0, (is.null(bandwidth) || (bandwidth >= 1 && (numFreq <= 1/(10^-bandwidth))))#, is.logical(ampMod)
-  #          )
+simTt <- function(n=1000, numFreq = 20, bandwidth = NULL){  
   
+  if( !is.numeric(numFreq)) stop('numFreq must be numeric.')
+  if((!is.numeric(bandwidth) && !is.null(bandwidth))) stop('bandwidth must be NULL or numeric.')
   if( any(numFreq < 0 | numFreq%%2 != 0 | numFreq%%1 != 0) ) stop('Please specify an even integer for numFreq')
   if( !(is.null(bandwidth)) &&  bandwidth>=1 && numFreq > 1/(10^-bandwidth) ) stop('Bandwidth must be at least -log10(1/numFreq)')
   if( !(is.numeric(n)) || n%%1 != 0) stop ('n must be a positive integer')
+  
+  stopifnot(n%%1 == 0, n >= 10, numFreq%%2 == 0, numFreq > 0, (is.null(bandwidth) || (bandwidth >= 1 && (numFreq <= 1/(10^-bandwidth)))),
+            (is.null(bandwidth) | is.numeric(bandwidth)))
   
   Tt_list <- list()
   t <- 0:(n-1)
