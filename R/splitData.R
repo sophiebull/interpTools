@@ -2,14 +2,19 @@
 #' 
 #' Function to K-split the Gappy Data
 #' 
-#' @param split The number of groups to divide K into (ie. K/split)
+#' @param split The number of groups to divide K into (ie. K/split). Value must be an integer and evenly divide K.
 #' @param GappyData A list object of dimension DxPxGxK 
 
 splitData <- function(GappyData, split = split){
+  
   D <- length(GappyData)
   P <- length(GappyData[[1]])
   G <- length(GappyData[[1]][[1]])
   K <- length(GappyData[[1]][[1]][[1]])
+  
+  if(split %% 1 != 0) stop("split must be an integer.")
+  if((K/split) %%1 != 0) stop(paste0("The split parameter must be an integer and evenly divide K, where K = ",K,"."))
+  
   Nind <- 1:split
   
   splitList <- lapply(splitList <- vector(mode = 'list',D),function(x)
