@@ -2,10 +2,15 @@
 #' 
 #' Function to stitch together data
 #' 
-#' @param directory The directory location of the .rda files to stitch. Must be devoid of other files and each file must be identical in structure. 
+#' @param directory The directory location of the .rda files to stitch. Must be devoid of other files, and each .rda must be identical in structure. 
 
 
 stitchData <- function(directory){
+  
+  if(!all(grepl(".rda", list.files(directory)))) stop(c("Directory must only contain .rda files that are identical in structure. Please relocate or delete the following files: ",
+                                                             
+                                                             paste(list.files(directory)[which(!grepl(".rda",list.files(directory)))], 
+                                                                   collapse = ", ")))
   
   files <- list.files(directory, pattern=".rda", full.names = TRUE, recursive = TRUE)
   split <- length(files)
