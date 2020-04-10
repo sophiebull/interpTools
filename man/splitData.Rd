@@ -9,7 +9,7 @@ splitData(GappyData, split = split)
 \arguments{
 \item{GappyData}{A list object of dimension DxPxGxK}
 
-\item{split}{The number of groups to divide K into (ie. K/split)}
+\item{split}{The number of groups to divide K into (ie. K/split). Value must be an integer and evenly divide K.}
 }
 \description{
 Function to K-split the Gappy Data

@@ -7,12 +7,13 @@
 performance(OriginalData, IntData, GappyData)
 }
 \arguments{
-\item{OriginalData}{A list object of dimension Dxn of original (complete) time series}
+\item{OriginalData}{\code{list}; A list object of dimension D x N of original (complete) time series}
 
-\item{IntData}{A list object of dimension DxMxPxGxKxN of interpolated time series (output of parInterpolate.R)}
+\item{IntData}{\code{list}; A list object of dimension D x M x P x G x K x N of interpolated time series (output of parInterpolate.R)}
 
-\item{GappyData}{A list object of dimension DxPxGxKxN of the gappy original time series (output of simulateGaps.R)}
+\item{GappyData}{\code{list}; A list object of dimension D x P x G x K x N of the gappy original time series (output of simulateGaps.R)}
 }
 \description{
-Function to calculate the performance metrics between lists of original and interpolated series.
+Function to calculate the performance metrics between lists of original and interpolated series. \cr \cr
+See \code{?eval_performance} and additional documentation provided in this package (\code{"~/metric_definitions.pdf/"}) for a full list and description of the the performance criteria.
 }

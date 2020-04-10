@@ -4,18 +4,20 @@
 \alias{parInterpolate}
 \title{Parallel Interpolation}
 \usage{
-parInterpolate(gappyTS, methods = NULL, FUN_CALL = NULL,
+parInterpolate(GappyList, methods = NULL, FUN_CALL = NULL,
   numCores = detectCores())
 }
 \arguments{
-\item{gappyTS}{A gappy time series vector}
+\item{GappyList}{A list of dimension P x G x K containing gappy time series.}
 
 \item{methods}{vector of IDs for selected interpolation methods, where m = 1,...,M}
 
-\item{FUN_CALL}{User specified interpolation function to be applied to gappyTS. Must be a character string.}
+\item{FUN_CALL}{User specified interpolation function to be applied to GappyList. Must be a character string.}
+
+\item{numCores}{How many CPU cores to use. The default is to use the total number of available cores, as determined by `detectCores()`.}
 }
 \description{
-Function to perform interpolation on gappy series in parallel using user-specified interpolation methods.\cr\cr
+Function to perform interpolation on gappy series in parallel using user-specified and/or user-defined interpolation methods. Parallelization occurs over the K level. \cr\cr
 INTERPOLATION METHOD IDS\cr
 1 - Nearest Neighbor - NN\cr
 2 - Linear Interpolation - LI\cr
@@ -64,7 +66,7 @@ FUN_CALL <- c("plus(","minus(")
 IntData <- list()
 
 for(d in 1:length(OriginalData)){
- IntData[[d]] <- parInterpolate(gappyTS = GappyData[[d]], methods = methods, FUN_CALL = FUN_CALL)
+ IntData[[d]] <- parInterpolate(GappyList = GappyData[[d]], methods = methods, FUN_CALL = FUN_CALL)
 }
 names(IntData) <- names(OriginalData)
 }

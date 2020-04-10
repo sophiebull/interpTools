@@ -2,61 +2,42 @@
 % Please edit documentation in R/eval_performance.R
 \name{eval_performance}
 \alias{eval_performance}
-\title{Evaluate Interpolation Performance of a Single Time Series
- 
-Function to define and store performance criteria for the comparison of a single interpolated series with its original.
-Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:\cr
-pearson_r = 1\cr
-r_squared = 1\cr
-abs_differences = 0\cr
-MBE = 0\cr
-ME = 0\cr
-MAE = 0\cr
-MRE = 0\cr
-MARE = 0\cr
-MAPE = 0\cr
-SSE = 0 \cr
-MSE = 0\cr
-RMS = 0 \cr
-NMSE = 0\cr
-RE = 1\cr
-RMSE = 0\cr
-NRMSD = 0\cr
-RMSS = 0\cr
-MdAPE = 0\cr
-TMAPE = 0\cr}
+\title{Evaluate Interpolation Performance of a Single Time Series}
 \usage{
 eval_performance(x, X, gappyx)
 }
 \arguments{
-\item{x}{The original time series vector}
+\item{x}{\code{numeric}; The \strong{original} time series vector.}
 
-\item{X}{The interpolated time series vector}
+\item{X}{\code{numeric}; The \strong{interpolated} time series vector.}
 
-\item{gappyx}{The gappy original time series vector}
+\item{gappyx}{\code{numeric}; The \strong{gappy} time series vector. Gaps must be indicated by \code{NA}.}
 }
 \description{
-Evaluate Interpolation Performance of a Single Time Series
- 
-Function to define and store performance criteria for the comparison of a single interpolated series with its original.
-Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:\cr
-pearson_r = 1\cr
-r_squared = 1\cr
-abs_differences = 0\cr
-MBE = 0\cr
-ME = 0\cr
-MAE = 0\cr
-MRE = 0\cr
-MARE = 0\cr
-MAPE = 0\cr
-SSE = 0 \cr
-MSE = 0\cr
-RMS = 0 \cr
-NMSE = 0\cr
-RE = 1\cr
-RMSE = 0\cr
-NRMSD = 0\cr
-RMSS = 0\cr
-MdAPE = 0\cr
-TMAPE = 0\cr
+Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated.
+}
+\details{
+The following is a description of the list of performance metrics that are generated: \cr
+\tabular{ccc}{
+     ID \tab Criterion \tab Optimal \cr
+     ...... \tab ........... \tab ......... \cr
+     1 \tab  pearson_r \tab max  \cr
+     2 \tab  r_squared \tab max  \cr
+     3 \tab  abs_differences \tab min  \cr
+     4 \tab  MBE \tab min  \cr
+     5 \tab  ME \tab min  \cr
+     6 \tab  MAE \tab min  \cr
+     7 \tab  MRE \tab min  \cr
+     8 \tab  MARE \tab min  \cr
+     9 \tab  MAPE \tab min  \cr
+     10 \tab  SSE \tab min  \cr
+     11 \tab  MSE \tab min  \cr
+     12 \tab  RMS \tab min  \cr
+     13 \tab  NMSE \tab min  \cr
+     14 \tab  RE \tab max  \cr
+     15 \tab  RMSE \tab min  \cr
+     16 \tab  NRMSD \tab min  \cr
+     17 \tab  RMSS \tab min  \cr
+     18 \tab  MdAPE \tab min  \cr
+   }
 }

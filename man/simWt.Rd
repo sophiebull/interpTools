@@ -12,6 +12,8 @@ simWt(n = 1000, p = 0, q = 0, var = 1)
 \item{p}{The AR order}
 
 \item{q}{The MA order}
+
+\item{var}{The variance of the stochastic process}
 }
 \description{
 Function to simulate W_t: the noise component of X_t. Defaults to white noise.

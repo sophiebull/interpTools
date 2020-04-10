@@ -4,13 +4,28 @@
 \alias{agEvaluate}
 \title{Aggregate the Performance Matrices of Multiple Interpolations}
 \usage{
-agEvaluate(pmats, hist = F)
+agEvaluate(pmats)
 }
 \arguments{
-\item{pmats}{The performance matrices (result of performance.R)}
-
-\item{hist}{logical. TRUE returns a list of histograms of criteria, FALSE returns matrix of aggregated metrics}
+\item{pmats}{\code{list}; A nested list of dimension D x M x P x G x K (result of \code{performance.R}), where the terminal node is a performance matrix.}
 }
 \description{
-Function to 'condense' the performance matrices of the interpolations from each method (M) across K simulations in each (P,G) missingness specification
+Function to aggregate the set of performance matrices, by criterion, using sample statistics of the sampling distribution across K. Resulting object is of class \code{'agEvaluate'}.
+}
+\details{
+The statistics provided in the output are as follows:
+\itemize{
+\item mean
+\item standard deviation 
+\item minimum (0\% quantile)
+\item 2.5\% quantile
+\item 25\% quantile
+\item median (50\% quantile)
+\item 75\% quantile
+\item 97.5\% quantile
+\item maximum (100\% quantile)
+\item IQR (97.5\% quantile - 2.5\% quantile)
+\item skewness
+\item p-value of dip test for unimodality (see \code{?dip} for details)
+}
 }

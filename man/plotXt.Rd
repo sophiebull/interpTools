@@ -4,13 +4,25 @@
 \alias{plotXt}
 \title{Plot Each Component of Xt}
 \usage{
-plotXt(d, simData, cptwise = T)
+plotXt(d, simData, cptwise = T, axisLabels = F, plot.title = T,
+  return = NULL)
 }
 \arguments{
-\item{d}{The index of the original time series of interest}
+\item{d}{\code{numeric}; The index of the original time series to show}
 
-\item{cptwise}{Logical; whether to display Xt componentwise or not}
+\item{simData}{\code{simList}; An object containing the information about the original data}
+
+\item{cptwise}{\code{logical}; Whether to display Xt componentwise, or not}
+
+\item{axisLabels}{\code{logical}; Set to \code{TRUE} if returning a single plot (i.e. \code{cptwise = TRUE} and \code{return != NULL}), and \code{FALSE} otherwise.}
+
+\item{plot.title}{\code{logical}; Whether to include individual plot titles}
+
+\item{return}{\code{character}; The particular plot(s) to display.\cr  \cr
+If \code{cptwise = TRUE} and \code{return = NULL}, all of \code{'Mt'}, \code{'Tt'}, \code{'freq'}, and \code{'Wt'} will be displayed.\cr \cr
+If \code{cptwise = TRUE} and \code{return = 'Mt' | 'Tt' | 'freq' | 'Wt'}, the specified plot will show. \cr \cr
+If \code{cptwise = FALSE}, \code{return} must be the default (\code{NULL}) to display the sum total (this is \code{Xt}).}
 }
 \description{
-A function to generate a triptych to visualize each component of the original time series
+A function to generate a series of plots to visualize each component of the original time series
 }
