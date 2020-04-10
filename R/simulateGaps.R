@@ -21,15 +21,16 @@
 
 simulateGaps <- function(data, prop_vec, gap_vec, K){
   
+  if( !(all(prop_vec > 0) && all(prop_vec < 1))) stop("Values in prop_vec must be between 0 and 1.")
+  if( !(all(gap_vec %% 1 == 0) | all(gap_vec >=1 ) )) stop("Values in gap_vec must be positive integers.")
+  
   stopifnot(is.vector(data),
             is.numeric(data),
-            is.vector(prop_vec), 
             is.numeric(prop_vec),
-            is.vector(gap_vec),
             is.numeric(gap_vec),
-            is.null(prop_vec) == FALSE,
-            is.null(gap_vec) == FALSE,
-            is.null(data) == FALSE,
+            !is.null(prop_vec),
+            !is.null(gap_vec),
+            !is.null(data),
             K %% 1 == 0,
             K > 0)
   
