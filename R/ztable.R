@@ -16,7 +16,7 @@ ztable <- function(agEval, d, crit, m, combine = T, output = NULL){
     
     tableMat <- eval(parse(text = string))
     
-    bold_row <- c(2,5,8,11)
+    bold_row <- c(2,5,8)
   
     for(i in 1:length(bold_row)){
       tableMat[,bold_row[i]] <- paste0("\\textbf{",tableMat[,bold_row[i]],"}")
