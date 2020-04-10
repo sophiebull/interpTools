@@ -26,8 +26,8 @@ p4 <- plotXt(4, simData = new.simData, cptwise = F, axisLabels = F)
 p5 <- plotXt(5, simData = new.simData, cptwise = F, axisLabels = F)
 
 setwd("/home/sophie/sophTools/files/new_1")
-png("dataXt5.png", width = 1080, height = 1200)
-grid.arrange(arrangeGrob(p1,p2,p3,p4,ncol = 2, nrow = 3), arrangeGrob(p5, nrow = 1, ncol = 1), heights = c(2,1),
+png("dataXt.png", width = 1080, height = 1200)
+grid.arrange(arrangeGrob(p1,p2,p3,p4,ncol = 2, nrow = 2), arrangeGrob(p5, nrow = 1, ncol = 1), heights = c(2,1),
              bottom = textGrob("time"), left = textGrob("value", rot = 90))
 dev.off()
 ```
