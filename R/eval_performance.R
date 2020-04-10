@@ -1,35 +1,43 @@
 #' Evaluate Interpolation Performance of a Single Time Series
-#'  
-#' Function to define and store performance criteria for the comparison of a single interpolated series with its original.
-#' Criteria are "optimized" when they are either maximized (1) or minimized (0) as per the following:\cr
-#' pearson_r = 1\cr
-#' r_squared = 1\cr
-#' abs_differences = 0\cr
-#' MBE = 0\cr
-#' ME = 0\cr
-#' MAE = 0\cr
-#' MRE = 0\cr
-#' MARE = 0\cr
-#' MAPE = 0\cr
-#' SSE = 0 \cr
-#' MSE = 0\cr
-#' RMS = 0 \cr
-#' NMSE = 0\cr
-#' RE = 1\cr
-#' RMSE = 0\cr
-#' NRMSD = 0\cr
-#' RMSS = 0\cr
-#' MdAPE = 0\cr
-#' TMAPE = 0\cr
-#' @param x The original time series vector
-#' @param X The interpolated time series vector
-#' @param gappyx The gappy original time series vector
-
-#best <- data.frame(criterion = criteria, maximize = c(1,1,rep(0,11),1,rep(0,3))) # 1 = yes, 0 = no
+#' 
+#' Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated.
+#'    
+#' @param x \code{numeric}; The \strong{original} time series vector.
+#' @param X \code{numeric}; The \strong{interpolated} time series vector.
+#' @param gappyx \code{numeric}; The \strong{gappy} time series vector. Gaps must be indicated by \code{NA}.
+#' 
+#' @details The following is a description of the list of performance metrics that are generated: \cr
+#' \tabular{ccc}{
+#'      ID \tab Criterion \tab Optimal \cr
+#'      ...... \tab ........... \tab ......... \cr
+#'      1 \tab  pearson_r \tab max  \cr
+#'      2 \tab  r_squared \tab max  \cr
+#'      3 \tab  abs_differences \tab min  \cr
+#'      4 \tab  MBE \tab min  \cr
+#'      5 \tab  ME \tab min  \cr
+#'      6 \tab  MAE \tab min  \cr
+#'      7 \tab  MRE \tab min  \cr
+#'      8 \tab  MARE \tab min  \cr
+#'      9 \tab  MAPE \tab min  \cr
+#'      10 \tab  SSE \tab min  \cr
+#'      11 \tab  MSE \tab min  \cr
+#'      12 \tab  RMS \tab min  \cr
+#'      13 \tab  NMSE \tab min  \cr
+#'      14 \tab  RE \tab max  \cr
+#'      15 \tab  RMSE \tab min  \cr
+#'      16 \tab  NRMSD \tab min  \cr
+#'      17 \tab  RMSS \tab min  \cr
+#'      18 \tab  MdAPE \tab min  \cr
+#'    }
+#' 
 
 eval_performance <- function(x, X, gappyx) {
 
   # x = original , X = interpolated 
+  
+  if(sum(is.na(gappyx)) == 0) stop(paste0("Gappy data in 'gappyx' does not contain NAs. Please impose gaps and try again."))
+  if(sum(x - gappyx, na.rm = TRUE) != 0) stop(paste0("Gappy data in 'gappyx' is not representative of 'x' (original data). The two vectors are non-conforming."))
+  if(sum(X[which(!is.na(ga))] - x[which(!is.na(ga))]) != 0) stop(paste0("Non-interpolated points in 'X' do not match those of the original data in 'x'.  The two vectors are non-conforming."))
   
   if(!is.null(X)){
   stopifnot((is.numeric(x) | is.null(x)),
