@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Sophie Castel" />
+
+<meta name="date" content="2020-04-02" />
+
+<title>interpTools: A Framework for Testing Time Series Interpolators</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">interpTools: A Framework for Testing Time Series Interpolators</h1>
+<h4 class="author">Sophie Castel</h4>
+<h4 class="date">2020-04-02</h4>
+
+
+
+<p>The intended use of this R package is to provide a set of tools for the systematic testing of time series interpolators in light of changing the features of the data and the gap structure. The basic framework is as follows:</p>
+
+<p>This document will describe how to navigate steps 1-4 using the package functions. The example code is that which was used to generate the built-in `toy data’ contained in this package.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Setting seed for reproducibility</span>
+<span class="kw">set.seed</span>(<span class="dv">23</span>)</code></pre></div>
+<div id="step-1-generate-artificial-time-series" class="section level1">
+<h1>Step 1 — Generate artificial time series</h1>
+<p>The <code>simXt()</code> function generates time series, <span class="math inline">\(x_t\)</span>, according to the general additive model:</p>
+<span class="math display">\[\begin{equation}
+ x_t = m_t + t_t + \xi_t
+\end{equation}\]</span>
+<p>where <span class="math inline">\(m_t\)</span> is the mean function, <span class="math inline">\(t_t\)</span> is the trend function, and <span class="math inline">\(\xi_t\)</span> is the noise function. The arguments in <code>simXt()</code> are passed to constituent functions <code>simMt()</code>, <code>simTt()</code>, and <code>simWt()</code> and are consistently named. Hence, it is possible to generate, for a single time series, each piece independently. The following section provides a brief description of each component, along with its set of defining parameters.</p>
+<div id="m_t-the-mean-component" class="section level2">
+<h2><span class="math inline">\(m_t\)</span>: The mean component</h2>
+The mean component <span class="math inline">\(m_t\)</span> is composed of a constant, non-varying mean element (the grand mean), and a varying polynomial trend element:
+<span class="math display">\[\begin{align}
+  m_t &amp;= \mu +\mu_t \\
+      &amp;= \mu + \sum_{i=1}^{\phi} a_i \left(\frac{t-c}{N}\right)^i
+\end{align}\]</span>
+<p>where <span class="math inline">\(\mu \sim U(\frac{-N}{100},\frac{N}{100})\)</span>, and <span class="math inline">\(\textbf{a} = \left[a_1,a_2,...,a_\phi\right]\)</span> with <span class="math inline">\(a_i \sim N(0,\frac{N}{20i})\)</span> and are randomly sampled.</p>
+<p>Table  provides a description of each parameter. Note the “user control in <code>simMt()</code>/<code>simXt()</code> column, which identifies parameters which can be set by the user.</p>
+<p>\begin{table}[!h]   \begin{tabular}{ccll}</p>
+<p>parameter &amp; range &amp; description &amp; user control in <code>simMt()</code>/<code>simXt()</code> \</p>
+<p><span class="math inline">\(\mu\)</span> &amp; <span class="math inline">\(\frac{-N}{100}\leq\mu\leq\frac{N}{100}\)</span> &amp; grand mean &amp; — \ <span class="math inline">\(\phi\)</span> &amp; <span class="math inline">\(\phi\in\mathbb{Z}\)</span>, <span class="math inline">\(\phi\geq0\)</span> $ &amp; degree of polynomial <span class="math inline">\(\mu_t\)</span> &amp; <code>numTrend</code> \ <span class="math inline">\(a_i\)</span> &amp; <span class="math inline">\(a_i\in\mathbb{R},\text{ }i=1,...,\phi\)</span> &amp; coefficient on <span class="math inline">\(i^\text{th}\)</span> polynomial &amp; — \ <span class="math inline">\(c\)</span> &amp; <span class="math inline">\(c\in1,...,N\)</span>, fixed <span class="math inline">\(\forall i\)</span> &amp; centering parameter &amp; — \ <span class="math inline">\(N\)</span> &amp; <span class="math inline">\(N\in\mathbb{N}\)</span> &amp; length of time series &amp; <code>n</code> \ \end{tabular}  \end{table}</p>
+<p>This component can be generated on its own using the function <code>simMt()</code>. For example:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulating a mean vector</span>
+mt &lt;-<span class="st"> </span><span class="kw">simMt</span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">numTrend =</span> <span class="dv">4</span>)</code></pre></div>
+</div>
+<div id="t_t-the-trend-component" class="section level2">
+<h2><span class="math inline">\(t_t\)</span>: The trend component</h2>
+The trend component <span class="math inline">\(t_t\)</span> is constructed as a finite linear combination of sinusoids:
+<span class="math display">\[\begin{equation}
+    t_t = \sum_{i=1}^{\psi} b_i \sin(\omega_it)
+\end{equation}\]</span>
+<p>where <span class="math inline">\(\textbf{b} = \left[b_1,b_2,...,b_\psi\right]\)</span> with <span class="math inline">\(b_i \sim N(1,\frac{N}{200})\)</span> and <span class="math inline">\(\omega = \left[\omega_1,\omega_2,...,\omega_\psi\right]\)</span> where <span class="math inline">\(\omega_i\)</span> defines the period of the <span class="math inline">\(i\)</span>th sinusoid.</p>
+<p>The default is to sample <span class="math inline">\(\psi\)</span> unique values for each <span class="math inline">\(\omega_i \in \left[\frac{2\pi}{N},\pi \right]\)</span>, where <span class="math inline">\(\frac{2\pi}{n}\)</span> is the  and <span class="math inline">\(\pi\)</span> is the . The frequency is related to the period <span class="math inline">\(\omega\)</span> through the relation <span class="math inline">\(f = \frac{\omega}{2\pi}\)</span>. Thus, the lowest possible frequency that could be sampled is <span class="math inline">\(f = \frac{\frac{2\pi}{N}}{2\pi} = \frac{1}{N}\)</span>, and the highest possible frequency is <span class="math inline">\(f = \frac{\pi}{2\pi} = \frac{1}{2}\)</span>.</p>
+<p>There is an additional parameter, <span class="math inline">\(\eta\)</span>, that defines a bandwidth of the order <span class="math inline">\(10^{-\eta}\)</span> from which to sample <span class="math inline">\(\omega\)</span> from <span class="math inline">\(\frac{\psi}{2}\)</span> random non-overlapping subintervals in the interval <span class="math inline">\(\left[\frac{2\pi}{N},\pi \right]\)</span>. For bandwidth-specified simulations, two <span class="math inline">\(\omega\)</span>’s are sampled from each subinterval, and so for this reason <span class="math inline">\(\psi\)</span> must be an even integer.</p>
+<p>Table  provides a description of each parameter. Note the “user control in <code>simTt()</code>/<code>simXt()</code> column, which identifies parameters which can be set by the user.</p>
+
+<p>This component can be generated on its own using the function <code>simTt()</code>. For example:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulating a trend vector</span>
+tt &lt;-<span class="st"> </span><span class="kw">simTt</span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">numFreq =</span> <span class="dv">20</span>, <span class="dt">bandwidth =</span> <span class="dv">2</span>)</code></pre></div>
+</div>
+<div id="xi_t-the-noise-component" class="section level2">
+<h2><span class="math inline">\(\xi_t\)</span>: The noise component</h2>
+The noise component <span class="math inline">\(\xi_t\)</span> is constructed as an <span class="math inline">\(ARIMA(P,Q)\)</span> stochastic process:
+<span class="math display">\[\begin{equation}
+    \xi_t = \alpha_1X_{t-1} + ... + \alpha_P X_{t-P} + Z_t + \beta_1Z_{t-1} + ... + \beta_Q Z_{t-Q}
+\end{equation}\]</span>
+<p>where <span class="math inline">\(P\)</span> is the autoregressive order, and <span class="math inline">\(Q\)</span> is the moving-average order.</p>
+<p>Table  provides a description of each parameter. Note the “user control in <code>simWt()</code>/<code>simXt()</code> column, which identifies parameters which can be set by the user.</p>
+
+<p>This component can be generated on its own using the function <code>simWt()</code>. For example:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulating a noise vector</span>
+wt &lt;-<span class="st"> </span><span class="kw">simWt</span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">p =</span> <span class="dv">0</span>, <span class="dt">q =</span> <span class="dv">0</span> , <span class="dt">var =</span> <span class="dv">5</span>) <span class="co"># white noise process</span></code></pre></div>
+</div>
+<div id="implementation" class="section level2">
+<h2>Implementation</h2>
+<p>We generate a set of <span class="math inline">\(D\)</span> time series <span class="math inline">\(\left\{x_{t,d},\text{  }d\in1...D\right\}\)</span> all in one step using <code>simXt()</code>, where the features of the time series change as <span class="math inline">\(d\rightarrow D\)</span>.</p>
+<p>By defining the <code>vary</code> argument, the user can decide which component to vary, <span class="math inline">\(m_t\)</span>, <span class="math inline">\(t_t\)</span>, or <span class="math inline">\(\xi_t\)</span>, as <span class="math inline">\(d\rightarrow D\)</span>.</p>
+<div id="varying-m_t" class="section level3">
+<h3>Varying <span class="math inline">\(m_t\)</span></h3>
+<p>In this scenario, the variable parameter is <span class="math inline">\(\phi\)</span>, where <span class="math inline">\(\phi = d\)</span>. All other parameters are held constant as <span class="math inline">\(d\rightarrow D\)</span>, such that only the degree of the mean polynomial is subject to change. As such, <code>numTrend</code> will be overridden.</p>
+</div>
+<div id="varying-t_t" class="section level3">
+<h3>Varying <span class="math inline">\(t_t\)</span></h3>
+<p>In this scenario, the variable parameter is <span class="math inline">\(\psi\)</span>, where <span class="math inline">\(\psi = d*10\)</span>. All other parameters are held constant as <span class="math inline">\(d\rightarrow D\)</span>, such that only the number of constituent frequencies is subject to change. As such, <code>numFreq</code> will be overridden.</p>
+</div>
+<div id="varying-xi_t" class="section level3">
+<h3>Varying <span class="math inline">\(\xi_t\)</span></h3>
+<p>In this scenario, the variable parameter is either <span class="math inline">\(P\)</span> or <span class="math inline">\(Q\)</span>, where <span class="math inline">\(P = d\)</span> or <span class="math inline">\(Q = d\)</span>. All other parameters are held constant as <span class="math inline">\(d\rightarrow D\)</span>, such that only the order of the <span class="math inline">\(AR(P)\)</span> or <span class="math inline">\(MA(Q)\)</span> process is subject to change. The user can set which parameter to fix via the <code>fix</code> argument. As such, <code>p</code> or <code>q</code> will be overridden.</p>
+<p>The toy data provided describes a set of <span class="math inline">\(x_t\)</span> with <span class="math inline">\(t_t\)</span> as the variable component:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulating five time series</span>
+xt &lt;-<span class="st"> </span><span class="kw">simXt</span>(<span class="dt">D =</span> <span class="dv">5</span>, <span class="dt">vary =</span> <span class="st">&quot;Tt&quot;</span>, <span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">numTrend =</span> <span class="dv">4</span>, <span class="dt">bandwidth =</span> <span class="dv">2</span>, <span class="dt">p =</span> <span class="dv">0</span>, <span class="dt">q =</span> <span class="dv">0</span>, <span class="dt">snr =</span> <span class="fl">1.5</span>)
+<span class="co">#&gt; Warning in simXt(D = 5, vary = &quot;Tt&quot;, n = 100, numTrend = 4, bandwidth =</span>
+<span class="co">#&gt; 2, : trendType not specified- defaulting to 'polynomial';</span></code></pre></div>
+The user should carefully note the <code>snr</code> argument in <code>simXt()</code>, which represents the desired signal-to-noise ratio of <span class="math inline">\(x_t\)</span>, where:
+<span class="math display">\[\begin{equation}
+  \mathbf{SNR} = \frac{\sigma^2_{t_t}}{\sigma^2_{\xi_t}}
+\end{equation}\]</span>
+<p>When the user specifies the <code>snr</code>, the <code>var</code> argument in <code>simWt()</code> will be overridden and need not be set, since <span class="math inline">\(\sigma^2_{\xi_t}\)</span> is calculated based on the variance of <span class="math inline">\(t_t\)</span>.</p>
+<p>The resulting output is an object of class <code>simList</code>, which containing the time series themselves, as well as each element of their functional definition. The actual numeric vectors can be extracted using the following subset command:</p>
+</div>
+</div>
+</div>
+<div id="step-2-imposing-a-gap-structure" class="section level1">
+<h1>Step 2: Imposing a gap structure</h1>
+<p>Gap structure is defined by two parameters: <span class="math inline">\(p\)</span>, the overall percentage of data missing, and <span class="math inline">\(g\)</span>, the width of the gaps. The result is a total of <span class="math inline">\(I=p\cdot N\)</span> missing observations, appearing structurally as <span class="math inline">\(\leq\frac{p\cdot N}{g}\)</span> randomly-spaced non-overlapping holes of width <span class="math inline">\(g\)</span>, where a ‘hole’ is defined as a sequence of adjacent missing observations.</p>
+<p>Since the other principal objective of this package is to assess statistical performance in light of changes to gap structure, the user should initialize vectors contaning numerous values of <span class="math inline">\(p\)</span> and <span class="math inline">\(g\)</span>, such that each <span class="math inline">\((p,g)\)</span> combination can be applied. Under the constraint that only integer numbers of gaps can be removed, the actual number of missing observations may not always be consistent with the theoretical number due to rounding. Thus, care should be taken when selecting selection of these values.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Initializing vectors of p and g</span>
+<span class="co">#prop_vec &lt;- c(0.1, 0.20, 0.30)</span>
+<span class="co">#gap_vec &lt;- c(1, 5, 10)</span></code></pre></div>
+<p>A single time series can be passed into <code>simulateGaps()</code>, along with arguments <code>prop_vec</code> and <code>gap_vec</code> to remove observations according to the desired gap specification. The user can also define <code>K</code> to set the number of gappy series to generate for each original dataset. Note that in each iteration, gap locations are chosen randomly under the specified gap parameterization.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Using a loop to apply gaps to each of the five original time series</span>
+<span class="co">#D &lt;- length(OriginalData)</span>
+
+<span class="co">#GappyData &lt;- list()</span>
+
+<span class="co">#for(d in 1:D){</span>
+<span class="co">#  GappyData[[d]] &lt;- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = 10)</span>
+<span class="co">#}</span></code></pre></div>
+<p>The result is a nested list of dimension <span class="math inline">\(D\times P \times G \times K\)</span>.</p>
+</div>
+<div id="step-3-interpolating-the-gappy-data" class="section level1">
+<h1>Step 3: Interpolating the gappy data</h1>
+<p>The next step is to interpolate the list of gappy data using <code>parInterpolate()</code>. The user can choose from a list of 18 algorithms pulled from external packages, shown in Table .</p>
+
+<p>A vector of <code>methods</code> of length <span class="math inline">\(M\)</span> can be defined to facilitate a comparative assessment between algorithms later, if so desired. Should the user decide to pass in their own function via <code>FUN_CALL</code>, they must ensure that the output the function is a single numeric vector. The interpolations will occur in parallel over the <span class="math inline">\(K\)</span> index, where the number of cores to use can be defined via <code>num_cores</code> (the default is to use as many as are available).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Using a loop to interpolate over the five sets of gappy data</span>
+<span class="co">#D &lt;- length(GappyData)</span>
+
+<span class="co">#IntData &lt;- list()</span>
+
+<span class="co">#for(d in 1:D){</span>
+<span class="co">#  IntData[[d]] &lt;- parInterpolate(gappyTS = GappyData[[d]], methods = c(&quot;EWMA&quot;, &quot;HWI&quot;, &quot;KAF&quot;))</span>
+<span class="co">#}</span></code></pre></div>
+<p>The resulting object is a nested list of dimension <span class="math inline">\(D \times M \times P \times G \times K\)</span>.</p>
+</div>
+<div id="step-4-compare-the-interpolated-series-with-the-original" class="section level1">
+<h1>Step 4: Compare the interpolated series with the original</h1>
+The performance of a single interpolation can be assessed by comparing the original time series, <span class="math inline">\(x_t\)</span>, with the interpolated series, <span class="math inline">\(X_t\)</span>. Here, statistical performance is defined as some measure of the bias, represented by some function:
+<span class="math display">\[\begin{equation}
+    C(\mathbf{X}, \mathbf{x}),
+\end{equation}\]</span>
+<p>called a performance criterion. Generally speaking, <span class="math inline">\(C\)</span> quantifies how well the interpolated series, <span class="math inline">\(\mathbf{X} = \left\{X_t\right\}_{t=0}^{N-1}\)</span>, captures the essence of the original series, <span class="math inline">\(\mathbf{x} = \left\{x_t\right\}_{t=0}^{N-1}\)</span>.</p>
+<div id="generating-performance-matrices" class="section level2">
+<h2>Generating performance matrices</h2>
+<p>A set of performance criteria are computed for each <span class="math inline">\((x_t,X_t)\)</span> pair using the <code>performance()</code> function. Table  shows the metrics that are built-in to the package.</p>
+
+<p>The full set of performance criteria can be generated as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#pmats &lt;- performance(OriginalData = OriginalData, GappyData = GappyData, IntData = IntData)</span></code></pre></div>
+<p>The resulting output is a list of dimension <span class="math inline">\(D \times M \times P \times G \times K\)</span>, where the terminal node is a matrix of metrics.</p>
+</div>
+<div id="aggregating-the-performance-data" class="section level2">
+<h2>Aggregating the performance data</h2>
+<p>Consider that for any <span class="math inline">\((d,m,p,g)\)</span> set, there are a set of <span class="math inline">\(K\)</span> values for each criterion. Thus, each performance metric has a sampling distribution containing <span class="math inline">\(K\)</span> elements. The performance matrices can be condensed by aggregating over <span class="math inline">\(K\)</span> to reduce dimensionality. The comprehensive set of sample statistics that are offered in this package are listed below:</p>
+
+<p>The aggregated performance matrices are computed via the <code>agEvaluate()</code> function:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#agEval &lt;- agEvaluate(pmats = pmats)</span></code></pre></div>
+<p>The result is an object of class <code>agEvaluate</code>. This object structure is required for all data analyses to follow.</p>
+</div>
+</div>
+<div id="data-visualization" class="section level1">
+<h1>Data Visualization</h1>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

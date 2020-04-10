@@ -1,0 +1,354 @@
+---
+title: "interpTools: A Framework for Testing Time Series Interpolators"
+author: "Sophie Castel"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r lib, cache = TRUE, echo = FALSE}
+# Loading library
+library(sophTools)
+```
+
+The intended use of this R package is to provide a set of tools for the systematic testing of time series interpolators in light of changing the features of the data and the gap structure. The basic framework is as follows:
+
+\begin{enumerate}
+\item Generate artificial time series
+\item Impose a gap structure
+\item Interpolate the gappy data
+\item Compare the interpolated series with the original
+\end{enumerate}
+
+This document will describe how to navigate steps 1-4, and also how to assess the results, using the package functions.  The example code is that which was used to generate the built-in `toy data' contained in this package.
+
+```{r setseed, cache = TRUE}
+# Setting seed for reproducibility
+set.seed(23)
+```
+
+# Simulating the Data and Gathering Statistics
+
+## Step 1 --- Generate artificial time series
+
+The `simXt()` function generates time series, $x_t$, according to the general additive model:
+
+\begin{equation}
+ x_t = m_t + t_t + \xi_t
+\end{equation}
+
+where $m_t$ is the mean function, $t_t$ is the trend function, and $\xi_t$ is the noise function. The arguments in `simXt()` are passed to constituent functions `simMt()`, `simTt()`, and `simWt()` and are consistently named.  Hence, it is possible to generate, for a single time series, each piece independently. The following section provides a brief description of each component, along with its set of defining parameters.
+
+### $m_t$: The mean component
+The mean component $m_t$ is composed of a constant, non-varying mean element (the grand mean), and a varying polynomial trend element:
+\begin{align}
+  m_t &= \mu +\mu_t \\
+      &= \mu + \sum_{i=1}^{\phi} a_i \left(\frac{t-c}{N}\right)^i
+\end{align}
+where $\mu \sim U(\frac{-N}{100},\frac{N}{100})$, and $\textbf{a} = \left[a_1,a_2,...,a_\phi\right]$ with $a_i \sim N(0,\frac{N}{20i})$ and are randomly sampled. 
+
+Table \ref{tab:mt} provides a description of each parameter. Note the "user control in `simMt()`/`simXt()` column, which identifies parameters which can be set by the user.
+
+\begin{table}[!h]
+  \centering
+  \caption{A summary of the minor parameters used in the simulation of $m_t$.}
+  \begin{tabular}{ccll}
+    
+  parameter & range & description & user control in `simMt()`/`simXt()` \\
+  
+  $\mu$ & $\frac{-N}{100}\leq\mu\leq\frac{N}{100}$ & grand mean & --- \\
+  $\phi$ & $\phi\in\mathbb{Z}$, $\phi\geq0$ $ & degree of polynomial $\mu_t$ & `numTrend` \\
+  $a_i$ & $a_i\in\mathbb{R},\text{ }i=1,...,\phi$ & coefficient on $i^\text{th}$ polynomial & --- \\
+  $c$ & $c\in1,...,N$, fixed $\forall i$ & centering parameter & --- \\
+  $N$ & $N\in\mathbb{N}$ & length of time series & `n` \\
+  \end{tabular}
+  \label{tab:mt}
+\end{table}
+
+This component can be generated on its own using the function `simMt()`. For example:
+
+```{r mt}
+# Simulating a mean vector
+mt <- simMt(n = 100, numTrend = 4)
+```
+
+### $t_t$: The trend component
+The trend component $t_t$ is constructed as a finite linear combination of sinusoids:
+\begin{equation}
+    t_t = \sum_{i=1}^{\psi} b_i \sin(\omega_it)
+\end{equation}
+where $\textbf{b} = \left[b_1,b_2,...,b_\psi\right]$ with $b_i \sim N(1,\frac{N}{200})$ and $\omega = \left[\omega_1,\omega_2,...,\omega_\psi\right]$ where $\omega_i$ defines the period of the $i$th sinusoid.
+
+The default is to sample $\psi$ unique values for each $\omega_i \in \left[\frac{2\pi}{N},\pi \right]$, where $\frac{2\pi}{n}$ is the \emph{fundamental Fourier frequency} and $\pi$ is the \emph{Nyquist frequency}. The frequency is related to the period $\omega$ through the relation $f = \frac{\omega}{2\pi}$. Thus, the lowest possible frequency that could be sampled is $f = \frac{\frac{2\pi}{N}}{2\pi} = \frac{1}{N}$, and the highest possible frequency is $f = \frac{\pi}{2\pi} = \frac{1}{2}$.
+
+There is an additional parameter, $\eta$, that defines a bandwidth of the order $10^{-\eta}$ from which to sample $\omega$ from $\frac{\psi}{2}$ random non-overlapping subintervals in the interval $\left[\frac{2\pi}{N},\pi \right]$. For bandwidth-specified simulations, two $\omega$'s are sampled from each subinterval, and so for this reason $\psi$ must be an even integer. 
+
+Table \ref{tab:tt} provides a description of each parameter. Note the "user control in `simTt()`/`simXt()` column, which identifies parameters which can be set by the user.
+
+\begin{table}[!h]
+  \centering
+  \caption{A summary of the minor parameters used in the simulation of $t_t$.}
+  \begin{tabular}{ccll}
+    
+  parameter & range & description & user control in `simTt()`/`simXt()` \\
+  
+  $\psi$ & $\psi\geq0,\text{ }\psi\in2\mathbb{Z}$ & total number of sinusoids & `numFreq` \\
+  $b_i$ & $b_i\in\mathbb{R},\text{ }i=1,...,\psi$ & amplitude of $i^\text{th}$ sinusoid & --- \\
+  $\omega_i$ & $\frac{2\pi}{N}\leq\omega_i\leq\pi,\text{ }i=1,...,\psi$ & period of $i^\text{th}$ sinusoid & --- \\
+  $\eta$* & $\eta\geq1$ & bandwidth $= 10^{-\eta}$ & `bandwidth` \\
+  $N$ & $N\in\mathbb{N}$ & length of time series & `n` \\
+  \end{tabular}
+  \label{tab:tt}
+\end{table}
+
+This component can be generated on its own using the function `simTt()`. For example:
+
+```{r tt}
+# Simulating a trend vector
+tt <- simTt(n = 100, numFreq = 20, bandwidth = 2)
+```
+
+### $\xi_t$: The noise component
+The noise component $\xi_t$ is constructed as an $ARIMA(P,Q)$ stochastic process:
+\begin{equation}
+    \xi_t = \alpha_1X_{t-1} + ... + \alpha_P X_{t-P} + Z_t + \beta_1Z_{t-1} + ... + \beta_Q Z_{t-Q}
+\end{equation}
+where $P$ is the autoregressive order, and $Q$ is the moving-average order. 
+
+Table \ref{tab:wt} provides a description of each parameter. Note the "user control in `simWt()`/`simXt()` column, which identifies parameters which can be set by the user.
+
+
+\begin{table}[!h]
+  \centering
+  \caption{A summary of the minor parameters used in the simulation of $\xi_t$.}
+  \begin{tabular}{ccll}
+    
+  parameter & range & description & user control in `simWt()`/`simXt()` \\
+  
+  $P$ & $P\in\mathbb{Z},\text{ }P\geq 0$ & $AR$ order & `p` \\
+  $\alpha_i$ & $\alpha_i\in\mathbb{R},\text{ }i = 1,...,P$ & coefficient on $i$th component of $AR(P)$ & --- \\
+  $Q$ & $Q\in\mathbb{Z},\text{ }Q\geq 0$ & $MA$ order & `q` \\
+  $\beta_j$ & $\beta_j\in\mathbb{R},\text{ }j=1,...,Q$ & coefficient on $j$th component of $MA(Q)$ & ---\\
+  $\sigma^2_{\xi_t}$ & $\sigma^2_{\xi_t}\in\mathbb{R}$, $\sigma^2_{\xi_t}>0$ & variance of $\xi_t$ & `var`
+  \end{tabular}
+  \label{tab:wt}
+\end{table}
+
+This component can be generated on its own using the function `simWt()`. For example:
+
+```{r wt}
+# Simulating a noise vector
+wt <- simWt(n = 100, p = 0, q = 0 , var = 5) # white noise process
+```
+
+### Implementation
+We generate a set of $D$ time series $\left\{x_{t,d},\text{  }d\in1...D\right\}$ all in one step using `simXt()`, where the features of the time series change as $d\rightarrow D$. 
+
+By defining the `vary` argument, the user can decide which component to vary, $m_t$, $t_t$, or $\xi_t$, as $d\rightarrow D$.
+
+#### Varying $m_t$
+In this scenario, the variable parameter is $\phi$, where $\phi = d$. All other parameters are held constant as $d\rightarrow D$, such that only the degree of the mean polynomial is subject to change. As such, `numTrend` will be overridden.
+
+#### Varying $t_t$
+In this scenario, the variable parameter is $\psi$, where $\psi = d*10$. All other parameters are held constant as $d\rightarrow D$, such that only the number of constituent frequencies is subject to change. As such, `numFreq` will be overridden.
+
+The toy data provided describes a set of $x_t$ with $t_t$ as the variable component:
+
+```{r xt}
+# Simulating five time series
+xt <- simXt(D = 5, vary = "Tt", n = 100, numTrend = 4, bandwidth = 2, p = 0, q = 0, snr = 1.5)
+```
+
+#### Varying $\xi_t$
+In this scenario, the variable parameter is either $P$ or $Q$, where $P = d$ or $Q = d$. All other parameters are held constant as $d\rightarrow D$, such that only the order of the $AR(P)$ or $MA(Q)$ process is subject to change. The user can set which parameter to fix via the `fix` argument. As such, `p` or `q` will be overridden.
+
+The user should carefully note the `snr` argument in `simXt()`, which represents the desired signal-to-noise ratio of $x_t$, where:
+\begin{equation}
+  \mathbf{SNR} = \frac{\sigma^2_{t_t}}{\sigma^2_{\xi_t}}
+\end{equation}
+When the user specifies the `snr`, the `var` argument in `simWt()` will be overridden and need not be set, since $\sigma^2_{\xi_t}$ is calculated based on the variance of $t_t$.
+
+The resulting output is an object of class `simList`, which containing the time series themselves, as well as each element of their functional definition. The actual numeric vectors can be extracted using the following subset command:
+
+```{r OriginalData, echo = FALSE}
+# Extracting the time series themselves
+#OriginalData <- xt$Xt
+```
+
+## Step 2: Imposing a gap structure
+Gap structure is defined by two parameters: $p$, the overall percentage of data missing, and $g$, the width of the gaps. The result is a total of $I=p\cdot N$ missing observations, appearing structurally as $\leq\frac{p\cdot N}{g}$ randomly-spaced non-overlapping holes of width $g$, where a 'hole' is defined as a sequence of adjacent missing observations. 
+
+Since the other principal objective of this package is to assess statistical performance in light of changes to gap structure, the user should initialize vectors contaning numerous values of $p$ and $g$, such that each $(p,g)$ combination can be applied. Under the constraint that only integer numbers of gaps can be removed, the actual number of missing observations may not always be consistent with the theoretical number due to rounding. Thus, care should be taken when selecting selection of these values. 
+
+```{r pg}
+# Initializing vectors of p and g
+#prop_vec <- c(0.1, 0.20, 0.30)
+#gap_vec <- c(1, 5, 10)
+```
+
+A single time series can be passed into `simulateGaps()`, along with arguments `prop_vec` and `gap_vec` to remove observations according to the desired gap specification.  The user can also define `K` to set the number of gappy series to generate for each original dataset.  Note that in each iteration, gap locations are chosen randomly under the specified gap parameterization.
+
+```{r simulateGaps}
+# Using a loop to apply gaps to each of the five original time series
+#D <- length(OriginalData)
+
+#GappyData <- list()
+
+#for(d in 1:D){
+#  GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = 10)
+#}
+```
+
+The result is a nested list of dimension $D\times P \times G \times K$. 
+
+## Step 3: Interpolating the gappy data
+
+The next step is to interpolate the list of gappy data using `parInterpolate()`.  The user can choose from a list of 18 algorithms pulled from external packages, shown in Table \ref{tab:algorithm_names}.
+
+\begin{table}[!h]
+    \caption{A set of interpolation algorithms that have been implemented in \texttt{interpTools}. Algorithms considered in the analysis (shown in bold) are based on the results of Van Bussel \cite{vanbussel2019honours}.}
+    \centering
+    \fontsize{10}{12}\selectfont
+    \begin{tabular}{llr}
+    \hline
+       Package & Function & Algorithm name \\
+        \hline
+        \verb+interpTools+ & \verb+nearestNeighbor()+ & Nearest Neighbor (NN)\\
+        \verb+zoo+ & \verb+na.approx()+ & Linear Interpolation (LI)\\
+        \verb+zoo+ & \verb+na.spline()+ & \textbf{Natural Cubic Spline (NCS)}\\
+        \verb+zoo+ & \verb+na.spline()+ & \textbf{FMM Cubic Spline (FMM)}\\
+        \verb+zoo+ & \verb+na.spline()+ & \textbf{Hermite Cubic Spline (HCS)}\\
+        \verb+imputeTS+ & \verb+na_interpolation()+ & Stineman Interpolation (SI)\\
+        \verb+imputeTS+ & \verb+na_kalman()+ & \textbf{Kalman - ARIMA (KAF)}\\
+        \verb+imputeTS+ & \verb+na_kalman()+ & Kalman - StructTS (KKSF)\\
+        \verb+imputeTS+ & \verb+na.locf()+ &  Last Observation Carried Forward (LOCF)\\
+        \verb+imputeTS+ & \verb+na.locf()+ & Next Observation Carried Backward (NOCB)\\
+        \verb+imputeTS+ & \verb+na_ma()+ & Simple Moving Average (SMA)\\
+        \verb+imputeTS+ & \verb+na_ma()+ & Linear Weighted Moving Average (LWMA)\\
+        \verb+imputeTS+ & \verb+na_ma()+ & \textbf{Exponential Weighted Moving Average (EWMA)}\\
+        \verb+imputeTS+ & \verb+na_mean()+ & Replace with Mean (RMEA)\\
+        \verb+imputeTS+ & \verb+na_mean()+ & Replace with Median (RMED)\\
+        \verb+imputeTS+ & \verb+na_mean()+ & Replace with Mode (RMOD)\\
+        \verb+imputeTS+ & \verb+na_random()+ & Replace with Random (RRND)\\
+        \verb+tsinterp+ & \verb+interpolate()+ & \textbf{Hybrid Wiener Interpolator (HWI)}
+    \end{tabular}
+    \label{tab:algorithm_names}
+\end{table}
+
+A vector of `methods` of length $M$ can be defined to facilitate a comparative assessment between algorithms later, if so desired. Should the user decide to pass in their own function via `FUN_CALL`, they must ensure that the output the function is a single numeric vector. The interpolations will occur in parallel over the $K$ index, where the number of cores to use can be defined via `num_cores` (the default is to use as many as are available).
+
+```{r parInterpolate, cache = TRUE}
+# Using a loop to interpolate over the five sets of gappy data
+#D <- length(GappyData)
+
+#IntData <- list()
+
+#for(d in 1:D){
+#  IntData[[d]] <- parInterpolate(gappyTS = GappyData[[d]], methods = c("EWMA", "HWI", "KAF"))
+#}
+
+```
+
+The resulting object is a nested list of dimension $D \times M \times P \times G \times K$.
+
+## Step 4: Compare the interpolated series with the original
+
+The performance of a single interpolation can be assessed by comparing the original time series, $x_t$, with the interpolated series, $X_t$.  Here, statistical performance is defined as some measure of the bias, represented by some function:
+\begin{equation}
+    C(\mathbf{X}, \mathbf{x}),
+\end{equation}
+called a performance criterion. Generally speaking, $C$ quantifies how well the interpolated series, $\mathbf{X} = \left\{X_t\right\}_{t=0}^{N-1}$, captures the essence of the original series,  $\mathbf{x} = \left\{x_t\right\}_{t=0}^{N-1}$.
+
+### Generating performance matrices
+A set of performance criteria are computed for each $(x_t,X_t)$ pair using the `performance()` function. Table \ref{tab:criteria} shows the metrics that are built-in to the package.
+
+\begin{table}[!h]
+    \centering
+    \caption{Description of the criteria used in the performance analysis. The expanded mathematical definitions are given in Appendix \ref{appendix:C}.}
+    \begin{tabular}{llc}
+    \hline
+        Criterion & Abbreviation & Optimal \\
+    \hline
+        Correlation Coefficient &  $r$ & max \\
+        Coefficient of Determination & $r^2$ & max \\
+        Absolute Differences & $\mathbf{AD}$ & min\\
+        Mean Bias Error & $\mathbf{MBE}$ & min\\
+        Mean Error & $\mathbf{ME}$ & min\\
+        Mean Absolute Error & $\mathbf{MAE}$& min\\
+        Mean Relative Error & $\mathbf{MRE}$& min\\
+        Mean Absolute Relative Error & $\mathbf{MARE}$& min\\
+        Mean Absolute Percentage Error & $\mathbf{MAPE}$ & min\\
+        Sum of Squared Errors & $\mathbf{SSE}$ & min\\
+        Mean Square Error & $\mathbf{MSE}$ & min\\
+        Root Mean Squares & $\mathbf{RMS}$ & min\\
+        Normalized Mean Square Error & $\mathbf{NMSE}$ & min\\
+        Nash-Sutcliffe Coefficient & $\mathbf{RE}$ & max\\
+        Root Mean Square Error & $\mathbf{RMSE}$ & min\\
+        Normalized Root Mean Square Deviations & $\mathbf{NRMSD}$ & min\\
+        Root Mean Square Standardized Error & $\mathbf{RMSS}$ & min \\
+        Median Absolute Percentage Error & $\mathbf{MdAPE}$ & min\\
+    \hline
+    \end{tabular}
+    \label{tab:criteria}
+\end{table}
+
+The full set of performance criteria can be generated as follows:
+
+```{r performance}
+#pmats <- performance(OriginalData = OriginalData, GappyData = GappyData, IntData = IntData)
+```
+
+The resulting output is a list of dimension $D \times M \times P \times G \times K$, where the terminal node is a matrix of metrics.
+
+### Aggregating the performance data
+
+Consider that for any $(d,m,p,g)$ set, there are a set of $K$ values for each criterion. Thus, each performance metric has a sampling distribution containing $K$ elements. The performance matrices can be condensed by aggregating over $K$ to reduce dimensionality. The comprehensive set of sample statistics that are offered in this package are listed below:
+
+\begin{itemize}
+  \item mean
+  \item standard deviation
+  \item 0\% quantile (minimum)
+  \item 2.5\% quantile
+  \item 25\% quantile
+  \item 50\% quantile (median)
+  \item 75\% quantile
+  \item 97.5\% quantile
+  \item 100\% quantile (maximum)
+  \item skewness
+  \item p-value (dip test for unimodality)
+\end{itemize}
+
+The aggregated performance matrices are computed via the `agEvaluate()` function:
+
+```{r agEvaluate}
+#agEval <- agEvaluate(pmats = pmats)
+```
+
+The result is an object of class `agEvaluate`. This object structure is required for all data analyses to follow.
+
+# Data Visualization
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
