@@ -12,7 +12,7 @@
 
 <meta name="author" content="Sophie Castel" />
 
-<meta name="date" content="2020-04-02" />
+<meta name="date" content="2020-04-03" />
 
 <title>interpTools: A Framework for Testing Time Series Interpolators</title>
 
@@ -95,86 +95,239 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">interpTools: A Framework for Testing Time Series Interpolators</h1>
 <h4 class="author">Sophie Castel</h4>
-<h4 class="date">2020-04-02</h4>
+<h4 class="date">2020-04-03</h4>
 
 
 
-<p>The intended use of this R package is to provide a set of tools for the systematic testing of time series interpolators in light of changing the features of the data and the gap structure. The basic framework is as follows:</p>
-
-<p>This document will describe how to navigate steps 1-4 using the package functions. The example code is that which was used to generate the built-in `toy data’ contained in this package.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Loading library</span>
+<span class="kw">library</span>(sophTools)</code></pre></div>
+<p>The intended use of this R package is to provide a set of tools for the systematic testing of time series interpolators in light of changing the <strong>features of the data</strong> and the <strong>gap structure</strong>. The basic framework is as follows:</p>
+<ol style="list-style-type: decimal">
+<li>Generate artificial time series</li>
+<li>Impose a gap structure</li>
+<li>Interpolate the gappy data</li>
+<li>Compare the interpolated series with the original</li>
+</ol>
+<p>This document will describe how to navigate steps 1-4, and also how to assess the results, using the package functions. The example code is that which was used to generate the built-in ‘toy data’ contained in this package.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Setting seed for reproducibility</span>
 <span class="kw">set.seed</span>(<span class="dv">23</span>)</code></pre></div>
-<div id="step-1-generate-artificial-time-series" class="section level1">
-<h1>Step 1 — Generate artificial time series</h1>
-<p>The <code>simXt()</code> function generates time series, <span class="math inline">\(x_t\)</span>, according to the general additive model:</p>
+<div id="simulating-the-data-and-gathering-statistics" class="section level1">
+<h1>Simulating the Data and Gathering Statistics</h1>
+<div id="step-1-generate-artificial-time-series" class="section level2">
+<h2>Step 1 — Generate artificial time series</h2>
+<p>The <code>simXt()</code> function generates time series, <span class="math inline">\(x_t\)</span>, according to the <strong>general additive model</strong>:</p>
 <span class="math display">\[\begin{equation}
  x_t = m_t + t_t + \xi_t
 \end{equation}\]</span>
-<p>where <span class="math inline">\(m_t\)</span> is the mean function, <span class="math inline">\(t_t\)</span> is the trend function, and <span class="math inline">\(\xi_t\)</span> is the noise function. The arguments in <code>simXt()</code> are passed to constituent functions <code>simMt()</code>, <code>simTt()</code>, and <code>simWt()</code> and are consistently named. Hence, it is possible to generate, for a single time series, each piece independently. The following section provides a brief description of each component, along with its set of defining parameters.</p>
-<div id="m_t-the-mean-component" class="section level2">
-<h2><span class="math inline">\(m_t\)</span>: The mean component</h2>
-The mean component <span class="math inline">\(m_t\)</span> is composed of a constant, non-varying mean element (the grand mean), and a varying polynomial trend element:
+<p>where <span class="math inline">\(m_t\)</span> is the <strong>mean function</strong>, <span class="math inline">\(t_t\)</span> is the <strong>trend function</strong>, and <span class="math inline">\(\xi_t\)</span> is the <strong>noise function</strong>. The arguments in <code>simXt()</code> are passed to constituent functions <code>simMt()</code>, <code>simTt()</code>, and <code>simWt()</code> and are consistently named. Hence, it is possible to generate, for a single time series, each piece independently. The following section provides a brief description of each component, along with its set of defining parameters.</p>
+<div id="m_t-the-mean-component" class="section level3">
+<h3><span class="math inline">\(m_t\)</span>: The mean component</h3>
+The mean component <span class="math inline">\(m_t\)</span> is composed of a <strong>constant, non-varying mean element</strong> (the grand mean), and a <strong>varying polynomial trend element</strong>:
 <span class="math display">\[\begin{align}
   m_t &amp;= \mu +\mu_t \\
       &amp;= \mu + \sum_{i=1}^{\phi} a_i \left(\frac{t-c}{N}\right)^i
 \end{align}\]</span>
 <p>where <span class="math inline">\(\mu \sim U(\frac{-N}{100},\frac{N}{100})\)</span>, and <span class="math inline">\(\textbf{a} = \left[a_1,a_2,...,a_\phi\right]\)</span> with <span class="math inline">\(a_i \sim N(0,\frac{N}{20i})\)</span> and are randomly sampled.</p>
-<p>Table  provides a description of each parameter. Note the “user control in <code>simMt()</code>/<code>simXt()</code> column, which identifies parameters which can be set by the user.</p>
-<p>\begin{table}[!h]   \begin{tabular}{ccll}</p>
-<p>parameter &amp; range &amp; description &amp; user control in <code>simMt()</code>/<code>simXt()</code> \</p>
-<p><span class="math inline">\(\mu\)</span> &amp; <span class="math inline">\(\frac{-N}{100}\leq\mu\leq\frac{N}{100}\)</span> &amp; grand mean &amp; — \ <span class="math inline">\(\phi\)</span> &amp; <span class="math inline">\(\phi\in\mathbb{Z}\)</span>, <span class="math inline">\(\phi\geq0\)</span> $ &amp; degree of polynomial <span class="math inline">\(\mu_t\)</span> &amp; <code>numTrend</code> \ <span class="math inline">\(a_i\)</span> &amp; <span class="math inline">\(a_i\in\mathbb{R},\text{ }i=1,...,\phi\)</span> &amp; coefficient on <span class="math inline">\(i^\text{th}\)</span> polynomial &amp; — \ <span class="math inline">\(c\)</span> &amp; <span class="math inline">\(c\in1,...,N\)</span>, fixed <span class="math inline">\(\forall i\)</span> &amp; centering parameter &amp; — \ <span class="math inline">\(N\)</span> &amp; <span class="math inline">\(N\in\mathbb{N}\)</span> &amp; length of time series &amp; <code>n</code> \ \end{tabular}  \end{table}</p>
+<p>The table below provides a description of each parameter. Note the “user control in <code>simMt()</code>,<code>simXt()</code>” column, which identifies parameters which can be set by the user.</p>
+<table style="width:78%;">
+<colgroup>
+<col width="13%"></col>
+<col width="8%"></col>
+<col width="30%"></col>
+<col width="25%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">parameter</th>
+<th align="center">range</th>
+<th align="left">description</th>
+<th align="center">user control in <br> <code>simMt()</code>,<code>simXt()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><span class="math inline">\(\mu\)</span></td>
+<td align="center"><span class="math inline">\(\frac{-N}{100}\leq\mu\leq\frac{N}{100}\)</span></td>
+<td align="left">grand mean</td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td align="center"><span class="math inline">\(\phi\)</span></td>
+<td align="center"><span class="math inline">\(\phi\in\mathbb{Z}\)</span>, <span class="math inline">\(\phi\geq0\)</span></td>
+<td align="left">degree of polynomial <span class="math inline">\(\mu_t\)</span></td>
+<td align="center"><code>numTrend</code></td>
+</tr>
+<tr class="odd">
+<td align="center"><span class="math inline">\(a_i\)</span></td>
+<td align="center"><span class="math inline">\(a_i\in\mathbb{R},\text{ }i=1,...,\phi\)</span></td>
+<td align="left">coefficient on <span class="math inline">\(i^\text{th}\)</span> polynomial</td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td align="center"><span class="math inline">\(c\)</span></td>
+<td align="center"><span class="math inline">\(c\in1,...,N\)</span>, <br> fixed <span class="math inline">\(\forall i\)</span></td>
+<td align="left">centering parameter</td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td align="center"><span class="math inline">\(N\)</span></td>
+<td align="center"><span class="math inline">\(N\in\mathbb{N}\)</span></td>
+<td align="left">length of time series</td>
+<td align="center"><code>n</code></td>
+</tr>
+</tbody>
+</table>
 <p>This component can be generated on its own using the function <code>simMt()</code>. For example:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulating a mean vector</span>
 mt &lt;-<span class="st"> </span><span class="kw">simMt</span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">numTrend =</span> <span class="dv">4</span>)</code></pre></div>
 </div>
-<div id="t_t-the-trend-component" class="section level2">
-<h2><span class="math inline">\(t_t\)</span>: The trend component</h2>
-The trend component <span class="math inline">\(t_t\)</span> is constructed as a finite linear combination of sinusoids:
+<div id="t_t-the-trend-component" class="section level3">
+<h3><span class="math inline">\(t_t\)</span>: The trend component</h3>
+The trend component <span class="math inline">\(t_t\)</span> is constructed as a <strong>finite linear combination of sinusoids</strong>:
 <span class="math display">\[\begin{equation}
     t_t = \sum_{i=1}^{\psi} b_i \sin(\omega_it)
 \end{equation}\]</span>
-<p>where <span class="math inline">\(\textbf{b} = \left[b_1,b_2,...,b_\psi\right]\)</span> with <span class="math inline">\(b_i \sim N(1,\frac{N}{200})\)</span> and <span class="math inline">\(\omega = \left[\omega_1,\omega_2,...,\omega_\psi\right]\)</span> where <span class="math inline">\(\omega_i\)</span> defines the period of the <span class="math inline">\(i\)</span>th sinusoid.</p>
-<p>The default is to sample <span class="math inline">\(\psi\)</span> unique values for each <span class="math inline">\(\omega_i \in \left[\frac{2\pi}{N},\pi \right]\)</span>, where <span class="math inline">\(\frac{2\pi}{n}\)</span> is the  and <span class="math inline">\(\pi\)</span> is the . The frequency is related to the period <span class="math inline">\(\omega\)</span> through the relation <span class="math inline">\(f = \frac{\omega}{2\pi}\)</span>. Thus, the lowest possible frequency that could be sampled is <span class="math inline">\(f = \frac{\frac{2\pi}{N}}{2\pi} = \frac{1}{N}\)</span>, and the highest possible frequency is <span class="math inline">\(f = \frac{\pi}{2\pi} = \frac{1}{2}\)</span>.</p>
+<p>where <span class="math inline">\(\textbf{b} = \left[b_1,b_2,...,b_\psi\right]\)</span> with <span class="math inline">\(b_i \sim N(1,\frac{N}{200})\)</span> and <span class="math inline">\(\omega = \left[\omega_1,\omega_2,...,\omega_\psi\right]\)</span> where <span class="math inline">\(\omega_i\)</span> defines the period of the <span class="math inline">\(i\)</span>th sinusoid. The default is to sample <span class="math inline">\(\psi\)</span> unique values for each <span class="math inline">\(\omega_i \in \left[\frac{2\pi}{N},\pi \right]\)</span>, where <span class="math inline">\(\frac{2\pi}{n}\)</span> is the <strong>fundamental Fourier frequency</strong> and <span class="math inline">\(\pi\)</span> is the <strong>Nyquist frequency</strong>. The frequency is related to the period <span class="math inline">\(\omega\)</span> through the relation <span class="math inline">\(f = \frac{\omega}{2\pi}\)</span>. Thus, the lowest possible frequency that could be sampled is <span class="math inline">\(f = \frac{\frac{2\pi}{N}}{2\pi} = \frac{1}{N}\)</span>, and the highest possible frequency is <span class="math inline">\(f = \frac{\pi}{2\pi} = \frac{1}{2}\)</span>.</p>
 <p>There is an additional parameter, <span class="math inline">\(\eta\)</span>, that defines a bandwidth of the order <span class="math inline">\(10^{-\eta}\)</span> from which to sample <span class="math inline">\(\omega\)</span> from <span class="math inline">\(\frac{\psi}{2}\)</span> random non-overlapping subintervals in the interval <span class="math inline">\(\left[\frac{2\pi}{N},\pi \right]\)</span>. For bandwidth-specified simulations, two <span class="math inline">\(\omega\)</span>’s are sampled from each subinterval, and so for this reason <span class="math inline">\(\psi\)</span> must be an even integer.</p>
-<p>Table  provides a description of each parameter. Note the “user control in <code>simTt()</code>/<code>simXt()</code> column, which identifies parameters which can be set by the user.</p>
-
+<p>The table below provides a description of each parameter. Note the “user control in <code>simTt()</code>,<code>simXt()</code>” column, which identifies parameters which can be set by the user.</p>
+<table style="width:82%;">
+<colgroup>
+<col width="13%"></col>
+<col width="8%"></col>
+<col width="36%"></col>
+<col width="23%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">parameter</th>
+<th align="center">range</th>
+<th align="left">description</th>
+<th align="center">user control in <br> <code>simTt()</code>,<code>simXt()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><span class="math inline">\(\psi\)</span></td>
+<td align="center"><span class="math inline">\(\psi\geq0,\text{ }\psi\in2\mathbb{Z}\)</span></td>
+<td align="left">total number of sinusoids</td>
+<td align="center"><code>numFreq</code></td>
+</tr>
+<tr class="even">
+<td align="center"><span class="math inline">\(b_i\)</span></td>
+<td align="center"><span class="math inline">\(b_i\in\mathbb{R},\text{ }i=1,...,\psi\)</span></td>
+<td align="left">amplitude of <span class="math inline">\(i^\text{th}\)</span> sinusoid</td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td align="center"><span class="math inline">\(\omega_i\)</span></td>
+<td align="center"><span class="math inline">\(\frac{2\pi}{N}\leq\omega_i\leq\pi,\text{ }i=1,...,\psi\)</span></td>
+<td align="left">period of <span class="math inline">\(i^\text{th}\)</span> sinusoid</td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td align="center"><span class="math inline">\(\eta\)</span></td>
+<td align="center"><span class="math inline">\(\eta\geq1\)</span></td>
+<td align="left">bandwidth <span class="math inline">\(= 10^{-\eta}\)</span></td>
+<td align="center"><code>bandwidth</code></td>
+</tr>
+<tr class="odd">
+<td align="center"><span class="math inline">\(N\)</span></td>
+<td align="center"><span class="math inline">\(N\in\mathbb{N}\)</span></td>
+<td align="left">length of time series</td>
+<td align="center"><code>n</code></td>
+</tr>
+</tbody>
+</table>
 <p>This component can be generated on its own using the function <code>simTt()</code>. For example:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulating a trend vector</span>
 tt &lt;-<span class="st"> </span><span class="kw">simTt</span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">numFreq =</span> <span class="dv">20</span>, <span class="dt">bandwidth =</span> <span class="dv">2</span>)</code></pre></div>
 </div>
-<div id="xi_t-the-noise-component" class="section level2">
-<h2><span class="math inline">\(\xi_t\)</span>: The noise component</h2>
-The noise component <span class="math inline">\(\xi_t\)</span> is constructed as an <span class="math inline">\(ARIMA(P,Q)\)</span> stochastic process:
+<div id="xi_t-the-noise-component" class="section level3">
+<h3><span class="math inline">\(\xi_t\)</span>: The noise component</h3>
+The noise component <span class="math inline">\(\xi_t\)</span> is constructed as an <span class="math inline">\(ARIMA(P,Q)\)</span> <strong>stochastic process</strong>:
 <span class="math display">\[\begin{equation}
     \xi_t = \alpha_1X_{t-1} + ... + \alpha_P X_{t-P} + Z_t + \beta_1Z_{t-1} + ... + \beta_Q Z_{t-Q}
 \end{equation}\]</span>
 <p>where <span class="math inline">\(P\)</span> is the autoregressive order, and <span class="math inline">\(Q\)</span> is the moving-average order.</p>
-<p>Table  provides a description of each parameter. Note the “user control in <code>simWt()</code>/<code>simXt()</code> column, which identifies parameters which can be set by the user.</p>
-
+<p>The table below provides a description of each parameter. Note the “user control in <code>simWt()</code>,<code>simXt()</code>” column, which identifies parameters which can be set by the user.</p>
+<table style="width:78%;">
+<colgroup>
+<col width="13%"></col>
+<col width="8%"></col>
+<col width="36%"></col>
+<col width="19%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">parameter</th>
+<th align="center">range</th>
+<th align="left">description</th>
+<th align="center">user control in <br> <code>simWt()</code>,<code>simXt()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><span class="math inline">\(P\)</span></td>
+<td align="center"><span class="math inline">\(P\in\mathbb{Z},\text{ }P\geq 0\)</span></td>
+<td align="left"><span class="math inline">\(AR\)</span> order</td>
+<td align="center"><code>p</code></td>
+</tr>
+<tr class="even">
+<td align="center"><span class="math inline">\(\alpha_i\)</span></td>
+<td align="center"><span class="math inline">\(\alpha_i\in\mathbb{R},\text{ }i = 1,...,P\)</span></td>
+<td align="left">coefficient on <span class="math inline">\(i\)</span>th component of <span class="math inline">\(AR(P)\)</span></td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td align="center"><span class="math inline">\(Q\)</span></td>
+<td align="center"><span class="math inline">\(Q\in\mathbb{Z},\text{ }Q\geq 0\)</span></td>
+<td align="left"><span class="math inline">\(MA\)</span> order</td>
+<td align="center"><code>q</code></td>
+</tr>
+<tr class="even">
+<td align="center"><span class="math inline">\(\beta_j\)</span></td>
+<td align="center"><span class="math inline">\(\beta_j\in\mathbb{R},\text{ }j=1,...,Q\)</span></td>
+<td align="left">coefficient on <span class="math inline">\(j\)</span>th component of <span class="math inline">\(MA(Q)\)</span></td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td align="center"><span class="math inline">\(\sigma^2_{\xi_t}\)</span></td>
+<td align="center"><span class="math inline">\(\sigma^2_{\xi_t}\in\mathbb{R}\)</span>, <span class="math inline">\(\sigma^2_{\xi_t}&gt;0\)</span></td>
+<td align="left">variance of <span class="math inline">\(\xi_t\)</span></td>
+<td align="center"><code>var</code></td>
+</tr>
+<tr class="even">
+<td align="center"><span class="math inline">\(N\)</span></td>
+<td align="center"><span class="math inline">\(N\in\mathbb{N}\)</span></td>
+<td align="left">length of time series</td>
+<td align="center"><code>n</code></td>
+</tr>
+</tbody>
+</table>
 <p>This component can be generated on its own using the function <code>simWt()</code>. For example:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulating a noise vector</span>
 wt &lt;-<span class="st"> </span><span class="kw">simWt</span>(<span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">p =</span> <span class="dv">0</span>, <span class="dt">q =</span> <span class="dv">0</span> , <span class="dt">var =</span> <span class="dv">5</span>) <span class="co"># white noise process</span></code></pre></div>
 </div>
-<div id="implementation" class="section level2">
-<h2>Implementation</h2>
-<p>We generate a set of <span class="math inline">\(D\)</span> time series <span class="math inline">\(\left\{x_{t,d},\text{  }d\in1...D\right\}\)</span> all in one step using <code>simXt()</code>, where the features of the time series change as <span class="math inline">\(d\rightarrow D\)</span>.</p>
+<div id="implementation" class="section level3">
+<h3>Implementation</h3>
+<p>We generate a set of <span class="math inline">\(D\)</span> time series <span class="math inline">\(\left\{x_{t,d}:\text{  }d\in1...D\right\}\)</span> all in one step using <code>simXt()</code>, where the features of the time series change as <span class="math inline">\(d\rightarrow D\)</span>.</p>
 <p>By defining the <code>vary</code> argument, the user can decide which component to vary, <span class="math inline">\(m_t\)</span>, <span class="math inline">\(t_t\)</span>, or <span class="math inline">\(\xi_t\)</span>, as <span class="math inline">\(d\rightarrow D\)</span>.</p>
-<div id="varying-m_t" class="section level3">
-<h3>Varying <span class="math inline">\(m_t\)</span></h3>
-<p>In this scenario, the variable parameter is <span class="math inline">\(\phi\)</span>, where <span class="math inline">\(\phi = d\)</span>. All other parameters are held constant as <span class="math inline">\(d\rightarrow D\)</span>, such that only the degree of the mean polynomial is subject to change. As such, <code>numTrend</code> will be overridden.</p>
+<div id="varying-m_t" class="section level4">
+<h4>Varying <span class="math inline">\(m_t\)</span></h4>
+<p>In this scenario, the variable parameter is <span class="math inline">\(\phi\)</span>, where <span class="math inline">\(\phi = d\)</span>. All other parameters are held constant as <span class="math inline">\(d\rightarrow D\)</span>, such that <strong>only the degree of the mean polynomial is subject to change</strong>. As such, <code>numTrend</code> will be overridden.</p>
 </div>
-<div id="varying-t_t" class="section level3">
-<h3>Varying <span class="math inline">\(t_t\)</span></h3>
-<p>In this scenario, the variable parameter is <span class="math inline">\(\psi\)</span>, where <span class="math inline">\(\psi = d*10\)</span>. All other parameters are held constant as <span class="math inline">\(d\rightarrow D\)</span>, such that only the number of constituent frequencies is subject to change. As such, <code>numFreq</code> will be overridden.</p>
-</div>
-<div id="varying-xi_t" class="section level3">
-<h3>Varying <span class="math inline">\(\xi_t\)</span></h3>
-<p>In this scenario, the variable parameter is either <span class="math inline">\(P\)</span> or <span class="math inline">\(Q\)</span>, where <span class="math inline">\(P = d\)</span> or <span class="math inline">\(Q = d\)</span>. All other parameters are held constant as <span class="math inline">\(d\rightarrow D\)</span>, such that only the order of the <span class="math inline">\(AR(P)\)</span> or <span class="math inline">\(MA(Q)\)</span> process is subject to change. The user can set which parameter to fix via the <code>fix</code> argument. As such, <code>p</code> or <code>q</code> will be overridden.</p>
+<div id="varying-t_t" class="section level4">
+<h4>Varying <span class="math inline">\(t_t\)</span></h4>
+<p>In this scenario, the variable parameter is <span class="math inline">\(\psi\)</span>, where <span class="math inline">\(\psi = d*10\)</span>. All other parameters are held constant as <span class="math inline">\(d\rightarrow D\)</span>, such that <strong>only the number of constituent frequencies is subject to change</strong>. As such, <code>numFreq</code> will be overridden.</p>
 <p>The toy data provided describes a set of <span class="math inline">\(x_t\)</span> with <span class="math inline">\(t_t\)</span> as the variable component:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulating five time series</span>
 xt &lt;-<span class="st"> </span><span class="kw">simXt</span>(<span class="dt">D =</span> <span class="dv">5</span>, <span class="dt">vary =</span> <span class="st">&quot;Tt&quot;</span>, <span class="dt">n =</span> <span class="dv">100</span>, <span class="dt">numTrend =</span> <span class="dv">4</span>, <span class="dt">bandwidth =</span> <span class="dv">2</span>, <span class="dt">p =</span> <span class="dv">0</span>, <span class="dt">q =</span> <span class="dv">0</span>, <span class="dt">snr =</span> <span class="fl">1.5</span>)
 <span class="co">#&gt; Warning in simXt(D = 5, vary = &quot;Tt&quot;, n = 100, numTrend = 4, bandwidth =</span>
 <span class="co">#&gt; 2, : trendType not specified- defaulting to 'polynomial';</span></code></pre></div>
+</div>
+<div id="varying-xi_t" class="section level4">
+<h4>Varying <span class="math inline">\(\xi_t\)</span></h4>
+<p>In this scenario, the variable parameter is either <span class="math inline">\(P\)</span> or <span class="math inline">\(Q\)</span>, where <span class="math inline">\(P = d\)</span> or <span class="math inline">\(Q = d\)</span>. All other parameters are held constant as <span class="math inline">\(d\rightarrow D\)</span>, such that <strong>only the order of the <span class="math inline">\(AR(P)\)</span> or <span class="math inline">\(MA(Q)\)</span> process is subject to change</strong>. The user can set which parameter to fix via the <code>fix</code> argument. As such, <code>p</code> or <code>q</code> will be overridden.</p>
 The user should carefully note the <code>snr</code> argument in <code>simXt()</code>, which represents the desired signal-to-noise ratio of <span class="math inline">\(x_t\)</span>, where:
 <span class="math display">\[\begin{equation}
   \mathbf{SNR} = \frac{\sigma^2_{t_t}}{\sigma^2_{\xi_t}}
@@ -184,61 +337,318 @@ The user should carefully note the <code>snr</code> argument in <code>simXt()</c
 </div>
 </div>
 </div>
-<div id="step-2-imposing-a-gap-structure" class="section level1">
-<h1>Step 2: Imposing a gap structure</h1>
-<p>Gap structure is defined by two parameters: <span class="math inline">\(p\)</span>, the overall percentage of data missing, and <span class="math inline">\(g\)</span>, the width of the gaps. The result is a total of <span class="math inline">\(I=p\cdot N\)</span> missing observations, appearing structurally as <span class="math inline">\(\leq\frac{p\cdot N}{g}\)</span> randomly-spaced non-overlapping holes of width <span class="math inline">\(g\)</span>, where a ‘hole’ is defined as a sequence of adjacent missing observations.</p>
+<div id="step-2-imposing-a-gap-structure" class="section level2">
+<h2>Step 2: Imposing a gap structure</h2>
+<p>Gap structure is defined by two parameters: <span class="math inline">\(p\)</span>, the overall <strong>percentage of data missing</strong>, and <span class="math inline">\(g\)</span>, the <strong>width of the gaps</strong>. The result is a total of <span class="math inline">\(I=p\cdot N\)</span> missing observations, appearing structurally as <span class="math inline">\(\leq\frac{p\cdot N}{g}\)</span> randomly-spaced non-overlapping holes of width <span class="math inline">\(g\)</span>, where a ‘hole’ is defined as a sequence of adjacent missing observations.</p>
 <p>Since the other principal objective of this package is to assess statistical performance in light of changes to gap structure, the user should initialize vectors contaning numerous values of <span class="math inline">\(p\)</span> and <span class="math inline">\(g\)</span>, such that each <span class="math inline">\((p,g)\)</span> combination can be applied. Under the constraint that only integer numbers of gaps can be removed, the actual number of missing observations may not always be consistent with the theoretical number due to rounding. Thus, care should be taken when selecting selection of these values.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Initializing vectors of p and g</span>
-<span class="co">#prop_vec &lt;- c(0.1, 0.20, 0.30)</span>
-<span class="co">#gap_vec &lt;- c(1, 5, 10)</span></code></pre></div>
+prop_vec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.20</span>, <span class="fl">0.30</span>)
+gap_vec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>)</code></pre></div>
 <p>A single time series can be passed into <code>simulateGaps()</code>, along with arguments <code>prop_vec</code> and <code>gap_vec</code> to remove observations according to the desired gap specification. The user can also define <code>K</code> to set the number of gappy series to generate for each original dataset. Note that in each iteration, gap locations are chosen randomly under the specified gap parameterization.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Using a loop to apply gaps to each of the five original time series</span>
-<span class="co">#D &lt;- length(OriginalData)</span>
+D &lt;-<span class="st"> </span><span class="kw">length</span>(OriginalData)
 
-<span class="co">#GappyData &lt;- list()</span>
+GappyData &lt;-<span class="st"> </span><span class="kw">list</span>()
 
-<span class="co">#for(d in 1:D){</span>
-<span class="co">#  GappyData[[d]] &lt;- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = 10)</span>
-<span class="co">#}</span></code></pre></div>
+<span class="cf">for</span>(d <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>D){
+  GappyData[[d]] &lt;-<span class="st"> </span><span class="kw">simulateGaps</span>(<span class="dt">data =</span> <span class="kw">as.numeric</span>(OriginalData[[d]]), <span class="dt">prop_vec =</span> prop_vec, <span class="dt">gap_vec =</span> gap_vec, <span class="dt">K =</span> <span class="dv">10</span>)
+}</code></pre></div>
 <p>The result is a nested list of dimension <span class="math inline">\(D\times P \times G \times K\)</span>.</p>
 </div>
-<div id="step-3-interpolating-the-gappy-data" class="section level1">
-<h1>Step 3: Interpolating the gappy data</h1>
-<p>The next step is to interpolate the list of gappy data using <code>parInterpolate()</code>. The user can choose from a list of 18 algorithms pulled from external packages, shown in Table .</p>
-
+<div id="step-3-interpolating-the-gappy-data" class="section level2">
+<h2>Step 3: Interpolating the gappy data</h2>
+<p>The next step is to interpolate the list of gappy data using <code>parInterpolate()</code>. The user can choose from a list of 18 algorithms pulled from external packages, shown in the table below.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Package</th>
+<th align="left">Function</th>
+<th align="left">Algorithm name</th>
+<th align="right">Abbreviation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">interpTools</td>
+<td align="left">nearestNeighbor()</td>
+<td align="left">Nearest Neighbor</td>
+<td align="right">NN</td>
+</tr>
+<tr class="even">
+<td align="left">zoo</td>
+<td align="left">na.approx()</td>
+<td align="left">Linear Interpolation</td>
+<td align="right">LI</td>
+</tr>
+<tr class="odd">
+<td align="left">zoo</td>
+<td align="left">na.spline()</td>
+<td align="left">Natural Cubic Spline</td>
+<td align="right">NCS</td>
+</tr>
+<tr class="even">
+<td align="left">zoo</td>
+<td align="left">na.spline()</td>
+<td align="left">FMM Cubic Spline</td>
+<td align="right">FMM</td>
+</tr>
+<tr class="odd">
+<td align="left">zoo</td>
+<td align="left">na.spline()</td>
+<td align="left">Hermite Cubic Spline</td>
+<td align="right">HCS</td>
+</tr>
+<tr class="even">
+<td align="left">imputeTS</td>
+<td align="left">na_interpolation()</td>
+<td align="left">Stineman Interpolation</td>
+<td align="right">SI</td>
+</tr>
+<tr class="odd">
+<td align="left">imputeTS</td>
+<td align="left">na_kalman()</td>
+<td align="left">Kalman - ARIMA</td>
+<td align="right">KAF</td>
+</tr>
+<tr class="even">
+<td align="left">imputeTS</td>
+<td align="left">na_kalman()</td>
+<td align="left">Kalman - StructTS</td>
+<td align="right">KKSF</td>
+</tr>
+<tr class="odd">
+<td align="left">imputeTS</td>
+<td align="left">na.locf()</td>
+<td align="left">Last Observation Carried Forward</td>
+<td align="right">LOCF</td>
+</tr>
+<tr class="even">
+<td align="left">imputeTS</td>
+<td align="left">na.locf()</td>
+<td align="left">Next Observation Carried Backward</td>
+<td align="right">NOCB</td>
+</tr>
+<tr class="odd">
+<td align="left">imputeTS</td>
+<td align="left">na_ma()</td>
+<td align="left">Simple Moving Average</td>
+<td align="right">SMA</td>
+</tr>
+<tr class="even">
+<td align="left">imputeTS</td>
+<td align="left">na_ma()</td>
+<td align="left">Linear Weighted Moving Average</td>
+<td align="right">LWMA</td>
+</tr>
+<tr class="odd">
+<td align="left">imputeTS</td>
+<td align="left">na_ma()</td>
+<td align="left">Exponential Weighted Moving Average</td>
+<td align="right">EWMA</td>
+</tr>
+<tr class="even">
+<td align="left">imputeTS</td>
+<td align="left">na_mean()</td>
+<td align="left">Replace with Mean</td>
+<td align="right">RMEA</td>
+</tr>
+<tr class="odd">
+<td align="left">imputeTS</td>
+<td align="left">na_mean()</td>
+<td align="left">Replace with Median</td>
+<td align="right">RMED</td>
+</tr>
+<tr class="even">
+<td align="left">imputeTS</td>
+<td align="left">na_mean()</td>
+<td align="left">Replace with Mode</td>
+<td align="right">RMOD</td>
+</tr>
+<tr class="odd">
+<td align="left">imputeTS</td>
+<td align="left">na_random()</td>
+<td align="left">Replace with Random</td>
+<td align="right">RRND</td>
+</tr>
+<tr class="even">
+<td align="left">tsinterp</td>
+<td align="left">interpolate()</td>
+<td align="left">Hybrid Wiener Interpolator</td>
+<td align="right">HWI</td>
+</tr>
+</tbody>
+</table>
 <p>A vector of <code>methods</code> of length <span class="math inline">\(M\)</span> can be defined to facilitate a comparative assessment between algorithms later, if so desired. Should the user decide to pass in their own function via <code>FUN_CALL</code>, they must ensure that the output the function is a single numeric vector. The interpolations will occur in parallel over the <span class="math inline">\(K\)</span> index, where the number of cores to use can be defined via <code>num_cores</code> (the default is to use as many as are available).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Using a loop to interpolate over the five sets of gappy data</span>
-<span class="co">#D &lt;- length(GappyData)</span>
+D &lt;-<span class="st"> </span><span class="kw">length</span>(GappyData)
+methods &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;NN&quot;</span>, <span class="st">&quot;EWMA&quot;</span>, <span class="st">&quot;KAF&quot;</span>)
+IntData &lt;-<span class="st"> </span><span class="kw">list</span>()
 
-<span class="co">#IntData &lt;- list()</span>
-
-<span class="co">#for(d in 1:D){</span>
-<span class="co">#  IntData[[d]] &lt;- parInterpolate(gappyTS = GappyData[[d]], methods = c(&quot;EWMA&quot;, &quot;HWI&quot;, &quot;KAF&quot;))</span>
-<span class="co">#}</span></code></pre></div>
+<span class="cf">for</span>(d <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>D){
+  IntData[[d]] &lt;-<span class="st"> </span><span class="kw">parInterpolate</span>(<span class="dt">gappyTS =</span> GappyData[[d]], <span class="dt">methods =</span> methods)
+}</code></pre></div>
 <p>The resulting object is a nested list of dimension <span class="math inline">\(D \times M \times P \times G \times K\)</span>.</p>
+<div id="reducing-the-computational-burden-splitdata-and-stitchdata" class="section level3">
+<h3>Reducing the computational burden: <code>splitData()</code> and <code>stitchData()</code></h3>
+<p>Considering the dimensionality of the data and complexity of some interpolation algorithms (especially that of the Hybrid Wiener Interpolator), the system requirements for this number of computations can be quite large. The function <code>splitData()</code> can be used to “break apart” the gappy data at the <span class="math inline">\(K\)</span>-level into more manageable chunks (the number of sets specified by the <code>split</code> argument) prior to being passed into <code>parInterpolate()</code>.</p>
+<p>See the usage of the function in the following example, where the Gappy Data is divided into sets of size <span class="math inline">\(K/2\)</span>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">GappyData_split &lt;-<span class="st"> </span><span class="kw">splitData</span>(<span class="dt">GappyData =</span> GappyData, <span class="dt">split =</span> <span class="dv">2</span>)</code></pre></div>
+<p>The split data can then be passed into <code>parInterpolate()</code> as normal, except with an additional nested loop, iterating over the number of sets. It is also wise to save each set of interpolated data with each iteration in an <strong>appropriately organized directory</strong>, where the parent folder should contain <strong>only .rda files organized into subfolders by dataset</strong>. See the example below:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">D &lt;-<span class="st"> </span><span class="kw">length</span>(GappyData_split)
+split =<span class="st"> </span><span class="dv">2</span>
+
+IntData_split &lt;-<span class="st"> </span><span class="kw">list</span>()
+
+<span class="cf">for</span>(d <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>D){
+  <span class="cf">for</span>(n <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>split){
+    IntData_split &lt;-<span class="st"> </span><span class="kw">parInterpolate</span>(<span class="dt">gappyTS =</span> GappyData_split[[d]][[n]], <span class="dt">methods =</span> methods)
+    filename &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;D&quot;</span>,d,<span class="st">&quot;_&quot;</span>,letters[n],<span class="st">&quot;.rda&quot;</span>)
+<span class="co">#   setwd(paste0(&quot;~/IntData_split/D&quot;,d))</span>
+<span class="co">#   save(IntData_split, file = filename)</span>
+    <span class="kw">gc</span>()
+  }
+}</code></pre></div>
+<p>Once the interpolations have completed, the split data can be recombined into a single <span class="math inline">\(D \times M \times P \times G \times K\)</span> list using the <code>stitchData()</code> function and referencing the directory containing the files:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> IntData_stitched &lt;-<span class="st"> </span><span class="kw">stitchData</span>(<span class="st">&quot;~/IntData_split&quot;</span>)
+
+ IntData <span class="op">==</span><span class="st"> </span>IntData_stitched</code></pre></div>
 </div>
-<div id="step-4-compare-the-interpolated-series-with-the-original" class="section level1">
-<h1>Step 4: Compare the interpolated series with the original</h1>
-The performance of a single interpolation can be assessed by comparing the original time series, <span class="math inline">\(x_t\)</span>, with the interpolated series, <span class="math inline">\(X_t\)</span>. Here, statistical performance is defined as some measure of the bias, represented by some function:
+</div>
+<div id="step-4-compare-the-interpolated-series-with-the-original" class="section level2">
+<h2>Step 4: Compare the interpolated series with the original</h2>
+The performance of a single interpolation can be assessed by comparing the <strong>original time series</strong>, <span class="math inline">\(x_t\)</span>, with the <strong>interpolated series</strong>, <span class="math inline">\(X_t\)</span>. Here, statistical performance is defined as some measure of the bias, represented by some function:
 <span class="math display">\[\begin{equation}
     C(\mathbf{X}, \mathbf{x}),
 \end{equation}\]</span>
 <p>called a performance criterion. Generally speaking, <span class="math inline">\(C\)</span> quantifies how well the interpolated series, <span class="math inline">\(\mathbf{X} = \left\{X_t\right\}_{t=0}^{N-1}\)</span>, captures the essence of the original series, <span class="math inline">\(\mathbf{x} = \left\{x_t\right\}_{t=0}^{N-1}\)</span>.</p>
-<div id="generating-performance-matrices" class="section level2">
-<h2>Generating performance matrices</h2>
-<p>A set of performance criteria are computed for each <span class="math inline">\((x_t,X_t)\)</span> pair using the <code>performance()</code> function. Table  shows the metrics that are built-in to the package.</p>
-
+<div id="generating-performance-matrices" class="section level3">
+<h3>Generating performance matrices</h3>
+<p>A set of performance criteria are computed for each <span class="math inline">\((x_t,X_t)\)</span> pair using the <code>performance()</code> function. The table below shows the metrics that are built-in to the package.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Criterion</th>
+<th align="left">Abbreviation</th>
+<th align="left">Optimal</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Correlation Coefficient</td>
+<td align="left"><span class="math inline">\(r\)</span></td>
+<td align="left">max</td>
+</tr>
+<tr class="even">
+<td align="left">Coefficient of Determination</td>
+<td align="left"><span class="math inline">\(r^2\)</span></td>
+<td align="left">max</td>
+</tr>
+<tr class="odd">
+<td align="left">Absolute Differences</td>
+<td align="left"><span class="math inline">\(\mathbf{AD}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="even">
+<td align="left">Mean Bias Error</td>
+<td align="left"><span class="math inline">\(\mathbf{MBE}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="odd">
+<td align="left">Mean Error</td>
+<td align="left"><span class="math inline">\(\mathbf{ME}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="even">
+<td align="left">Mean Absolute Error</td>
+<td align="left"><span class="math inline">\(\mathbf{MAE}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="odd">
+<td align="left">Mean Relative Error</td>
+<td align="left"><span class="math inline">\(\mathbf{MRE}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="even">
+<td align="left">Mean Absolute Relative Error</td>
+<td align="left"><span class="math inline">\(\mathbf{MARE}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="odd">
+<td align="left">Mean Absolute Percentage Error</td>
+<td align="left"><span class="math inline">\(\mathbf{MAPE}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="even">
+<td align="left">Sum of Squared Errors</td>
+<td align="left"><span class="math inline">\(\mathbf{SSE}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="odd">
+<td align="left">Mean Square Error</td>
+<td align="left"><span class="math inline">\(\mathbf{MSE}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="even">
+<td align="left">Root Mean Squares</td>
+<td align="left"><span class="math inline">\(\mathbf{RMS}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="odd">
+<td align="left">Normalized Mean Square Error</td>
+<td align="left"><span class="math inline">\(\mathbf{NMSE}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="even">
+<td align="left">Nash-Sutcliffe Coefficient</td>
+<td align="left"><span class="math inline">\(\mathbf{RE}\)</span></td>
+<td align="left">max</td>
+</tr>
+<tr class="odd">
+<td align="left">Root Mean Square Error</td>
+<td align="left"><span class="math inline">\(\mathbf{RMSE}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="even">
+<td align="left">Normalized Root Mean Square Deviations</td>
+<td align="left"><span class="math inline">\(\mathbf{NRMSD}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="odd">
+<td align="left">Root Mean Square Standardized Error</td>
+<td align="left"><span class="math inline">\(\mathbf{RMSS}\)</span></td>
+<td align="left">min</td>
+</tr>
+<tr class="even">
+<td align="left">Median Absolute Percentage Error</td>
+<td align="left"><span class="math inline">\(\mathbf{MdAPE}\)</span></td>
+<td align="left">min</td>
+</tr>
+</tbody>
+</table>
 <p>The full set of performance criteria can be generated as follows:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#pmats &lt;- performance(OriginalData = OriginalData, GappyData = GappyData, IntData = IntData)</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pmats &lt;-<span class="st"> </span><span class="kw">performance</span>(<span class="dt">OriginalData =</span> OriginalData, <span class="dt">GappyData =</span> GappyData, <span class="dt">IntData =</span> IntData)</code></pre></div>
 <p>The resulting output is a list of dimension <span class="math inline">\(D \times M \times P \times G \times K\)</span>, where the terminal node is a matrix of metrics.</p>
 </div>
-<div id="aggregating-the-performance-data" class="section level2">
-<h2>Aggregating the performance data</h2>
+<div id="aggregating-the-performance-data" class="section level3">
+<h3>Aggregating the performance data</h3>
 <p>Consider that for any <span class="math inline">\((d,m,p,g)\)</span> set, there are a set of <span class="math inline">\(K\)</span> values for each criterion. Thus, each performance metric has a sampling distribution containing <span class="math inline">\(K\)</span> elements. The performance matrices can be condensed by aggregating over <span class="math inline">\(K\)</span> to reduce dimensionality. The comprehensive set of sample statistics that are offered in this package are listed below:</p>
-
+<ul>
+<li>mean</li>
+<li>standard deviation</li>
+<li>0% quantile (minimum)</li>
+<li>2.5% quantile</li>
+<li>25% quantile</li>
+<li>50% quantile (median)</li>
+<li>75% quantile</li>
+<li>97.5% quantile</li>
+<li>100% quantile (maximum)</li>
+<li>skewness</li>
+<li>p-value (dip test for unimodality)</li>
+</ul>
 <p>The aggregated performance matrices are computed via the <code>agEvaluate()</code> function:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#agEval &lt;- agEvaluate(pmats = pmats)</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">agEval &lt;-<span class="st"> </span><span class="kw">agEvaluate</span>(<span class="dt">pmats =</span> pmats)</code></pre></div>
 <p>The result is an object of class <code>agEvaluate</code>. This object structure is required for all data analyses to follow.</p>
+</div>
 </div>
 </div>
 <div id="data-visualization" class="section level1">

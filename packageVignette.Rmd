@@ -16,21 +16,23 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r lib, cache = TRUE, echo = FALSE}
+```{r lib, message = FALSE}
+# installing library
+#library(devtools)
+#install_github("castels/interpTools")
+
 # Loading library
 library(sophTools)
 ```
 
-The intended use of this R package is to provide a set of tools for the systematic testing of time series interpolators in light of changing the features of the data and the gap structure. The basic framework is as follows:
+The intended use of this R package is to provide a set of tools for the systematic testing of time series interpolators in light of changing the __features of the data__ and the __gap structure__. The basic framework is as follows:
 
-\begin{enumerate}
-\item Generate artificial time series
-\item Impose a gap structure
-\item Interpolate the gappy data
-\item Compare the interpolated series with the original
-\end{enumerate}
+1. Generate artificial time series
+2. Impose a gap structure
+3. Interpolate the gappy data
+4. Compare the interpolated series with the original
 
-This document will describe how to navigate steps 1-4, and also how to assess the results, using the package functions.  The example code is that which was used to generate the built-in `toy data' contained in this package.
+This document will describe how to navigate steps 1-4, and also how to assess the results, using the package functions.  The example code is that which was used to generate the built-in 'toy data' contained in this package.
 
 ```{r setseed, cache = TRUE}
 # Setting seed for reproducibility
@@ -41,136 +43,113 @@ set.seed(23)
 
 ## Step 1 --- Generate artificial time series
 
-The `simXt()` function generates time series, $x_t$, according to the general additive model:
+The `simXt()` function generates time series, $x_t$, according to the __general additive model__:
 
 \begin{equation}
  x_t = m_t + t_t + \xi_t
 \end{equation}
 
-where $m_t$ is the mean function, $t_t$ is the trend function, and $\xi_t$ is the noise function. The arguments in `simXt()` are passed to constituent functions `simMt()`, `simTt()`, and `simWt()` and are consistently named.  Hence, it is possible to generate, for a single time series, each piece independently. The following section provides a brief description of each component, along with its set of defining parameters.
+where $m_t$ is the __mean function__, $t_t$ is the __trend function__, and $\xi_t$ is the __noise function__. The arguments in `simXt()` are passed to constituent functions `simMt()`, `simTt()`, and `simWt()` and are consistently named.  Hence, it is possible to generate, for a single time series, each piece independently. The following section provides a brief description of each component, along with its set of defining parameters.
 
 ### $m_t$: The mean component
-The mean component $m_t$ is composed of a constant, non-varying mean element (the grand mean), and a varying polynomial trend element:
+The mean component $m_t$ is composed of a __constant, non-varying mean element__ (the grand mean), and a __varying polynomial trend element__:
 \begin{align}
   m_t &= \mu +\mu_t \\
       &= \mu + \sum_{i=1}^{\phi} a_i \left(\frac{t-c}{N}\right)^i
 \end{align}
 where $\mu \sim U(\frac{-N}{100},\frac{N}{100})$, and $\textbf{a} = \left[a_1,a_2,...,a_\phi\right]$ with $a_i \sim N(0,\frac{N}{20i})$ and are randomly sampled. 
 
-Table \ref{tab:mt} provides a description of each parameter. Note the "user control in `simMt()`/`simXt()` column, which identifies parameters which can be set by the user.
+The table below provides a description of each parameter. Note the "user control in `simMt()`,`simXt()`" column, which identifies parameters which can be set by the user.
 
-\begin{table}[!h]
-  \centering
-  \caption{A summary of the minor parameters used in the simulation of $m_t$.}
-  \begin{tabular}{ccll}
-    
-  parameter & range & description & user control in `simMt()`/`simXt()` \\
-  
-  $\mu$ & $\frac{-N}{100}\leq\mu\leq\frac{N}{100}$ & grand mean & --- \\
-  $\phi$ & $\phi\in\mathbb{Z}$, $\phi\geq0$ $ & degree of polynomial $\mu_t$ & `numTrend` \\
-  $a_i$ & $a_i\in\mathbb{R},\text{ }i=1,...,\phi$ & coefficient on $i^\text{th}$ polynomial & --- \\
-  $c$ & $c\in1,...,N$, fixed $\forall i$ & centering parameter & --- \\
-  $N$ & $N\in\mathbb{N}$ & length of time series & `n` \\
-  \end{tabular}
-  \label{tab:mt}
-\end{table}
 
-This component can be generated on its own using the function `simMt()`. For example:
+|parameter|range|description          |user control in <br> `simMt()`,`simXt()`|
+|:-------:|:---:|:--------------------|:---------------:|
+|$\mu$ | $\frac{-N}{100}\leq\mu\leq\frac{N}{100}$ | grand mean|  |
+|$\phi$ | $\phi\in\mathbb{Z}$, $\phi\geq0$ | degree of polynomial $\mu_t$ | `numTrend` |
+|$a_i$ | $a_i\in\mathbb{R},\text{ }i=1,...,\phi$ | coefficient on $i^\text{th}$ polynomial |  | 
+|$c$ | $c\in1,...,N$, <br> fixed $\forall i$ | centering parameter |  |
+|$N$ | $N\in\mathbb{N}$ | length of time series | `n` |
 
-```{r mt}
+This component can be generated on its own using the function `simMt()` with `trendType = "polynomial"`. For example:
+
+```{r mt, cache = TRUE}
 # Simulating a mean vector
-mt <- simMt(n = 100, numTrend = 4)
+mt <- simMt(n = 100, numTrend = 4, trendType = "polynomial")
 ```
 
 ### $t_t$: The trend component
-The trend component $t_t$ is constructed as a finite linear combination of sinusoids:
+The trend component $t_t$ is constructed as a __finite linear combination of sinusoids__:
 \begin{equation}
     t_t = \sum_{i=1}^{\psi} b_i \sin(\omega_it)
 \end{equation}
-where $\textbf{b} = \left[b_1,b_2,...,b_\psi\right]$ with $b_i \sim N(1,\frac{N}{200})$ and $\omega = \left[\omega_1,\omega_2,...,\omega_\psi\right]$ where $\omega_i$ defines the period of the $i$th sinusoid.
-
-The default is to sample $\psi$ unique values for each $\omega_i \in \left[\frac{2\pi}{N},\pi \right]$, where $\frac{2\pi}{n}$ is the \emph{fundamental Fourier frequency} and $\pi$ is the \emph{Nyquist frequency}. The frequency is related to the period $\omega$ through the relation $f = \frac{\omega}{2\pi}$. Thus, the lowest possible frequency that could be sampled is $f = \frac{\frac{2\pi}{N}}{2\pi} = \frac{1}{N}$, and the highest possible frequency is $f = \frac{\pi}{2\pi} = \frac{1}{2}$.
+where $\textbf{b} = \left[b_1,b_2,...,b_\psi\right]$ with $b_i \sim N(1,\frac{N}{200})$ and $\omega = \left[\omega_1,\omega_2,...,\omega_\psi\right]$ where $\omega_i$ defines the period of the $i$th sinusoid. The default is to sample $\psi$ unique values for each $\omega_i \in \left[\frac{2\pi}{N},\pi \right]$, where $\frac{2\pi}{n}$ is the __fundamental Fourier frequency__ and $\pi$ is the __Nyquist frequency__. The frequency is related to the period $\omega$ through the relation $f = \frac{\omega}{2\pi}$. Thus, the lowest possible frequency that could be sampled is $f = \frac{\frac{2\pi}{N}}{2\pi} = \frac{1}{N}$, and the highest possible frequency is $f = \frac{\pi}{2\pi} = \frac{1}{2}$.
 
 There is an additional parameter, $\eta$, that defines a bandwidth of the order $10^{-\eta}$ from which to sample $\omega$ from $\frac{\psi}{2}$ random non-overlapping subintervals in the interval $\left[\frac{2\pi}{N},\pi \right]$. For bandwidth-specified simulations, two $\omega$'s are sampled from each subinterval, and so for this reason $\psi$ must be an even integer. 
 
-Table \ref{tab:tt} provides a description of each parameter. Note the "user control in `simTt()`/`simXt()` column, which identifies parameters which can be set by the user.
+The table below provides a description of each parameter. Note the "user control in `simTt()`,`simXt()`" column, which identifies parameters which can be set by the user.
 
-\begin{table}[!h]
-  \centering
-  \caption{A summary of the minor parameters used in the simulation of $t_t$.}
-  \begin{tabular}{ccll}
-    
-  parameter & range & description & user control in `simTt()`/`simXt()` \\
-  
-  $\psi$ & $\psi\geq0,\text{ }\psi\in2\mathbb{Z}$ & total number of sinusoids & `numFreq` \\
-  $b_i$ & $b_i\in\mathbb{R},\text{ }i=1,...,\psi$ & amplitude of $i^\text{th}$ sinusoid & --- \\
-  $\omega_i$ & $\frac{2\pi}{N}\leq\omega_i\leq\pi,\text{ }i=1,...,\psi$ & period of $i^\text{th}$ sinusoid & --- \\
-  $\eta$* & $\eta\geq1$ & bandwidth $= 10^{-\eta}$ & `bandwidth` \\
-  $N$ & $N\in\mathbb{N}$ & length of time series & `n` \\
-  \end{tabular}
-  \label{tab:tt}
-\end{table}
+|parameter|range|description              |user control in <br> `simTt()`,`simXt()`|
+|:-------:|:---:|:------------------------|:--------------:|
+|$\psi$ | $\psi\geq0,\text{ }\psi\in2\mathbb{Z}$ | total number of sinusoids | `numFreq` |
+|$b_i$ | $b_i\in\mathbb{R},\text{ }i=1,...,\psi$ | amplitude of $i^\text{th}$ sinusoid | | 
+|$\omega_i$ | $\frac{2\pi}{N}\leq\omega_i\leq\pi,\text{ }i=1,...,\psi$ | period of $i^\text{th}$ sinusoid | | 
+|$\eta$ | $\eta\geq1$ | bandwidth $= 10^{-\eta}$ | `bandwidth` | 
+|$N$ | $N\in\mathbb{N}$ | length of time series | `n` |
+
 
 This component can be generated on its own using the function `simTt()`. For example:
 
-```{r tt}
+```{r tt, cache = TRUE}
 # Simulating a trend vector
 tt <- simTt(n = 100, numFreq = 20, bandwidth = 2)
 ```
 
 ### $\xi_t$: The noise component
-The noise component $\xi_t$ is constructed as an $ARIMA(P,Q)$ stochastic process:
+The noise component $\xi_t$ is constructed as an $ARIMA(P,Q)$ __stochastic process__:
 \begin{equation}
     \xi_t = \alpha_1X_{t-1} + ... + \alpha_P X_{t-P} + Z_t + \beta_1Z_{t-1} + ... + \beta_Q Z_{t-Q}
 \end{equation}
 where $P$ is the autoregressive order, and $Q$ is the moving-average order. 
 
-Table \ref{tab:wt} provides a description of each parameter. Note the "user control in `simWt()`/`simXt()` column, which identifies parameters which can be set by the user.
+The table below provides a description of each parameter. Note the "user control in `simWt()`,`simXt()`" column, which identifies parameters which can be set by the user.
 
 
-\begin{table}[!h]
-  \centering
-  \caption{A summary of the minor parameters used in the simulation of $\xi_t$.}
-  \begin{tabular}{ccll}
-    
-  parameter & range & description & user control in `simWt()`/`simXt()` \\
-  
-  $P$ & $P\in\mathbb{Z},\text{ }P\geq 0$ & $AR$ order & `p` \\
-  $\alpha_i$ & $\alpha_i\in\mathbb{R},\text{ }i = 1,...,P$ & coefficient on $i$th component of $AR(P)$ & --- \\
-  $Q$ & $Q\in\mathbb{Z},\text{ }Q\geq 0$ & $MA$ order & `q` \\
-  $\beta_j$ & $\beta_j\in\mathbb{R},\text{ }j=1,...,Q$ & coefficient on $j$th component of $MA(Q)$ & ---\\
-  $\sigma^2_{\xi_t}$ & $\sigma^2_{\xi_t}\in\mathbb{R}$, $\sigma^2_{\xi_t}>0$ & variance of $\xi_t$ & `var`
-  \end{tabular}
-  \label{tab:wt}
-\end{table}
+|parameter|range|description              |user control in <br> `simWt()`,`simXt()`|
+|:-------:|:---:|:------------------------|:-----------:|
+|$P$ | $P\in\mathbb{Z},\text{ }P\geq 0$ | $AR$ order | `p` |
+|$\alpha_i$ | $\alpha_i\in\mathbb{R},\text{ }i = 1,...,P$ | coefficient on $i$th component of $AR(P)$ | |
+|$Q$ | $Q\in\mathbb{Z},\text{ }Q\geq 0$ | $MA$ order | `q` |
+|$\beta_j$ | $\beta_j\in\mathbb{R},\text{ }j=1,...,Q$ | coefficient on $j$th component of $MA(Q)$ | |
+|$\sigma^2_{\xi_t}$ | $\sigma^2_{\xi_t}\in\mathbb{R}$, $\sigma^2_{\xi_t}>0$ | variance of $\xi_t$ | `var` |
+|$N$ | $N\in\mathbb{N}$ | length of time series | `n` |
 
 This component can be generated on its own using the function `simWt()`. For example:
 
-```{r wt}
+```{r wt, cache = TRUE}
 # Simulating a noise vector
 wt <- simWt(n = 100, p = 0, q = 0 , var = 5) # white noise process
 ```
 
 ### Implementation
-We generate a set of $D$ time series $\left\{x_{t,d},\text{  }d\in1...D\right\}$ all in one step using `simXt()`, where the features of the time series change as $d\rightarrow D$. 
+We generate a set of $D$ time series $\left\{x_{t,d}:\text{  }d\in1...D\right\}$ all in one step using `simXt()`, where the features of the time series change as $d\rightarrow D$. 
 
 By defining the `vary` argument, the user can decide which component to vary, $m_t$, $t_t$, or $\xi_t$, as $d\rightarrow D$.
 
 #### Varying $m_t$
-In this scenario, the variable parameter is $\phi$, where $\phi = d$. All other parameters are held constant as $d\rightarrow D$, such that only the degree of the mean polynomial is subject to change. As such, `numTrend` will be overridden.
+In this scenario, the variable parameter is $\phi$, where $\phi = d$. All other parameters are held constant as $d\rightarrow D$, such that __only the degree of the mean polynomial is subject to change__. As such, `numTrend` will be overridden.
 
 #### Varying $t_t$
-In this scenario, the variable parameter is $\psi$, where $\psi = d*10$. All other parameters are held constant as $d\rightarrow D$, such that only the number of constituent frequencies is subject to change. As such, `numFreq` will be overridden.
+In this scenario, the variable parameter is $\psi$, where $\psi = d*10$. All other parameters are held constant as $d\rightarrow D$, such that __only the number of constituent frequencies is subject to change__. As such, `numFreq` will be overridden.
 
 The toy data provided describes a set of $x_t$ with $t_t$ as the variable component:
 
-```{r xt}
+```{r xt, cache = TRUE, warnings = FALSE}
 # Simulating five time series
-xt <- simXt(D = 5, vary = "Tt", n = 100, numTrend = 4, bandwidth = 2, p = 0, q = 0, snr = 1.5)
+xt <- simXt(D = 5, vary = "Tt", n = 100, numTrend = 4, trendType = "polynomial", bandwidth = 2, p = 0, q = 0, snr = 1.5)
 ```
 
 #### Varying $\xi_t$
-In this scenario, the variable parameter is either $P$ or $Q$, where $P = d$ or $Q = d$. All other parameters are held constant as $d\rightarrow D$, such that only the order of the $AR(P)$ or $MA(Q)$ process is subject to change. The user can set which parameter to fix via the `fix` argument. As such, `p` or `q` will be overridden.
+In this scenario, the variable parameter is either $P$ or $Q$, where $P = d$ or $Q = d$. All other parameters are held constant as $d\rightarrow D$, such that __only the order of the $AR(P)$ or $MA(Q)$ process is subject to change__. The user can set which parameter to fix via the `fix` argument. As such, `p` or `q` will be overridden.
 
 The user should carefully note the `snr` argument in `simXt()`, which represents the desired signal-to-noise ratio of $x_t$, where:
 \begin{equation}
@@ -178,170 +157,557 @@ The user should carefully note the `snr` argument in `simXt()`, which represents
 \end{equation}
 When the user specifies the `snr`, the `var` argument in `simWt()` will be overridden and need not be set, since $\sigma^2_{\xi_t}$ is calculated based on the variance of $t_t$.
 
-The resulting output is an object of class `simList`, which containing the time series themselves, as well as each element of their functional definition. The actual numeric vectors can be extracted using the following subset command:
 
-```{r OriginalData, echo = FALSE}
+The resulting output is an object of class `simList`, saved as `~/toyData/toy_simData.rda`, which containing the time series themselves, as well as each element of their functional definition. The actual numeric vectors can be extracted using the following subset command:
+
+```{r OriginalData, cache = TRUE}
 # Extracting the time series themselves
-#OriginalData <- xt$Xt
+OriginalData <- xt$Xt
+names(OriginalData) <- c("D1", "D2", "D3", "D4", "D5")
 ```
 
+The original time series are saved as `~/toyData/toy_OriginalData.rda`.  
+
 ## Step 2: Imposing a gap structure
-Gap structure is defined by two parameters: $p$, the overall percentage of data missing, and $g$, the width of the gaps. The result is a total of $I=p\cdot N$ missing observations, appearing structurally as $\leq\frac{p\cdot N}{g}$ randomly-spaced non-overlapping holes of width $g$, where a 'hole' is defined as a sequence of adjacent missing observations. 
+Gap structure is defined by two parameters: $p$, the overall __percentage of data missing__, and $g$, the __width of the gaps__. The result is a total of $I=p\cdot N$ missing observations, appearing structurally as $\leq\frac{p\cdot N}{g}$ randomly-spaced non-overlapping holes of width $g$, where a 'hole' is defined as a sequence of adjacent missing observations. 
 
 Since the other principal objective of this package is to assess statistical performance in light of changes to gap structure, the user should initialize vectors contaning numerous values of $p$ and $g$, such that each $(p,g)$ combination can be applied. Under the constraint that only integer numbers of gaps can be removed, the actual number of missing observations may not always be consistent with the theoretical number due to rounding. Thus, care should be taken when selecting selection of these values. 
 
-```{r pg}
+```{r pg, cache = TRUE}
 # Initializing vectors of p and g
-#prop_vec <- c(0.1, 0.20, 0.30)
-#gap_vec <- c(1, 5, 10)
+prop_vec <- c(0.1, 0.20, 0.30)
+gap_vec <- c(1, 5, 10)
 ```
 
 A single time series can be passed into `simulateGaps()`, along with arguments `prop_vec` and `gap_vec` to remove observations according to the desired gap specification.  The user can also define `K` to set the number of gappy series to generate for each original dataset.  Note that in each iteration, gap locations are chosen randomly under the specified gap parameterization.
 
-```{r simulateGaps}
+```{r simulateGaps, cache = TRUE}
 # Using a loop to apply gaps to each of the five original time series
-#D <- length(OriginalData)
+D <- length(OriginalData)
 
-#GappyData <- list()
+GappyData <- list()
 
-#for(d in 1:D){
-#  GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = 10)
-#}
+for(d in 1:D){
+  GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = 10)
+  
+  names(GappyData)[d] <- names(OriginalData)[d]
+}
+
 ```
 
-The result is a nested list of dimension $D\times P \times G \times K$. 
+The result is a nested list of dimension $D\times P \times G \times K$, saved as `~/toyData/toy_GappyData.rda`.  
 
 ## Step 3: Interpolating the gappy data
 
-The next step is to interpolate the list of gappy data using `parInterpolate()`.  The user can choose from a list of 18 algorithms pulled from external packages, shown in Table \ref{tab:algorithm_names}.
+The next step is to interpolate the list of gappy data using `parInterpolate()`.  The user can choose from a list of 18 algorithms pulled from external packages, shown in the table below.
 
-\begin{table}[!h]
-    \caption{A set of interpolation algorithms that have been implemented in \texttt{interpTools}. Algorithms considered in the analysis (shown in bold) are based on the results of Van Bussel \cite{vanbussel2019honours}.}
-    \centering
-    \fontsize{10}{12}\selectfont
-    \begin{tabular}{llr}
-    \hline
-       Package & Function & Algorithm name \\
-        \hline
-        \verb+interpTools+ & \verb+nearestNeighbor()+ & Nearest Neighbor (NN)\\
-        \verb+zoo+ & \verb+na.approx()+ & Linear Interpolation (LI)\\
-        \verb+zoo+ & \verb+na.spline()+ & \textbf{Natural Cubic Spline (NCS)}\\
-        \verb+zoo+ & \verb+na.spline()+ & \textbf{FMM Cubic Spline (FMM)}\\
-        \verb+zoo+ & \verb+na.spline()+ & \textbf{Hermite Cubic Spline (HCS)}\\
-        \verb+imputeTS+ & \verb+na_interpolation()+ & Stineman Interpolation (SI)\\
-        \verb+imputeTS+ & \verb+na_kalman()+ & \textbf{Kalman - ARIMA (KAF)}\\
-        \verb+imputeTS+ & \verb+na_kalman()+ & Kalman - StructTS (KKSF)\\
-        \verb+imputeTS+ & \verb+na.locf()+ &  Last Observation Carried Forward (LOCF)\\
-        \verb+imputeTS+ & \verb+na.locf()+ & Next Observation Carried Backward (NOCB)\\
-        \verb+imputeTS+ & \verb+na_ma()+ & Simple Moving Average (SMA)\\
-        \verb+imputeTS+ & \verb+na_ma()+ & Linear Weighted Moving Average (LWMA)\\
-        \verb+imputeTS+ & \verb+na_ma()+ & \textbf{Exponential Weighted Moving Average (EWMA)}\\
-        \verb+imputeTS+ & \verb+na_mean()+ & Replace with Mean (RMEA)\\
-        \verb+imputeTS+ & \verb+na_mean()+ & Replace with Median (RMED)\\
-        \verb+imputeTS+ & \verb+na_mean()+ & Replace with Mode (RMOD)\\
-        \verb+imputeTS+ & \verb+na_random()+ & Replace with Random (RRND)\\
-        \verb+tsinterp+ & \verb+interpolate()+ & \textbf{Hybrid Wiener Interpolator (HWI)}
-    \end{tabular}
-    \label{tab:algorithm_names}
-\end{table}
+| Package | Function | Algorithm name | Abbreviation |
+|:--------|:--------------------|:--------------------------------|----------:|
+| interpTools | nearestNeighbor() | Nearest Neighbor | NN |  
+| zoo | na.approx() | Linear Interpolation | LI |
+| zoo | na.spline() | Natural Cubic Spline | NCS |
+| zoo | na.spline() | FMM Cubic Spline | FMM |
+| zoo  | na.spline() | Hermite Cubic Spline | HCS |
+| imputeTS | na_interpolation() | Stineman Interpolation | SI |
+| imputeTS | na_kalman() | Kalman - ARIMA | KAF |       
+| imputeTS | na_kalman() | Kalman - StructTS | KKSF |
+| imputeTS | na.locf() | Last Observation Carried Forward | LOCF |
+| imputeTS | na.locf() | Next Observation Carried Backward | NOCB |
+| imputeTS | na_ma() | Simple Moving Average | SMA |
+| imputeTS | na_ma() | Linear Weighted Moving Average | LWMA |
+| imputeTS | na_ma() | Exponential Weighted Moving Average | EWMA |
+| imputeTS | na_mean() | Replace with Mean | RMEA |
+| imputeTS | na_mean() | Replace with Median | RMED |
+| imputeTS | na_mean() | Replace with Mode | RMOD |
+| imputeTS | na_random() | Replace with Random | RRND |
+| tsinterp | interpolate() | Hybrid Wiener Interpolator | HWI |
 
-A vector of `methods` of length $M$ can be defined to facilitate a comparative assessment between algorithms later, if so desired. Should the user decide to pass in their own function via `FUN_CALL`, they must ensure that the output the function is a single numeric vector. The interpolations will occur in parallel over the $K$ index, where the number of cores to use can be defined via `num_cores` (the default is to use as many as are available).
+A vector of `methods` of length $M$ can be defined to facilitate a comparative assessment between algorithms later, if so desired. Should the user decide to pass in their own function via `FUN_CALL`, they must ensure that the output the function is a single numeric vector. The interpolations will occur in parallel over the $K$ index, where the number of cores to use can be defined via `num_cores` (the default is to use as many as are available, as determined by `parallel::detectCores()`).
+
+Here, we interpolate using the Linear Interpolator (LI), the Exponential Weighted Moving Average (EWMA), and the Kalman ARIMA Filter (KAF).
 
 ```{r parInterpolate, cache = TRUE}
 # Using a loop to interpolate over the five sets of gappy data
-#D <- length(GappyData)
+D <- length(GappyData)
+methods <- c("LI", "EWMA", "KAF")
 
-#IntData <- list()
+IntData <- list()
 
-#for(d in 1:D){
-#  IntData[[d]] <- parInterpolate(gappyTS = GappyData[[d]], methods = c("EWMA", "HWI", "KAF"))
-#}
+for(d in 1:D){
+  IntData[[d]] <- parInterpolate(GappyList = GappyData[[d]], methods = methods)
+  
+  names(IntData)[d] <- names(GappyData)[d]
+}
 
 ```
 
-The resulting object is a nested list of dimension $D \times M \times P \times G \times K$.
+The resulting object is a nested list of dimension $D \times M \times P \times G \times K$, saved as `~/toyData/toy_IntData.rda`.  
+
+### Reducing the computational burden: `splitData()` and `stitchData()`
+Considering the dimensionality of the data and complexity of some interpolation algorithms (especially that of the Hybrid Wiener Interpolator), the system requirements for this number of computations can be quite large. The function `splitData()` can be used to "break apart" the gappy data at the $K$-level into more manageable chunks (the number of sets specified by the `split` argument) prior to being passed into `parInterpolate()`.
+
+See the usage of the function in the following example, where the Gappy Data is divided into sets of size $K/2 = 5$:
+```{r splitData, cache = TRUE}
+# Splitting GappyData to ease computation
+split = 2
+
+GappyData_split <- splitData(GappyData = GappyData, split = split)
+```
+
+The split data is saved as `~/toyData/toy_GappyData_split.rda`.  
+
+This object can then be passed into `parInterpolate()` as normal, except with an additional nested loop, iterating over the number of sets.  It is also wise to save each set of interpolated data with each iteration in an __appropriately organized directory__, where the parent folder should contain __only .rda files organized into subfolders by dataset__.  See the example below:
+
+```{r splitDataInt}
+# Using a nested loop to interpolate over 'd' and 'split'
+D <- length(GappyData_split)
+
+IntData_split <- list()
+
+for(d in 1:D){
+  for(n in 1:split){
+    IntData_split <- parInterpolate(GappyList = GappyData_split[[d]][[n]], methods = methods)
+    filename <- paste0("D",d,"_",letters[n],".rda")
+    setwd(paste0("/home/sophie/sophTools/toyData/toy_IntData_split/D",d))
+    save(IntData_split, file = filename)
+    gc()
+  }
+}
+```
+
+The files are saved in the folders contained in `~/toy_IntData_split`, which have the recommended structure.
+
+Once the interpolations have completed, the split data can be recombined into a single $D \times M \times P \times G \times K$ list using the `stitchData()` function and referencing the directory containing the files:  
+
+```{r stitchData}
+# Pasting together the segmented interpolated data
+IntData_stitch1 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D1")
+IntData_stitch2 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D2")
+IntData_stitch3 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D3")
+IntData_stitch4 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D4")
+IntData_stitch5 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D5")
+
+IntData_stitch <- list(D1 = IntData_stitch1,
+                       D2 = IntData_stitch2,
+                       D3 = IntData_stitch3,
+                       D4 = IntData_stitch4,
+                       D5 = IntData_stitch5)
+
+```
+
+The resulting object should be the same as the one processed without splitting, and is saved to the local directory as `~/toyData/toy_IntData_split/toy_IntData_stitch.rda`.
 
 ## Step 4: Compare the interpolated series with the original
 
-The performance of a single interpolation can be assessed by comparing the original time series, $x_t$, with the interpolated series, $X_t$.  Here, statistical performance is defined as some measure of the bias, represented by some function:
+The performance of a single interpolation can be assessed by comparing the __original time series__, $x_t$, with the __interpolated series__, $X_t$.  Here, statistical performance is defined as some measure of the bias, represented by some function:
 \begin{equation}
     C(\mathbf{X}, \mathbf{x}),
 \end{equation}
 called a performance criterion. Generally speaking, $C$ quantifies how well the interpolated series, $\mathbf{X} = \left\{X_t\right\}_{t=0}^{N-1}$, captures the essence of the original series,  $\mathbf{x} = \left\{x_t\right\}_{t=0}^{N-1}$.
 
 ### Generating performance matrices
-A set of performance criteria are computed for each $(x_t,X_t)$ pair using the `performance()` function. Table \ref{tab:criteria} shows the metrics that are built-in to the package.
+A set of performance criteria are computed for each $(x_t,X_t)$ pair using the `performance()` function. The table below shows the metrics that are built-in to the package.
 
-\begin{table}[!h]
-    \centering
-    \caption{Description of the criteria used in the performance analysis. The expanded mathematical definitions are given in Appendix \ref{appendix:C}.}
-    \begin{tabular}{llc}
-    \hline
-        Criterion & Abbreviation & Optimal \\
-    \hline
-        Correlation Coefficient &  $r$ & max \\
-        Coefficient of Determination & $r^2$ & max \\
-        Absolute Differences & $\mathbf{AD}$ & min\\
-        Mean Bias Error & $\mathbf{MBE}$ & min\\
-        Mean Error & $\mathbf{ME}$ & min\\
-        Mean Absolute Error & $\mathbf{MAE}$& min\\
-        Mean Relative Error & $\mathbf{MRE}$& min\\
-        Mean Absolute Relative Error & $\mathbf{MARE}$& min\\
-        Mean Absolute Percentage Error & $\mathbf{MAPE}$ & min\\
-        Sum of Squared Errors & $\mathbf{SSE}$ & min\\
-        Mean Square Error & $\mathbf{MSE}$ & min\\
-        Root Mean Squares & $\mathbf{RMS}$ & min\\
-        Normalized Mean Square Error & $\mathbf{NMSE}$ & min\\
-        Nash-Sutcliffe Coefficient & $\mathbf{RE}$ & max\\
-        Root Mean Square Error & $\mathbf{RMSE}$ & min\\
-        Normalized Root Mean Square Deviations & $\mathbf{NRMSD}$ & min\\
-        Root Mean Square Standardized Error & $\mathbf{RMSS}$ & min \\
-        Median Absolute Percentage Error & $\mathbf{MdAPE}$ & min\\
-    \hline
-    \end{tabular}
-    \label{tab:criteria}
-\end{table}
+| Criterion | Abbreviation | Optimal |
+|:----------|:-------------|:--------|
+| Correlation Coefficient | $r$ | max |
+| Coefficient of Determination | $r^2$ | max |
+| Absolute Differences | $\mathbf{AD}$ | min |
+| Mean Bias Error | $\mathbf{MBE}$ | min |
+| Mean Error | $\mathbf{ME}$ | min |
+| Mean Absolute Error | $\mathbf{MAE}$ | min |
+| Mean Relative Error | $\mathbf{MRE}$ | min |
+| Mean Absolute Relative Error | $\mathbf{MARE}$ | min |
+| Mean Absolute Percentage Error | $\mathbf{MAPE}$ | min |
+| Sum of Squared Errors | $\mathbf{SSE}$ | min |
+| Mean Square Error | $\mathbf{MSE}$ | min |
+| Root Mean Squares | $\mathbf{RMS}$ | min |
+| Normalized Mean Square Error | $\mathbf{NMSE}$ | min |
+| Nash-Sutcliffe Coefficient | $\mathbf{RE}$ | max |
+| Root Mean Square Error | $\mathbf{RMSE}$ | min |
+| Normalized Root Mean Square Deviations | $\mathbf{NRMSD}$ | min |
+| Root Mean Square Standardized Error | $\mathbf{RMSS}$ | min |
+| Median Absolute Percentage Error | $\mathbf{MdAPE}$ | min |
 
 The full set of performance criteria can be generated as follows:
 
-```{r performance}
-#pmats <- performance(OriginalData = OriginalData, GappyData = GappyData, IntData = IntData)
+```{r performance, cache = TRUE}
+# Generating performance matrices
+pmats <- performance(OriginalData = OriginalData, GappyData = GappyData, IntData = IntData)
 ```
 
-The resulting output is a list of dimension $D \times M \times P \times G \times K$, where the terminal node is a matrix of metrics.
+The resulting output is a list of dimension $D \times M \times P \times G \times K$ of class `pmat`, where the terminal node is a matrix of performance metrics, saved as `~/toyData/toy_pmats.rda`.
 
 ### Aggregating the performance data
 
 Consider that for any $(d,m,p,g)$ set, there are a set of $K$ values for each criterion. Thus, each performance metric has a sampling distribution containing $K$ elements. The performance matrices can be condensed by aggregating over $K$ to reduce dimensionality. The comprehensive set of sample statistics that are offered in this package are listed below:
 
-\begin{itemize}
-  \item mean
-  \item standard deviation
-  \item 0\% quantile (minimum)
-  \item 2.5\% quantile
-  \item 25\% quantile
-  \item 50\% quantile (median)
-  \item 75\% quantile
-  \item 97.5\% quantile
-  \item 100\% quantile (maximum)
-  \item skewness
-  \item p-value (dip test for unimodality)
-\end{itemize}
+* mean
+* standard deviation
+* 0\% quantile (minimum)
+* 2.5\% quantile
+* 25\% quantile
+* 50\% quantile (median)
+* 75\% quantile
+* 97.5\% quantile
+* 100\% quantile (maximum)
+* IQR (97.5\% quantile - 2.5\% quantile)
+* skewness
+* p-value of dip test for unimodality
 
 The aggregated performance matrices are computed via the `agEvaluate()` function:
 
-```{r agEvaluate}
-#agEval <- agEvaluate(pmats = pmats)
+```{r agEvaluate, cache = TRUE}
+# Aggregating the performance matrices
+agEval <- agEvaluate(pmats = pmats)
 ```
 
-The result is an object of class `agEvaluate`. This object structure is required for all data analyses to follow.
+The result is an object of class `agEvaluate`, and is saved as `~/toyData/toy_agEval.rda`. This is the object that will be piped into all of the functions used to conduct the analyses, to follow.
 
 # Data Visualization
+This package provides a number of different data visualization tools, which are described in this section.
+
+## Original Data
+The original time series can be visualized using `plotXt()` by passing in an object of class `simList`. Below is a plot of $x_{t,1}$.
+
+```{r plotXt}
+plotXt(d = 1, simData = xt, cptwise = F)
+```
+
+Since this object stores all of the constituent pieces, the original data can also be visualized __componentwise__ by toggling `cptwise` to `TRUE`. The user can select which component to display via `return`.  Note that if the user wishes to leave the default `return = NULL` and return all components in a grid, then `axisLabels` must be set to `FALSE` to prevent redundant labelling. 
+
+Here is an example of such a grid, showing $m_{t,1}$, $t_{t,1}$, $\xi_{t,1}$, and the constituent frequencies:
+
+```{r plotXtcpt}
+plotXt(d = 1, simData = xt, cptwise = T, axisLabels = F, plot.title = T, return = NULL)
+```
+
+An example of extracting and visualizing the noise component only (toggling `axisLabels = TRUE`):
+```{r plotWt}
+plotXt(d = 1, simData = xt, cptwise = T, axisLabels = T, return = "Wt")
+```
+
+An example of extracting and visualizing the frequency distribution: (toggling `axisLabels = TRUE`):
+```{r plotfreq}
+plotXt(d = 1, simData = xt, cptwise = T, axisLabels = T, return = "freq")
+```
+
+Possible values of `return` are `NULL`, `"Mt"`, `"Mt"`, `"Mt"`, and `"freq"`.
+
+## Surface plots
+A three-dimensional __surface__ is used to visualize the performance of an interpolator as the structure of the gappy data changes. We will refer to such a surface as $f(p,g)$ in the following, with $f$ an undefined bivariate function describing the value of a criterion. 'Optimal' performance corresponds to an extreme point on the surface; either a maximum or minimum, depending on the definition of 'optimal' (see above table of performance criteria). Multiple interpolations can be compared by layering surfaces on top of one another, where the `best' interpolation for a particular gap structure will be at an extremum at the corresponding $(p,g)$ coordinate point.   
+
+This visualization is generated using the function `plotSurface()`, where the user can specify algorithms and datasets of interest, the sample statistic and criterion to model. The user can highlight certain surfaces via the `highlight` argument. The function will only accept objects of class `agEvaluate` in the `agEval` argument.
+
+The first example is for the visualization of the performance of the Linear Interpolation (LI) method on the first dataset according to the Mean Squared Error (MSE) criterion, where $f(p,g)$ represents the __median__ value:
+
+```{r plotSurface, cache = TRUE}
+plotSurface(d = 1, 
+            m = "LI", 
+            crit = "MSE", 
+            agEval = agEval, 
+            f = "median", 
+            highlight = "LI", 
+            highlight_color = "#33FFF9")
+```
+
+Multiple surfaces can be layered one on top of the other to facilitate comparison.  The user can specify whether to layer surfaces by __dataset__ (for a single method), or by __method__ (for a single dataset).
+
+Below is an example of a surface plot, layered by __method__, for the performance of the Linear Interpolation (LI, highlighted), Exponential Weighted Moving Average (EWMA), and Kalman Filter (KAF) on the first dataset according to the Mean Squared Error (MSE) criterion, where $f(p,g)$ represents the __median__ value:
+
+```{r plotSurface_m, cache = TRUE}
+plotSurface(d = 1, 
+            m = c("LI","EWMA","KAF"), 
+            layer_type = "method", 
+            crit = "MSE", 
+            agEval = agEval, 
+            f = "median", 
+            highlight = "LI", 
+            highlight_color = "#33FFF9")
+```
+
+Here is another example of a surface plot, layered by __dataset__, for the performance of the Linear Interpolation (LI) on all five datasets (dataset 3 highlighted) according to the Mean Squared Error (MSE) criterion, where $f(p,g)$ represents the __median__ value:
+
+```{r plotSurface_d, cache = TRUE}
+plotSurface(d = 1:5, 
+            m = "LI", 
+            layer_type = "dataset", 
+            crit = "MSE", 
+            agEval = agEval, 
+            f = "median", 
+            highlight = 3, 
+            highlight_color = "#33FFF9")
+```
+
+The function `multiplot()` allows the user to combine multiple surface plot objects into one grid to add another dimension for comparison. The following is an example of a set of surface plots describing datasets 1-5 of the method-layered plots.  
+
+```{r multiSurface_m, cache = TRUE}
+multiSurface(d = 1:5, 
+             agEval = agEval, 
+             layer_type = "method", 
+             m = c("LI","EWMA","KAF"), 
+             crit = "MSE", 
+             f = "median", 
+             highlight = "LI", 
+             highlight_color = "#33FFF9")
+```
+
+Grouping by __dataset__ was achieved by setting `layer_type = "method"`. To group the performances by __method__ instead, the `layer_type` argument can be set to `"dataset"`, where each plot represents the performance on any combination of original datasets, by a particular interpolation algorithm. See the example below:
+
+```{r multiSurface_d, cache = TRUE}
+multiSurface(d = 1:5, 
+             agEval = agEval, 
+             layer_type = "dataset", 
+             m = c("LI","EWMA","KAF"), 
+             crit = "MSE", 
+             f = "median", 
+             highlight = 3, 
+             highlight_color = "#33FFF9")
+```
+
+## Heatmaps
+Through R's interface, the user can interact with the surface plot widgets by manipulating the camera perspective, adjusting the zoom, and hovering over data points for precise numerical information. When constrained to static visualizations, like when writing papers, __heatmap__ are more effective at communicating the data. Using `heatmapGrid2()`, a three-dimensional surface can be collapsed into a heatmap through conversion of the third dimension to __colour__, to which the __value of the metric__ is proportional. 
+
+See below an example of a heatmap of the performance of the Linear Interpolation (LI) method on the first dataset according to the median value of the Mean Squared Error (MSE) criterion. Convince yourself that this graphic corresponds to the first surface plot shown in this vignette.
+
+```{r heatmapGrid2, cache = TRUE}
+heatmapGrid2(d = c(1,3), 
+             agEval = agEval, 
+             f = "median", 
+             crit = c("MSE"), 
+             m = "LI")
+```
+
+The `heatmapGrid2()` function allows for `d` to be vectorized to show heatmaps across any number of datasets:
+
+```{r heatmapGrid2_d, cache = TRUE}
+heatmapGrid2(d = c(1,3,5), 
+             agEval = agEval, 
+             f = "median", 
+             crit = "MSE", 
+             m = "LI")
+```
+
+The `multiHeatmap()` function enables the user to arrange multiple heatmaps into a grid to facilitate cross-comparison between __criteria__: 
+
+```{r multiHeatmap_crit, cache = TRUE}
+multiHeatmap(crit = c("abs_differences","MSE","MAPE"), 
+             agEval = agEval, 
+             m = "LI", 
+             by = "crit", 
+             f = "median", 
+             d = 1:5)
+```
+
+or __methods__:
+
+```{r multiHeatmap_method, cache = TRUE}
+multiHeatmap(crit = "MSE", 
+             agEval = agEval, 
+             m = c("LI","EWMA","KAF"), 
+             by = "method", 
+             f = "median", 
+             d = 1:5)
+```
+
+The user can specify which kind of comparison they would like to see via the `by` argument.
+
+## Cross-section plots
+### Collapsed 
+We can take a closer look at the surface plots by examining __cross-sections__, generated by `plotCS()`. We encourage the reader to imagine changing their perspective angle on the surface plots by rotating them such that the surface is viewed perpendicular to the $p-z$ or $g-z$ plane and the $p$-axis or $g$-axis is collapsed. Effectively, this allows us to examine changes in one variable across all values of the other. Each __ribbon__ represents the performance of a particular interpolation method in a dataset $d$, where the upper and lower bounds are the largest and smallest values observed across the set of medians contained in the collapsed variable (the highest and lowest points on the corresponding surface plot), and the central __line__ is the median value of this set.
+
+When the $p$-axis is collapsed, we are looking at a __cross-section of gap width__. From this perspective, we can observe how the overall performance of an algorithm on a particular dataset changes as the width of the gaps increases ($g\rightarrow G$), as well as get a rough sense of how sensitive the algorithm is to the proportion of data missing. For example, ribbons that are `thicker' indicate a greater disparity in performance between the best and worst interpolations, and `thinner' ribbons correspond to algorithms that seem to perform similarly regardless of proportion missing.
+
+Below is an example of a $g$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$ of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, EWMA, KAF) with respect to gap width, across all values of $p$. 
+
+```{r plotCS_g, cache = TRUE}
+plotCS(d = 1,
+       m = c("LI","EWMA","KAF"),
+       crit = "MSE", 
+       agEval = agEval, 
+       layer_type = "method", 
+       f = "median", 
+       cross_section = "g",
+       highlight = "LI", 
+       highlight_color = "#33FFF9")
+```
+
+When the $g$-axis is collapsed, the plot is a __cross-section of proportion missing__. Here, we can see how the performance of an algorithm on a particular dataset changes as the *sheer amount* of missing data points increases ($p\rightarrow P$), as well as get a rough sense of how sensitive the algorithm is to gap width. For example, ribbons that are `thicker' indicate a greater disparity in performance between the best and worst interpolations, and `thinner' ribbons correspond to algorithms that seem to perform similarly regardless of gap width.
+
+Below is an example of a $p$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$ of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, EWMA, KAF) with respect to proportion missing, across all values of $g$. 
+
+```{r plotCS_p, cache = TRUE}
+plotCS(d = 1,
+       m = c("LI","EWMA","KAF"),
+       crit = "MSE", 
+       agEval = agEval, 
+       layer_type = "method", 
+       f = "median", 
+       cross_section = "p",
+       highlight = "LI",
+       highlight_color = "#33FFF9")
+```
 
 
+The `multiCS()` function enables the user to arrange a grid of plots such that cross-sectional performance across either __dataset__ or __method__ can be assessed simultaneously. To obtain a grid of plots grouped by __dataset__, then each interior layer must represent a method (`layer_type = "method"`), as in the following example, where we have a set of $g$ cross-section plots describing the performance of each method in datasets 1-5:
 
+```{r multiCS_d, cache = TRUE}
+multiCS(d = 1:5,
+        agEval = agEval,
+        m = c("LI","EWMA","KAF"), 
+        crit = "MSE", 
+        layer_type = "method", 
+        f = "median", 
+        cross_section = "g",
+        highlight = "LI",
+        highlight_color = "#33FFF9")
+```
 
+To obtain a grid of plots grouped by __method__, then each interior layer must be represent a dataset (`layer_type = "dataset"`), as in the following example, where we have a set of $g$ cross-section plots describing the performance on each dataset by the LI, EWMA, and KAF:
 
+```{r multiCS_m, cache = TRUE}
+multiCS(d = 1:5,
+        agEval = agEval,
+        m = c("LI","EWMA","KAF"), 
+        crit = "MSE", 
+        layer_type = "dataset", 
+        f = "median", 
+        cross_section = "g",
+        highlight = 3,
+        highlight_color = "#33FFF9")
+```
+
+### Uncollapsed
+The collapsed cross section plots can be further deconstructed using `plotCS_un()` such that the performance can be assessed with respect to changes in one variable ($p$ or $g$) across __each individual value of the other__.  This will give insight into whether there are specific combinations of ($p,g$) for which the performance of a particular method is particularly sensitive. Each ribbon depicts the distribution of a metric across the $K$ simulations, where the upper and lower bounds represent the 2.5% and 97.5% quantiles, and the interior line is the median value.  The reader should note that this is the __same collection of medians__ used in the construction of the surface plot.  Save for producing an overcrowded and hard-to-read data visualization, we can imagine assigning the collection of error bars to each ($p,g$) coordinate point on the corresponding surface plot.
+
+Below is an example of a $p$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$  of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, EWMA, KAF) with respect to each value of $g$. 
+
+```{r plotCS_un_p, cache = TRUE}
+plotCS_un(d = 1,
+          agEval = agEval,
+          cross_section = "p", 
+          crit = "MSE", 
+          m = c("LI","EWMA","KAF"), 
+          f = "median", 
+          layer_type = "method", 
+          highlight = "LI",
+          highlight_color = "#33FFF9")
+
+```
+
+## Additional functionality
+
+### Gradient
+The __gradient__ of a surface plot describes the degree of resilience of an algorithm to changes in gap structure. A low-grade slope in the neighborhood of $p,g$ gives evidence that an algorithm is more *stable* at that point, whereas a steeper slope may indicate that the algorithm is more *sensitive* to changes in the same region. Computing the gradient, $\nabla f(p,g)$, will help identify the particular gap configurations at which the statistical performance breaks down, according to a particular criterion.
+
+Since the data lies on a discrete mesh, the gradient can be approximated by calculating the slope of the line that connects all pairs of adjacent points on the surface. For any $i,j$ pair of coordinate points ($p_i,g_i,f(p_i,g_i)$) and ($p_j,g_j,f(p_j,g_j)$), the slope between them is given by:
+\begin{equation}
+    \partial_{i,j} = \frac{f(p_j,g_j)-f(p_i,g_i)}{\sqrt{(p_j-p_i)^2 + (g_j-g_i)^2}}
+\end{equation}
+
+The complete set of slopes for each adjacent pair of points, generated by `gradient()`, defines our approximation of $\nabla f$. The user must specify the datasets, methods, criteria, and statistic of interest. The output is a list of tables, of dimension $C \times M \times D$, where $C$ represents the number of criteria of interest. Note that since the slopes are directional, half of them will have redundant magnitude, but opposite sign.
+
+Here is an example of a gradient calculation for the first surface plot generated in this vignette: the performance of the Linear Interpolation (LI) method on the first dataset according to the Mean Squared Error (MSE) criterion, where $f(p,g)$ represents the __median__ value:
+
+```{r gradient, eval = FALSE}
+grad <- gradient(d = 1,
+                 m = "LI",
+                 crit = "MSE",
+                 agEval = agEval,
+                 f = "median")
+
+```
+
+The output is a list of tables of values.
+
+The `gradient()` object can be passed into `gradEval()` to identify regions of statistical instability on a particular surface, which can then be compared to the performances of other select algorithms in that same ($p,g$) region using a ratio. The user can choose which method to compare to the others via `cm`, and the dataset of interest, via `cd`.
+
+Below is an example of the use of this tool, where the performance of the Linear Interpolation method on the third dataset, according to the Absolute Differences (AD) metric, is assessed with respect to its region of maximum instability (i.e., at which value of $p$ and $g$), and how it compares to the other metrics in that same region.
+
+```{r gradEval, eval = FALSE}
+gradEval(agEval = agEval, 
+         crit = "MSE", 
+         m = c("LI","EWMA","KAF"), 
+         d = 1:5, 
+         cm = "LI", 
+         cd = 3, 
+         f = "median")
+```
+
+### Skewness of performance criteria
+The user may wish to evaluate the degree of __skewness__ of the sampling distributions of each performance criterion. This may give helpful insight as to which statistic will best-measure central tendency (i.e., the __sample mean__ or __sample median__), assuming of course that the distributions are unimodal (this can be verified via the p-value of the `diptest` shown in the `agEvaluate` object). 
+
+On any set of $K$ interpolations, the skewness of the sampling distribution of a particular performance metric can be calculated as:
+\begin{equation}
+\frac{\sum_i^n (x_i-\bar{x})^3}{n\sigma_x^3}
+\end{equation}
+
+By plotting the distribution of the skewness values across all possible ($d,m,p,g$) sets, grouped by performance metric, the user can see determine the __average skewness__ of each, using some threshold. The convention in this package is as follows:
+
+-Sampling distributions with a sample mean roughly centered at zero $(\bar{X}_\text{skew}\leq\left|s_\text{skew}/3\right|)$ indicate that on average the criterion has a __reliably symmetric distribution__, and the __mean__ can be used to describe the behaviour of the performance.  
+
+-Distributions of skewness values whose center is *not* in the neighbourhood of zero $(\bar{X}_\text{skew}>\left|s_\text{skew}/3\right|)$ indicate that on average the criterion has a __skewed distribution__, and the __median__ will better capture the essence of the data. 
+
+The `plotSkew()` function can be used to plot the distributions of the skewness values for the chosen performance metrics.  The user can toggle the `symmetric` argument to view subsets of skewness distributions: symmetric only, asymmetric only, or the full set. 
+
+```{r plotSkew_plot, eval = FALSE}
+plotSkew(agEval = agEval, cptwise=T, symmetric= NULL)
+```
+
+Dotted lines represent the sample medians and solid lines represent the sample means. A darker colour is indicative of criteria which have a symmetric sampling distribution.
+
+The `output` argument can be changed such that a table of values is shown instead:
+```{r plotSkew_tab, eval = FALSE}
+plotSkew(agEval = agEval, cptwise=T, symmetric= NULL, output = "table")
+```
+
+## Viewing the raw data
+
+### Surface Plots 
+As a supplement to the surface plots, the user can easily retrieve the raw data in table-form using the `compileMatrix()` function.
+
+```{r compileMatrix, cache = TRUE, eval = FALSE}
+compileMatrix(agEval = agEval)
+```
+
+### Cross-section Plots
+The `CStable()` function shows the values used to construct the cross-section plots, with the optimal methods bolded.  
+
+To view the data for a particular __collapsed cross-section plot__, the user can set the argument `collapse = T`. For example, the data for the collapsed $g$ cross-section plot for the first dataset according to the median Mean Squared Error (MSE) metric would be computed as follows:
+
+```{r, CStable, eval = FALSE}
+CStable(d = 1, 
+        agEval = agEval, 
+        m = c("LI","EWMA","KAF"), 
+        crit="MSE",
+        f = "median",
+        cross_section = "g",
+        collapse = T)
+```
+
+To view the data for a particular __uncollapsed cross-section plot__, the user can set the argument `collapse = F` and `fixedIndex` to be the index on which to fix the other variable. For example, if the user wished to see the data for the uncollapsed $g$ cross-section plot in the same specification as before, except fixed at $p = 20\%$, then `fixedIndex = 2`, as shown:
+
+```{r, CStable_un, eval = FALSE}
+CStable(d = 1, 
+        agEval = agEval, 
+        m = c("LI","EWMA","KAF"), 
+        crit="MSE",
+        f = "median",
+        cross_section = "g",
+        fixedIndex = 2,
+        collapse = F)
+```
+
+The tables are produced in $\LaTeX$ format.
+
+### Sampling Distributions
+The `ztable()` function provides a compact view of the sampling distribution of the data, for any $d$, with respect to the 2.5% quantile, the median, and the 97.5% quantile.  For example, that of the Linear Interpolation method, on the first dataset according to the Mean Squared Error (MSE) criterion:
+
+```{r ztable, cache = TRUE, eval = FALSE}
+ztable(agEval = agEval, d = 1 , crit = "MSE", m = "LI", combine = T)
+```
+
+The table is produced in $\LaTeX$ format.
 
 
 
