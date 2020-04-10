@@ -13,7 +13,7 @@ P <- length(agEval[[1]])
 G <- length(agEval[[1]][[1]])
 M <- length(agEval[[1]][[1]][[1]])
 C <- nrow(agEval[[1]][[1]][[1]][[1]])
-stat <- c("mean","sd","q0","q2.5","q25","median","q75","q97.5","q100","skewness","dip","iqr")
+stat <- c("mean","sd","q0","q2.5","q25","median","q75","q97.5","q100","iqr","skewness","dip")
 
 prop_vec_names <- names(agEval[[1]])
 gap_vec_names <- names(agEval[[1]][[1]])
