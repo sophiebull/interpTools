@@ -2,7 +2,7 @@ gradEval <- function(agEval, crit, m = names(agEval[[1]][[1]][[1]]), d = 1:lengt
   
   stopifnot(cm %in% m)
   
-  gradList <- gradient(agEval = newag, crit = crit, f = f, d = d, m = m)
+  gradList <- gradient(agEval = agEval, crit = crit, f = f, d = d, m = m)
 
   om = m[!(m %in% cm)]
   
