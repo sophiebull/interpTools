@@ -4,11 +4,18 @@
 #' @param n The length of the output series 
 #' @param p The AR order
 #' @param q The MA order
+#' @param var The variance of the stochastic process
 
 simWt <- function(n = 1000, p = 0, q = 0, var = 1){
   
+  if(!is.numeric(n)) stop("n must be a numeric quantity >=10.")
+  if(!is.numeric(p)) stop("p must be a numeric quantity >=0.")
+  if(!is.numeric(q)) stop("q must be a numeric quantity >=0.")
+  if(!is.numeric(var)) stop("var must be a numeric quantity >0.")
+    
+    
   Wt_list <- list()
-  stopifnot(p >= 0,q >= 0,n >= 0, n %% 1 == 0, var > 0)
+  stopifnot(p >= 0,q >= 0,n >= 10, n %% 1 == 0, var > 0)
   
   if(p > 0){
     repeat{
