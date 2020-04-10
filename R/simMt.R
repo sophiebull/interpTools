@@ -3,9 +3,17 @@
 #' Function to simulate M_t: the mean component of X_t. 
 #' @param n The length of the output series
 #' @param numTrend The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.
-# @param trendType The type of trends to include
+#' @param trendType The type of trends to include. Either "polynomial" or "exponential".
  
 simMt <- function(n = 1000, numTrend = 0, trendType = "polynomial"){
+  
+  if(trendType != "polynomial" && trendType != "exponential"){
+    warning("Please specify trendType as either 'polynomial' or 'exponential'.")
+    stop()
+  }
+  
+  stopifnot(is.numeric(n), n>=10, is.numeric(numTrend), numTrend>=0, (trendType == "polynomial" | trendType == "exponential"))
+  
   
   Mt_list <- list()
   t <- 0:(n-1)
