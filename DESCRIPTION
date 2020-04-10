@@ -1,10 +1,10 @@
 Package: sophTools
-Type: Package
-Title: Tools for Soph's Thesis
 Version: 0.1.0
+Type: Package
+Title: Tools for systematic testing and evaluation of interpolation algorithms.
 Author: Sophie Castel
 Maintainer: The package maintainer <stmcastel@gmail.com>
-Description: This package contains functions for generating time series, simulating gaps, interpolation using a variety of methods, and computing and evaluating performance metrics.
+Description: This package contains functions for generating artificial time series, simulating gaps, interpolation, computation of performance metrics, and data visualization.
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1.9000
@@ -24,4 +24,6 @@ Depends: multitaper,
           RColorBrewer,
           tidyr,
           diptest,
-          xtable
+          xtable,
+          plyr,
+          reshape2
