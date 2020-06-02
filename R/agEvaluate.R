@@ -105,7 +105,7 @@ agEvaluate <- function(pmats){
               #q100 = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,quantile, na.rm = TRUE)["100%",],
               q100 = quantiles["100%",],
               
-              iqr = quantiles["97.5%",] - quantiles["2.5%",],
+              iqr = quantiles["75%",] - quantiles["25%",],
               
               skewness = apply(sapply(pmats[[d]][[m]][[p]][[g]],unlist),1,skew), 
               
