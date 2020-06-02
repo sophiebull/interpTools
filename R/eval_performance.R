@@ -37,7 +37,7 @@ eval_performance <- function(x, X, gappyx) {
   
   if(sum(is.na(gappyx)) == 0) stop(paste0("Gappy data in 'gappyx' does not contain NAs. Please impose gaps and try again."))
   if(sum(x - gappyx, na.rm = TRUE) != 0) stop(paste0("Gappy data in 'gappyx' is not representative of 'x' (original data). The two vectors are non-conforming."))
-  if(sum(X[which(!is.na(ga))] - x[which(!is.na(ga))]) != 0) stop(paste0("Non-interpolated points in 'X' do not match those of the original data in 'x'.  The two vectors are non-conforming."))
+  if(sum(X[which(!is.na(gappyx))] - x[which(!is.na(gappyx))]) != 0) stop(paste0("Non-interpolated points in 'X' do not match those of the original data in 'x'.  The two vectors are non-conforming."))
   
   if(!is.null(X)){
   stopifnot((is.numeric(x) | is.null(x)),
