@@ -43,7 +43,7 @@ multiHeatmap <- function(crit,
   
   if(!all(m %in%  names(agEval[[1]][[1]][[1]]))) stop(paste0("Method(s) '", paste0(m[!m%in% names(agEval[[1]][[1]][[1]])], collapse = ", "), "' not found. Possible choices are: '", paste0(names(agEval[[1]][[1]][[1]]), collapse = "', '"),"'."))
   if(!all(paste0("D",d) %in% names(agEval))) stop("Dataset(s) ", paste0(d[!paste0("D",d) %in% names(agEval)], collapse = ", ")," not found. Possible choices are: ", paste0(gsub("D", "",names(agEval)), collapse = ", "))
-  if(!all(f %in% names(agEval[[1]][[1]][[1]][[1]])[1:12])) stop(paste0(c("f must be one of: '",paste0(names(agEval[[1]][[1]][[1]][[1]])[1:12], collapse = "', '"),"'."), collapse = ""))
+  if(!all(f %in% names(agEval[[1]][[1]][[1]][[1]]))) stop(paste0(c("f must be one of: '",paste0(names(agEval[[1]][[1]][[1]][[1]]), collapse = "', '"),"'."), collapse = ""))
   if(!all(crit %in% rownames(agEval[[1]][[1]][[1]][[1]]))) stop(paste0("Criterion '",crit,"' must be one of ", paste(rownames(agEval[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
   
   if(length(colors) <2) stop("'colors' must contain at least two colors (each in HTML format: '#xxxxxx')")
@@ -102,8 +102,8 @@ multiHeatmap <- function(crit,
       plott <- list()
       
       for(vd in 1:D){
-        rownames(z_list[[crit[cr]]][[m]][[d[vd]]]) <- gsub("p","",rownames(z_list[[crit[cr]]][[m]][[d[vd]]]), fixed = TRUE)
-        colnames(z_list[[crit[cr]]][[m]][[d[vd]]]) <- gsub("g","",colnames(z_list[[crit[cr]]][[m]][[d[vd]]]), fixed = TRUE)
+        rownames(z_list[[crit[cr]]][[m]][[d[vd]]]) <- round(as.numeric(gsub("p","",rownames(z_list[[crit[cr]]][[m]][[d[vd]]]), fixed = TRUE)),2)
+        colnames(z_list[[crit[cr]]][[m]][[d[vd]]]) <- round(as.numeric(gsub("g","",colnames(z_list[[crit[cr]]][[m]][[d[vd]]]), fixed = TRUE)),2)
         
         
         plott[[vd]] <- melt(z_list[[crit[cr]]][[m]][[d[vd]]])
@@ -225,8 +225,8 @@ multiHeatmap <- function(crit,
       plott <- list()
       
       for(vd in 1:D){
-        rownames(z_list[[crit]][[m[cr]]][[d[vd]]]) <- gsub("p","",rownames(z_list[[crit]][[m[cr]]][[d[vd]]]), fixed = TRUE)
-        colnames(z_list[[crit]][[m[cr]]][[d[vd]]]) <- gsub("g","",colnames(z_list[[crit]][[m[cr]]][[d[vd]]]), fixed = TRUE)
+        rownames(z_list[[crit]][[m[cr]]][[d[vd]]]) <- round(as.numeric(gsub("p","",rownames(z_list[[crit]][[m[cr]]][[d[vd]]]), fixed = TRUE)),2)
+        colnames(z_list[[crit]][[m[cr]]][[d[vd]]]) <- round(as.numeric(gsub("g","",colnames(z_list[[crit]][[m[cr]]][[d[vd]]]), fixed = TRUE)),2)
         
         plott[[vd]] <- melt(z_list[[crit]][[m[cr]]][[d[vd]]])
         colnames(plott[[vd]]) <- c("p","g", "value")
