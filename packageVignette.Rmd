@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```{r lib, message = FALSE}
 # installing library
 #library(devtools)
-#install_github("castels/interpTools")
+#install_github("castels/sophTools")
 
 # Loading library
 library(sophTools)
@@ -33,11 +33,6 @@ The intended use of this R package is to provide a set of tools for the systemat
 4. Compare the interpolated series with the original
 
 This document will describe how to navigate steps 1-4, and also how to assess the results, using the package functions.  The example code is that which was used to generate the built-in 'toy data' contained in this package.
-
-```{r setseed, cache = TRUE}
-# Setting seed for reproducibility
-set.seed(23)
-```
 
 # Simulating the Data and Gathering Statistics
 
@@ -144,6 +139,8 @@ In this scenario, the variable parameter is $\psi$, where $\psi = d*10$. All oth
 The toy data provided describes a set of $x_t$ with $t_t$ as the variable component:
 
 ```{r xt, cache = TRUE, warnings = FALSE}
+set.seed(23)
+
 # Simulating five time series
 xt <- simXt(D = 5, vary = "Tt", n = 100, numTrend = 4, trendType = "polynomial", bandwidth = 2, p = 0, q = 0, snr = 1.5)
 ```
@@ -188,6 +185,8 @@ D <- length(OriginalData)
 GappyData <- list()
 
 for(d in 1:D){
+  set.seed(23)
+  
   GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = 10)
   
   names(GappyData)[d] <- names(OriginalData)[d]
@@ -222,18 +221,49 @@ The next step is to interpolate the list of gappy data using `parInterpolate()`.
 | imputeTS | na_random() | Replace with Random | RRND |
 | tsinterp | interpolate() | Hybrid Wiener Interpolator | HWI |
 
-A vector of `methods` of length $M$ can be defined to facilitate a comparative assessment between algorithms later, if so desired. Should the user decide to pass in their own function via `FUN_CALL`, they must ensure that the output the function is a single numeric vector. The interpolations will occur in parallel over the $K$ index, where the number of cores to use can be defined via `num_cores` (the default is to use as many as are available, as determined by `parallel::detectCores()`).
+A vector of `methods` of length $M$ can be defined to facilitate a comparative assessment between algorithms later, if so desired. Should the user decide to pass in their own algorithms via `FUN_CALL`, they must ensure that the argument is a character vector in the format `FUN_CALL = c("foo1(x = ", "foo2(x = " )` , and that the output of each function is a single numeric vector. The interpolations will occur in parallel over the specified index (`parallel = "p"`, `parallel = "g"`, or `parallel = "k"`), where the number of cores to use can be defined via `num_cores` (the default is to use as many as are available, as determined by `parallel::detectCores()`).
 
-Here, we interpolate using the Linear Interpolator (LI), the Exponential Weighted Moving Average (EWMA), and the Kalman ARIMA Filter (KAF).
+Here is an example using two user-defined functions: `plus()` returns the index position of each NA, and `minus()` returns the negative index position of each NA. 
+```{r example}  
+# EXAMPLE: User-defined functions to pass to FUN_CALL
+
+## Toy function 1: Convert each value of x to its index position
+plus <- function(x){
+vec <- numeric(length(x))
+for(i in 1:length(vec)){
+ vec[i] <- i
+}
+return(vec)
+}
+
+## Toy function 2: Convert each value of x to its negative index position
+minus <- function(x){
+ vec <- numeric(length(x))
+ for(i in 1:length(vec)){
+   vec[i] <- -i
+ }
+ return(vec)
+}
+```
+
+The appropriate use of FUN_CALL in `parInterpolate()` would then be:
+```{r examplecnt, eval = FALSE}
+parInterpolate(GappyList = GappyData[[1]], FUN_CALL = c("plus(x = ", "minus(x = "))
+```
+Additional built-in functions can be specified with `methods`.
+
+To generate the toy data found in the package files, we will interpolate using the Linear Interpolator (LI), the Nearest Neighbor (NN), and the Kalman ARIMA Filter (KAF).
 
 ```{r parInterpolate, cache = TRUE}
 # Using a loop to interpolate over the five sets of gappy data
 D <- length(GappyData)
-methods <- c("LI", "EWMA", "KAF")
+methods <- c("LI", "NN", "KAF")
 
 IntData <- list()
 
 for(d in 1:D){
+  set.seed(23)
+  
   IntData[[d]] <- parInterpolate(GappyList = GappyData[[d]], methods = methods)
   
   names(IntData)[d] <- names(GappyData)[d]
@@ -258,14 +288,17 @@ The split data is saved as `~/toyData/toy_GappyData_split.rda`.
 
 This object can then be passed into `parInterpolate()` as normal, except with an additional nested loop, iterating over the number of sets.  It is also wise to save each set of interpolated data with each iteration in an __appropriately organized directory__, where the parent folder should contain __only .rda files organized into subfolders by dataset__.  See the example below:
 
-```{r splitDataInt}
+```{r splitDataInt, cache = TRUE}
 # Using a nested loop to interpolate over 'd' and 'split'
 D <- length(GappyData_split)
+methods <- c("LI", "NN", "KAF")
 
 IntData_split <- list()
 
 for(d in 1:D){
   for(n in 1:split){
+    set.seed(23)
+    
     IntData_split <- parInterpolate(GappyList = GappyData_split[[d]][[n]], methods = methods)
     filename <- paste0("D",d,"_",letters[n],".rda")
     setwd(paste0("/home/sophie/sophTools/toyData/toy_IntData_split/D",d))
@@ -279,7 +312,7 @@ The files are saved in the folders contained in `~/toy_IntData_split`, which hav
 
 Once the interpolations have completed, the split data can be recombined into a single $D \times M \times P \times G \times K$ list using the `stitchData()` function and referencing the directory containing the files:  
 
-```{r stitchData}
+```{r stitchData, cache = TRUE}
 # Pasting together the segmented interpolated data
 IntData_stitch1 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D1")
 IntData_stitch2 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D2")
@@ -370,7 +403,7 @@ This package provides a number of different data visualization tools, which are 
 ## Original Data
 The original time series can be visualized using `plotXt()` by passing in an object of class `simList`. Below is a plot of $x_{t,1}$.
 
-```{r plotXt}
+```{r plotXt, cache = TRUE}
 plotXt(d = 1, simData = xt, cptwise = F)
 ```
 
@@ -378,17 +411,17 @@ Since this object stores all of the constituent pieces, the original data can al
 
 Here is an example of such a grid, showing $m_{t,1}$, $t_{t,1}$, $\xi_{t,1}$, and the constituent frequencies:
 
-```{r plotXtcpt}
+```{r plotXtcpt, cache = TRUE}
 plotXt(d = 1, simData = xt, cptwise = T, axisLabels = F, plot.title = T, return = NULL)
 ```
 
 An example of extracting and visualizing the noise component only (toggling `axisLabels = TRUE`):
-```{r plotWt}
+```{r plotWt, cache = TRUE}
 plotXt(d = 1, simData = xt, cptwise = T, axisLabels = T, return = "Wt")
 ```
 
 An example of extracting and visualizing the frequency distribution: (toggling `axisLabels = TRUE`):
-```{r plotfreq}
+```{r plotfreq, cache = TRUE}
 plotXt(d = 1, simData = xt, cptwise = T, axisLabels = T, return = "freq")
 ```
 

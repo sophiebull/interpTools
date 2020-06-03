@@ -26,4 +26,5 @@ Depends: multitaper,
           diptest,
           xtable,
           plyr,
-          reshape2
+          reshape2,
+          lifecycle
