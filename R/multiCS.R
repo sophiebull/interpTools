@@ -160,10 +160,18 @@ multiCS <- function(agEval,
   
   nrows = round_any(oth_bound, 2, f = ceiling)/2
     
+  
+  if(cross_section == "p"){
+    axxTitle = "proportion missing"
+  }
+  else if(cross_section == "g"){
+    axxTitle = "gap width"
+  }
+    
   p_string <- paste0("plotList[[",1:(oth_bound-1),"]],")
   p_string <- c("grid.arrange(",p_string,paste0("plotList[[",oth_bound,"]]"),", theLegend, nrow = ",nrows,", 
                  top = textGrob('",paste0(names(pcs)[1]," (",f,")"),"', gp = gpar(fontsize = 14, font = 1)),
-                 bottom = textGrob('proportion missing', gp = gpar(fontsize = 12, font = 1)),
+                 bottom = textGrob('",axxTitle,"', gp = gpar(fontsize = 12, font = 1)),
                  left = textGrob('value', rot = 90, gp = gpar(fontsize = 12, font = 1)))")
   
   return(eval(parse(text = p_string)))
