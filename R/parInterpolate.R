@@ -23,8 +23,10 @@
 #' 
 #' @param GappyList A list of dimension P x G x K containing gappy time series.
 #' @param methods vector of IDs for selected interpolation methods, where m = 1,...,M
-#' @param FUN_CALL User specified interpolation function to be applied to GappyList. Must be a character string.
+#' @param FUN_CALL User specified interpolation function to be applied to GappyList. Must be a character string in the form: `function_name(args = ..., x = `.
 #' @param numCores How many CPU cores to use. The default is to use the total number of available cores, as determined by `detectCores()`.
+#' @param parallel Over which index to parallelize. Possible choices: "p","g","k"
+#' 
 #' 
 #' @examples
 #'# Built-in interpolators
@@ -59,7 +61,7 @@
 #'names(IntData) <- names(OriginalData)
 
 
-parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores = detectCores()){
+parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores = detectCores(), parallel = "k"){
   # CALLING REQUIRED LIBRARIES
   #require(multitaper)
   #require(tsinterp)
@@ -70,12 +72,30 @@ parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores 
   #require(snow)
   #require(parallel)
   
-  if(!is.ts(GappyList[[1]][[1]][[1]])) stop("Gappy data must be of class 'ts'.")
-  stopifnot(!(is.null(methods) && is.null(FUN_CALL)), !(is.null(GappyList)))
-
-  ## DEFINING INTERPOLATION ALGORITHMS
+  stopifnot(!(is.null(methods) && is.null(FUN_CALL)), 
+            !(is.null(GappyList)),
+            (parallel == "p" | parallel == "g" | parallel == "k"))
+  
+  # check that FUN_CALL is in the correct format
+  if(!(is.null(FUN_CALL))){
+    
+    # check to see that output of FUN_CALL is a single numeric vector with no NAs
+    test_data <- rnorm(1000)
+    test_index <- sample(1:1000,20)
+    test_data[test_index] <- NA
+    
+    for(l in 1:length(FUN_CALL)){
+      test_str <- paste0(FUN_CALL[l],"test_data)")
+      test_eval <- eval(parse(text = test_str))
+      
+      if(!is.numeric(test_eval) && !is.ts(test_eval)) stop(paste0("Output of '",FUN_CALL[l],"' passed to FUN_CALL is not of class 'numeric' or 'ts'.  Please redefine '",FUN_CALL[l],"' to return a single numeric vector of the repaired series."))
+      if(sum(is.na(test_eval) != 0))  stop(paste0("Output of '",FUN_CALL[l],"' still contains missing values."))
+    }
+  }
+  
+  # DEFINING Nearest Neighbor INTERPOLATION
   nearestNeighbor <- function(x) {
-    stopifnot(is.ts(x)) 
+    stopifnot(is.ts(x) | is.numeric(x)) 
     
     findNearestNeighbors <- function(x, i) {
       leftValid <- FALSE
@@ -116,24 +136,8 @@ parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores 
     return(x)
   }
   
-  algorithm_names <- c("NN",
-                       "LI", 
-                       "NCS",
-                       "FMM", 
-                       "HCS",
-                       "SI",
-                       "KAF",
-                       "KKSF",
-                       "LOCF",
-                       "NOCB", 
-                       "SMA", 
-                       "LWMA",
-                       "EWMA",
-                       "RMEA",
-                       "RMED", 
-                       "RMOD",
-                       "RRND",
-                       "HWI")
+  # ACCEPTABLE ALGORITHM CALLS AND ABBREVIATIONS
+  
   algorithm_calls <- c("nearestNeighbor(", 
                        "na.approx(", 
                        "na.spline(method = 'natural', object = ",
@@ -153,7 +157,52 @@ parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores 
                        "na_random(",
                        "tsinterp::interpolate(gap = which(is.na(x) == TRUE), progress = FALSE, z = ")
   
+  if(!(is.null(FUN_CALL))){
+    algorithm_calls <- c(algorithm_calls, paste0(FUN_CALL))
+  }
+  
+  algorithm_names <- c("NN",
+                       "LI", 
+                       "NCS",
+                       "FMM", 
+                       "HCS",
+                       "SI",
+                       "KAF",
+                       "KKSF",
+                       "LOCF",
+                       "NOCB", 
+                       "SMA", 
+                       "LWMA",
+                       "EWMA",
+                       "RMEA",
+                       "RMED", 
+                       "RMOD",
+                       "RRND",
+                       "HWI")
+  
+  user_fun = NULL
+  
+  if(!(is.null(FUN_CALL))){
+    
+    FUN_call <- numeric(length(FUN_CALL))
+    
+    for(l in 1:length(FUN_CALL)){
+      FUN_call[l] <- paste0(FUN_CALL[l],"x",")")
+    }
+    user_fun = sub("\\(.*", "", FUN_call)
+    algorithm_names = c(algorithm_names, user_fun)
+  }
+  
   algorithms <- data.frame(algorithm_names, algorithm_calls)
+  
+  
+  # LOGICAL CHECKS
+  
+  if(!(is.null(methods))){
+    if(!all(methods %in% algorithm_names)) stop(paste0("Method '", methods[!(methods %in% algorithm_names)],
+                                                       "' not found.  Please make your selection from the following list: '", 
+                                                       paste0(algorithm_names, collapse = "' , '"), "'."))
+  }
   
   #Creating a list object to store interpolated series
   int_series <- lapply(int_series <- vector(mode = 'list',(length(methods)+length(FUN_CALL))),function(x)
@@ -161,54 +210,66 @@ parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores 
       lapply(int_series <- vector(mode = 'list',length(GappyList[[1]])),function(x) 
         x<-vector(mode='list',length(GappyList[[1]][[1]])))))
   
-  #method_names <- numeric(length(methods))
-  fun_names <- numeric(length(FUN_CALL))
   
-  index <- algorithm_names %in% methods
+  fun_names <- c(methods,user_fun)
+  method_index <- match(fun_names,algorithm_names)
   
-  vec <- 1:length(algorithm_names)
+  ## INTERPOLATION
   
-  method_index <- vec[index]
-  
-  if(!(missing(methods))){
-  
-      for(m in 1:length(methods)){ 
-        #method_names[m] <- algorithm_names[methods[m]]
-        
-        if(methods[m] == "HWI"){
-          function_call <- paste(algorithm_calls[method_index[m]], "x", ")","[[1]]", sep = "")
-        }
-        else{
-          function_call <- paste(algorithm_calls[method_index[m]], "x", ")", sep = "")
-        }
-        
-        int_series[[m]] <- lapply(GappyList, function(x){
-          lapply(x, function(x){
-            mclapply(x, function(x){
-              eval(parse(text = function_call))}
-              , mc.cores = numCores)}
-          )})
-      }
-  }
-  
-  if(!(missing(FUN_CALL))){
-    for(l in 1:length(FUN_CALL)){
-  
-      FUN_call <- paste(FUN_CALL[l],"x",")",sep="")
-      fun_names[l] <- sub("\\(.*", "", FUN_call)
+  if(parallel == "p"){
+    for(m in 1:length(method_index)){ 
       
-      int_series[[length(methods)+l]] <- mclapply(GappyList, function(x){
+      if(fun_names[m] == "HWI"){
+        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")","[[1]]")
+      }
+      else{
+        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
+      }
+      
+      int_series[[m]] <- mclapply(GappyList, function(x){
         lapply(x, function(x){
           lapply(x, function(x){
-            eval(parse(text = FUN_call))}
-          )}
-        )},
-        #mc.cores = detectCores())
-        mc.cores = numCores)
+            eval(parse(text = function_call))})})}, mc.cores = numCores)
     }
   }
   
-  names(int_series) <- c(methods,fun_names)
+  if(parallel == "g"){
+    for(m in 1:length(method_index)){ 
+      
+      if(fun_names[m] == "HWI"){
+        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")","[[1]]")
+      }
+      else{
+        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
+      }
+      
+      int_series[[m]] <- lapply(GappyList, function(x){
+        mclapply(x, function(x){
+          lapply(x, function(x){
+            eval(parse(text = function_call))})}, mc.cores = numCores)})
+    }
+  }
+  
+  
+  if(parallel == "k"){
+    for(m in 1:length(method_index)){ 
+      
+      if(fun_names[m] == "HWI"){
+        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")","[[1]]")
+      }
+      else{
+        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
+      }
+      
+      int_series[[m]] <- lapply(GappyList, function(x){
+        lapply(x, function(x){
+          mclapply(x, function(x){
+            eval(parse(text = function_call))}, mc.cores = numCores)}
+        )})
+    }
+  }
+  
+  names(int_series) <- c(fun_names)
   return(int_series)
 }
 
