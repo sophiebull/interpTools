@@ -22,18 +22,18 @@ heatmapGrid2 <- function(agEval,
   if(sum(duplicated(m) != 0)) stop(paste0("'m' contains redundant elements at position(s): ", paste0(c(1:length(m))[duplicated(m)], collapse = ", ") ))
   if(sum(duplicated(crit) != 0)) stop(paste0("'crit' contains redundant elements at position(s): ", paste0(c(1:length(crit))[duplicated(crit)], collapse = ", ") ))
   
-  if(by != "crit" & by != "method") stop("'by' must be either 'crit' or 'method'.")
+  #if(by != "crit" & by != "method") stop("'by' must be either 'crit' or 'method'.")
   
   if(class(agEval) != "agEvaluate") stop("'agEval' object must be of class 'agEvaluate'. Please use agEvaluate().")
   
   if(length(crit) != 1) stop("'crit' must contain only a single character element.")
   if(length(f) != 1) stop("'f' must contain only a single character element.")
   if(length(m) != 1) stop("'m' must contain only a single character element.")
-  if(length(by) != 1) stop("'by' must contain only a single character element.")
+  #if(length(by) != 1) stop("'by' must contain only a single character element.")
   
   if(!(m %in%  names(agEval[[1]][[1]][[1]]))) stop(paste0("Method '", m,"' not found. Possible choices are: '", paste0(names(agEval[[1]][[1]][[1]]), collapse = "', '"),"'."))
   if(!all(paste0("D",d) %in% names(agEval))) stop("Dataset(s) ", paste0(d[!paste0("D",d) %in% names(agEval)], collapse = ", ")," not found. Possible choices are: ", paste0(gsub("D", "",names(agEval)), collapse = ", "))
-  if(!all(f %in% names(agEval[[1]][[1]][[1]][[1]])[1:12])) stop(paste0(c("f must be one of: '",paste0(names(agEval[[1]][[1]][[1]][[1]])[1:12], collapse = "', '"),"'."), collapse = ""))
+  if(!all(f %in% names(agEval[[1]][[1]][[1]][[1]]))) stop(paste0(c("f must be one of: '",paste0(names(agEval[[1]][[1]][[1]][[1]]), collapse = "', '"),"'."), collapse = ""))
   if(!crit %in% rownames(agEval[[1]][[1]][[1]][[1]])) stop(paste0("Criterion '",crit,"' must be one of ", paste(rownames(agEval[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
   
   if(length(colors) <2) stop("'colors' must contain at least two colors (each in HTML format: '#xxxxxx')")
