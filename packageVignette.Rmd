@@ -34,9 +34,7 @@ The intended use of this R package is to provide a set of tools for the systemat
 
 This document will describe how to navigate steps 1-4, and also how to assess the results, using the package functions.  The example code is that which was used to generate the built-in 'toy data' contained in this package.
 
-# Simulating the Data and Gathering Statistics
-
-## Step 1 --- Generate artificial time series
+## Step 1 --- Generate artificial time series with `simXt()`
 
 The `simXt()` function generates time series, $x_t$, according to the __general additive model__:
 
@@ -70,7 +68,6 @@ This component can be generated on its own using the function `simMt()` with `tr
 ```{r mt, cache = TRUE}
 # Simulating a mean vector
 mt <- simMt(n = 100, numTrend = 4, trendType = "polynomial")
-head(mt)
 ```
 
 ### $t_t$: The trend component
@@ -98,7 +95,6 @@ This component can be generated on its own using the function `simTt()`. For exa
 ```{r tt, cache = TRUE}
 # Simulating a trend vector
 tt <- simTt(n = 100, numFreq = 20, bandwidth = 2)
-head(tt)
 ```
 
 ### $\xi_t$: The noise component
@@ -125,18 +121,26 @@ This component can be generated on its own using the function `simWt()`. For exa
 ```{r wt, cache = TRUE}
 # Simulating a noise vector
 wt <- simWt(n = 100, p = 0, q = 0 , var = 5) # white noise process
-head(wt)
 ```
 
-### Implementation
+## Varying data-defining parameters
 We generate a set of $D$ time series $\left\{x_{t,d}:\text{  }d\in1...D\right\}$ all in one step using `simXt()`, where the features of the time series change as $d\rightarrow D$. 
 
 By defining the `vary` argument, the user can decide which component to vary, $m_t$, $t_t$, or $\xi_t$, as $d\rightarrow D$.
 
-#### Varying $m_t$
+### Varying $m_t$
 In this scenario, the variable parameter is $\phi$, where $\phi = d$. All other parameters are held constant as $d\rightarrow D$, such that __only the degree of the mean polynomial is subject to change__. As such, `numTrend` will be overridden.
 
-#### Varying $t_t$
+### Varying $\xi_t$
+In this scenario, the variable parameter is either $P$ or $Q$, where $P = d$ or $Q = d$. All other parameters are held constant as $d\rightarrow D$, such that __only the order of the $AR(P)$ or $MA(Q)$ process is subject to change__. The user can set which parameter to fix via the `fix` argument. As such, `p` or `q` will be overridden.
+
+The user should carefully note the `snr` argument in `simXt()`, which represents the desired signal-to-noise ratio of $x_t$, where:
+\begin{equation}
+  \mathbf{SNR} = \frac{\sigma^2_{t_t}}{\sigma^2_{\xi_t}}
+\end{equation}
+When the user specifies the `snr`, the `var` argument in `simWt()` will be overridden and need not be set, since $\sigma^2_{\xi_t}$ is calculated based on the variance of $t_t$.
+
+### Varying $t_t$
 In this scenario, the variable parameter is $\psi$, where $\psi = d*10$. All other parameters are held constant as $d\rightarrow D$, such that __only the number of constituent frequencies is subject to change__. As such, `numFreq` will be overridden.
 
 The toy data provided describes a set of $x_t$ with $t_t$ as the variable component:
@@ -148,16 +152,6 @@ set.seed(23)
 xt <- simXt(D = 5, vary = "Tt", n = 100, numTrend = 4, trendType = "polynomial", bandwidth = 2, p = 0, q = 0, snr = 1.5)
 ```
 
-#### Varying $\xi_t$
-In this scenario, the variable parameter is either $P$ or $Q$, where $P = d$ or $Q = d$. All other parameters are held constant as $d\rightarrow D$, such that __only the order of the $AR(P)$ or $MA(Q)$ process is subject to change__. The user can set which parameter to fix via the `fix` argument. As such, `p` or `q` will be overridden.
-
-The user should carefully note the `snr` argument in `simXt()`, which represents the desired signal-to-noise ratio of $x_t$, where:
-\begin{equation}
-  \mathbf{SNR} = \frac{\sigma^2_{t_t}}{\sigma^2_{\xi_t}}
-\end{equation}
-When the user specifies the `snr`, the `var` argument in `simWt()` will be overridden and need not be set, since $\sigma^2_{\xi_t}$ is calculated based on the variance of $t_t$.
-
-
 The resulting output is an object of class `simList`, saved as `~/toyData/toy_simData.rda`, which containing the time series themselves, as well as each element of their functional definition. The actual numeric vectors can be extracted using the following subset command:
 
 ```{r OriginalData, cache = TRUE}
@@ -166,9 +160,9 @@ OriginalData <- xt$Xt
 names(OriginalData) <- c("D1", "D2", "D3", "D4", "D5")
 ```
 
-The original time series are saved as `~/toyData/toy_OriginalData.rda`.  
+The toy original time series are saved as `~/toyData/toy_OriginalData.rda`.
 
-## Step 2: Imposing a gap structure
+## Step 2: Imposing a gap structure with `simulateGaps()`
 Gap structure is defined by two parameters: $p$, the overall __percentage of data missing__, and $g$, the __width of the gaps__. The result is a total of $I=p\cdot N$ missing observations, appearing structurally as $\leq\frac{p\cdot N}{g}$ randomly-spaced non-overlapping holes of width $g$, where a 'hole' is defined as a sequence of adjacent missing observations. 
 
 Since the other principal objective of this package is to assess statistical performance in light of changes to gap structure, the user should initialize vectors contaning numerous values of $p$ and $g$, such that each $(p,g)$ combination can be applied. Under the constraint that only integer numbers of gaps can be removed, the actual number of missing observations may not always be consistent with the theoretical number due to rounding. Thus, care should be taken when selecting selection of these values. 
@@ -197,11 +191,29 @@ for(d in 1:D){
 
 ```
 
-The result is a nested list of dimension $D\times P \times G \times K$, saved as `~/toyData/toy_GappyData.rda`.  
+The result is a nested list of dimension $D\times P \times G \times K$, saved as `~/toyData/toy_GappyData.rda`. The data structure can be visualized as:
 
-## Step 3: Interpolating the gappy data
+* D1
+* D2
+* D3
+* D4
+* D5
+  + p0.10
+  + p0.20
+  + p0.30
+    - g1
+    - g5
+    - g10
+      - [[1]]
+      - [[2]]
+      - [[...]]
+      - [[K]]
+        
+## Step 3: Interpolating the gappy data with `parInterpolate()`
 
-The next step is to interpolate the list of gappy data using `parInterpolate()`.  The user can choose from a list of 18 algorithms pulled from external packages, shown in the table below.
+The next step is to interpolate the list of gappy data using `parInterpolate()`.  The user can choose from a list of 18 algorithms pulled from external packages, shown in the table below, and/or pass their own functions into `FUN_CALL`. Calling multiple methods is useful for facilitating comparative assessment. 
+
+### Built-in interpolation algorithms
 
 | Package | Function | Algorithm name | Abbreviation |
 |:--------|:--------------------|:--------------------------------|----------:|
@@ -224,7 +236,8 @@ The next step is to interpolate the list of gappy data using `parInterpolate()`.
 | imputeTS | na_random() | Replace with Random | RRND |
 | tsinterp | interpolate() | Hybrid Wiener Interpolator | HWI |
 
-A vector of `methods` of length $M$ can be defined to facilitate a comparative assessment between algorithms later, if so desired. Should the user decide to pass in their own algorithms via `FUN_CALL`, they must ensure that the argument is a character vector in the format `FUN_CALL = c("foo1(x = ", "foo2(x = " )` , and that the output of each function is a single numeric vector. The interpolations will occur in parallel over the specified index (`parallel = "p"`, `parallel = "g"`, or `parallel = "k"`), where the number of cores to use can be defined via `num_cores` (the default is to use as many as are available, as determined by `parallel::detectCores()`).
+### Passing in user-defined algorithms with `FUN_CALL`
+Should the user decide to pass in their own algorithms via `FUN_CALL`, they must ensure that the argument is a character vector in the format `FUN_CALL = c("foo1(x = ", "foo2(x = " )` , and that the output of each function is a single numeric vector. The interpolations will occur in parallel over the specified index (`parallel = "p"`, `parallel = "g"`, or `parallel = "k"`), where the number of cores to use can be defined via `num_cores` (the default is to use as many as are available, as determined by `parallel::detectCores()`).
 
 Here is an example using two user-defined functions: `plus()` returns the index position of each NA, and `minus()` returns the negative index position of each NA. 
 ```{r userdefparInterpolate1, eval = FALSE}  
@@ -253,9 +266,10 @@ The appropriate use of FUN_CALL in `parInterpolate()` would then be:
 ```{r userdefparInterpolate2, eval = FALSE}
 parInterpolate(GappyList = GappyData[[1]], FUN_CALL = c("plus(x = ", "minus(x = "))
 ```
-Additional built-in functions can be specified with `methods`.
 
-To generate the toy data found in the package files, we will interpolate using the Linear Interpolator (LI), the Nearest Neighbor (NN), and the Exponential Weighted Moving Average (EWMA).
+### A toy example, using built-in methods
+
+To generate the toy data found in the package files, we will interpolate using the **Linear Interpolator (LI)**, the **Nearest Neighbor (NN)**, and the **Exponential Weighted Moving Average (EWMA)**.
 
 ```{r parInterpolate, cache = TRUE}
 # Using a loop to interpolate over the five sets of gappy data
@@ -273,10 +287,32 @@ for(d in 1:D){
 
 ```
 
-The resulting object is a nested list of dimension $D \times M \times P \times G \times K$, saved as `~/toyData/toy_IntData.rda`.  
+The resulting object is a nested list of dimension $D \times M \times P \times G \times K$, saved as `~/toyData/toy_IntData.rda`. The structure of the data can be visualized as:
 
-### Reducing the computational burden: `splitData()` and `stitchData()`
-Considering the dimensionality of the data and complexity of some interpolation algorithms (especially that of the Hybrid Wiener Interpolator), the system requirements for this number of computations can be quite large. The function `splitData()` can be used to "break apart" the gappy data at the $K$-level into more manageable chunks (the number of sets specified by the `split` argument) prior to being passed into `parInterpolate()`.
+* D1
+* D2
+* D3
+* D4
+* D5
+  + LI
+  + NN
+  + EWMA
+    + p0.10
+    + p0.20
+    + p0.30
+      - g1
+      - g5
+      - g10
+        - [[1]]
+        - [[2]]
+        - [[...]]
+        - [[K]]
+
+##### Reducing the computational burden: `splitData()` and `stitchData()`
+Considering the dimensionality of the data and complexity of some interpolation algorithms (especially that of the Hybrid Wiener Interpolator), the system requirements for this number of computations can be quite large. 
+
+#### Splitting the gappy data with `splitData()`
+The function `splitData()` can be used to "break apart" the gappy data at the $K$-level into more manageable chunks (the number of sets specified by the `split` argument) prior to being passed into `parInterpolate()`.
 
 See the usage of the function in the following example, where the Gappy Data is divided into sets of size $K/2 = 5$:
 ```{r splitData, eval = FALSE}
@@ -286,9 +322,39 @@ split = 2
 GappyData_split <- splitData(GappyData = GappyData, split = split)
 ```
 
+The resulting data structure can be visualized as:
+
+* D1
+* D2
+* D3
+* D4
+* D5
+  + $[1:(K/2)]$
+    + p0.10
+    + p0.20
+    + p0.30
+      - g1
+      - g5
+      - g10
+        - [[1]]
+        - [[2]]
+        - [[...]]
+        - [[K/2]]
+  + $[(K/2):K]$
+    + p0.10
+    + p0.20
+    + p0.30
+      - g1
+      - g5
+      - g10
+        - [[(K/2)]]
+        - [[...]]
+        - [[K]]
+
 The split data is saved as `~/toyData/toy_GappyData_split.rda`.  
 
-This object can then be passed into `parInterpolate()` as normal, except with an additional nested loop, iterating over the number of sets.  It is also wise to save each set of interpolated data with each iteration in an __appropriately organized directory__, where the parent folder should contain __only .rda files organized into subfolders by dataset__.  See the example below:
+#### Interpolating the split data with `parInterpolate()`
+The 'split' object can then be passed into `parInterpolate()` as normal, except with an additional nested loop, iterating over the number of sets.  It is also wise to save each set of interpolated data with each iteration in an __appropriately organized directory__, where the parent folder should contain __only .rda files organized into subfolders by dataset__.  See the example below:
 
 ```{r splitDataInt, eval = FALSE}
 # Using a nested loop to interpolate over 'd' and 'split'
@@ -309,6 +375,7 @@ for(d in 1:D){
 }
 ```
 
+#### Recommended directory structure
 The files are saved in the folders contained in `~/toy_IntData_split`, which have the recommended structure:
 
 *  `/IntData_split`
@@ -329,6 +396,7 @@ The files are saved in the folders contained in `~/toy_IntData_split`, which hav
     - `...`
   + `...`
 
+#### Re-stitching the interpolated data with `stitchData()`
 Once the interpolations have completed, the split data can be recombined into a single $D \times M \times P \times G \times K$ list using the `stitchData()` function and referencing the directory containing the files:  
 
 ```{r stitchData, eval = FALSE}
@@ -357,7 +425,7 @@ The performance of a single interpolation can be assessed by comparing the __ori
 \end{equation}
 called a performance criterion. Generally speaking, $C$ quantifies how well the interpolated series, $\mathbf{X} = \left\{X_t\right\}_{t=0}^{N-1}$, captures the essence of the original series,  $\mathbf{x} = \left\{x_t\right\}_{t=0}^{N-1}$.
 
-### Generating performance matrices
+### Generating performance matrices with `performance()`
 A set of performance criteria are computed for each $(x_t,X_t)$ pair using the `performance()` function. The table below shows the metrics that are built-in to the package.
 
 | Criterion | Abbreviation | Optimal |
@@ -390,7 +458,7 @@ pmats <- performance(OriginalData = OriginalData, GappyData = GappyData, IntData
 
 The resulting output is a list of dimension $D \times M \times P \times G \times K$ of class `pmat`, where the terminal node is a matrix of performance metrics, saved as `~/toyData/toy_pmats.rda`.
 
-### Aggregating the performance data
+### **Aggregating** the performance data with `agEvaluate()`
 
 Consider that for any $(d,m,p,g)$ set, there are a set of $K$ values for each criterion. Thus, each performance metric has a sampling distribution containing $K$ elements. The performance matrices can be condensed by aggregating over $K$ to reduce dimensionality. The comprehensive set of sample statistics that are offered in this package are listed below:
 
@@ -417,59 +485,63 @@ agEval <- agEvaluate(pmats = pmats)
 
 The result is an object of class `agEvaluate`, and is saved as `~/toyData/toy_agEval.rda`. This is the object that will be piped into all of the functions used to conduct the analyses, to follow.
 
-# Data Visualization
+## Data visualization tools
 This package provides a number of different data visualization tools, which are described in this section.
 
-## Original Data
+### Plotting the original data with `plotXt()`
 The original time series can be visualized using `plotXt()` by passing in an object of class `simList`. Below is a plot of $x_{t,1}$.
 
-```{r plotXt, cache = TRUE}
+```{r plotXt, cache = TRUE, fig.width = 6, fig.height = 3, fig.align = "center"}
 plotXt(d = 1, simData = xt, cptwise = F, axisLabels = T)
 ```
 
 Since this object stores all of the constituent pieces, the original data can also be visualized __componentwise__ by toggling `cptwise` to `TRUE`. The user can select which component to display via `return`.  Note that if the user wishes to leave the default `return = NULL` and return all components in a grid, then `axisLabels` must be set to `FALSE` to prevent redundant labelling. 
 
-Here is an example of such a grid, showing $m_{t,1}$, $t_{t,1}$, $\xi_{t,1}$, and the constituent frequencies:
+Here is an example of such a **grid**, showing $m_{t,1}$, $t_{t,1}$, $\xi_{t,1}$, and the constituent frequencies:
 
-```{r plotXtcpt, cache = TRUE}
+```{r plotXtcpt, cache = TRUE, fig.width = 6, fig.height = 7, fig.align = "center"}
 plotXt(d = 1, simData = xt, cptwise = T, axisLabels = F, plot.title = T, return = NULL)
+
 ```
 
-An example of extracting and visualizing the noise component only (toggling `axisLabels = TRUE`):
-```{r plotWt, cache = TRUE}
+An example of extracting and visualizing the **noise component** only (toggling `axisLabels = TRUE`):
+```{r plotWt, cache = TRUE, fig.width = 6, fig.height = 3, fig.align = "center"}
 plotXt(d = 1, simData = xt, cptwise = T, axisLabels = T, return = "Wt")
 ```
 
-An example of extracting and visualizing the frequency distribution: (toggling `axisLabels = TRUE`):
-```{r plotfreq, cache = TRUE}
+An example of extracting and visualizing the **frequency distribution**: (toggling `axisLabels = TRUE`):
+```{r plotfreq, cache = TRUE, fig.width = 6, fig.height = 2, fig.align = "center"}
 plotXt(d = 1, simData = xt, cptwise = T, axisLabels = T, return = "freq")
 ```
 
 Possible values of `return` are `NULL`, `"Mt"`, `"Mt"`, `"Mt"`, and `"freq"`.
 
-## Surface plots
+### Generating surface plots with `plotSurface()`
 A three-dimensional __surface__ is used to visualize the performance of an interpolator as the structure of the gappy data changes. We will refer to such a surface as $f(p,g)$ in the following, with $f$ an undefined bivariate function describing the value of a criterion. 'Optimal' performance corresponds to an extreme point on the surface; either a maximum or minimum, depending on the definition of 'optimal' (see above table of performance criteria). Multiple interpolations can be compared by layering surfaces on top of one another, where the `best' interpolation for a particular gap structure will be at an extremum at the corresponding $(p,g)$ coordinate point.   
 
 This visualization is generated using the function `plotSurface()`, where the user can specify algorithms and datasets of interest, the sample statistic and criterion to model. The user can highlight certain surfaces via the `highlight` argument. The function will only accept objects of class `agEvaluate` in the `agEval` argument.
 
 The first example is for the visualization of the performance of the Linear Interpolation (LI) method on the first dataset according to the Mean Squared Error (MSE) criterion, where $f(p,g)$ represents the __median__ value:
 
-```{r plotSurface, cache = TRUE}
-plotSurface(d = 1, 
-            m = "LI", 
-            crit = "MSE", 
-            agEval = agEval, 
-            f = "median", 
-            highlight = "LI", 
-            highlight_color = "#33FFF9")
+```{r plotSurface, cache = TRUE, fig.width = 6, fig.height = 6, fig.align = "center"}
+p <- plotSurface(d = 1, 
+              m = "LI", 
+              crit = "MSE", 
+              agEval = agEval, 
+              f = "median", 
+              highlight = "LI", 
+              highlight_color = "#33FFF9")
+p$MSE$D1
 ```
 
+##### Surface plots with multiple layers 
 Multiple surfaces can be layered one on top of the other to facilitate comparison.  The user can specify whether to layer surfaces by __dataset__ (for a single method), or by __method__ (for a single dataset).
 
+#### Layering by **method**
 Below is an example of a surface plot, layered by __method__, for the performance of the Linear Interpolation (LI, highlighted), Nearest Neighbor (NN), and Exponential Weighted Moving Average (EWMA) on the first dataset according to the Mean Squared Error (MSE) criterion, where $f(p,g)$ represents the __median__ value:
 
-```{r plotSurface_m, cache = TRUE}
-plotSurface(d = 1, 
+```{r plotSurface_m, cache = TRUE, fig.width = 6, fig.height = 6, fig.align = "center"}
+p <- plotSurface(d = 1, 
             m = c("LI","NN","EWMA"), 
             layer_type = "method", 
             crit = "MSE", 
@@ -477,12 +549,14 @@ plotSurface(d = 1,
             f = "median", 
             highlight = "LI", 
             highlight_color = "#33FFF9")
+p$MSE$D1
 ```
 
+#### Layering by **dataset**
 Here is another example of a surface plot, layered by __dataset__, for the performance of the Linear Interpolation (LI) on all five datasets (dataset 3 highlighted) according to the Mean Squared Error (MSE) criterion, where $f(p,g)$ represents the __median__ value:
 
-```{r plotSurface_d, cache = TRUE}
-plotSurface(d = 1:5, 
+```{r plotSurface_d, cache = TRUE, fig.width = 6, fig.height = 6, fig.align = "center"}
+p <- plotSurface(d = 1:5, 
             m = "LI", 
             layer_type = "dataset", 
             crit = "MSE", 
@@ -490,11 +564,13 @@ plotSurface(d = 1:5,
             f = "median", 
             highlight = 3, 
             highlight_color = "#33FFF9")
+p$MSE$LI
 ```
 
-The function `multiplot()` allows the user to combine multiple surface plot objects into one grid to add another dimension for comparison. The following is an example of a set of surface plots describing datasets 1-5 of the method-layered plots.  
+##### Arranging multiple surface plots with `multiSurface()`
+The function `multiSurface()` allows the user to combine multiple surface plot objects into one grid to add another dimension for comparison. The following is an example of a set of surface plots describing datasets 1-5 of the method-layered plots.  
 
-```{r multiSurface_m, cache = TRUE}
+```{r multiSurface_m, cache = TRUE, fig.width = 8, fig.height = 10, fig.align = "center"}
 multiSurface(d = 1:5, 
              agEval = agEval, 
              layer_type = "method", 
@@ -507,7 +583,7 @@ multiSurface(d = 1:5,
 
 Grouping by __dataset__ was achieved by setting `layer_type = "method"`. To group the performances by __method__ instead, the `layer_type` argument can be set to `"dataset"`, where each plot represents the performance on any combination of original datasets, by a particular interpolation algorithm. See the example below:
 
-```{r multiSurface_d, cache = TRUE}
+```{r multiSurface_d, cache = TRUE, fig.width = 8, fig.height = 7, fig.align = "center"}
 multiSurface(d = 1:5, 
              agEval = agEval, 
              layer_type = "dataset", 
@@ -518,12 +594,12 @@ multiSurface(d = 1:5,
              highlight_color = "#33FFF9")
 ```
 
-## Heatmaps
+### Generating heatmaps with `heatmapGrid2()`
 Through R's interface, the user can interact with the surface plot widgets by manipulating the camera perspective, adjusting the zoom, and hovering over data points for precise numerical information. When constrained to static visualizations, like when writing papers, __heatmap__ are more effective at communicating the data. Using `heatmapGrid2()`, a three-dimensional surface can be collapsed into a heatmap through conversion of the third dimension to __colour__, to which the __value of the metric__ is proportional. 
 
 See below an example of a heatmap of the performance of the Linear Interpolation (LI) method on the first dataset according to the median value of the Mean Squared Error (MSE) criterion. Convince yourself that this graphic corresponds to the first surface plot shown in this vignette.
 
-```{r heatmapGrid2, cache = TRUE}
+```{r heatmapGrid2, cache = TRUE, fig.width = 4, fig.height = 4, fig.align = "center"}
 heatmapGrid2(d = 1, 
              agEval = agEval, 
              f = "median", 
@@ -533,7 +609,7 @@ heatmapGrid2(d = 1,
 
 The `heatmapGrid2()` function allows for `d` to be vectorized to show heatmaps across any number of datasets:
 
-```{r heatmapGrid2_d, cache = TRUE}
+```{r heatmapGrid2_d, cache = TRUE, fig.width = 6, fig.height = 4, fig.align = "center"}
 heatmapGrid2(d = c(1,3,5), 
              agEval = agEval, 
              f = "median", 
@@ -541,9 +617,10 @@ heatmapGrid2(d = c(1,3,5),
              m = "LI")
 ```
 
+#### Arranging multiple heatmaps with `multiHeatmap()`
 The `multiHeatmap()` function enables the user to arrange multiple heatmaps into a grid to facilitate cross-comparison between __criteria__: 
 
-```{r multiHeatmap_crit, cache = TRUE}
+```{r multiHeatmap_crit, cache = TRUE, fig.width = 6, fig.height = 5, fig.align = "center"}
 multiHeatmap(crit = c("abs_differences","MSE","MAPE"), 
              agEval = agEval, 
              m = "LI", 
@@ -554,7 +631,7 @@ multiHeatmap(crit = c("abs_differences","MSE","MAPE"),
 
 or __methods__:
 
-```{r multiHeatmap_method, cache = TRUE}
+```{r multiHeatmap_method, cache = TRUE, fig.width = 6, fig.height = 5, fig.align = "center"}
 multiHeatmap(crit = "MSE", 
              agEval = agEval, 
              m = c("LI","NN","EWMA"), 
@@ -565,16 +642,16 @@ multiHeatmap(crit = "MSE",
 
 The user can specify which kind of comparison they would like to see via the `by` argument.
 
-## Cross-section plots
-### Collapsed 
+### Generating **cross-section** plots with `plotCS()`
 We can take a closer look at the surface plots by examining __cross-sections__, generated by `plotCS()`. We encourage the reader to imagine changing their perspective angle on the surface plots by rotating them such that the surface is viewed perpendicular to the $p-z$ or $g-z$ plane and the $p$-axis or $g$-axis is collapsed. Effectively, this allows us to examine changes in one variable across all values of the other. Each __ribbon__ represents the performance of a particular interpolation method in a dataset $d$, where the upper and lower bounds are the largest and smallest values observed across the set of sample statistics contained in the collapsed variable (the highest and lowest points on the corresponding surface plot), and the central __line__ is the median value of this set.
 
+#### Cross-section plot of **gap width**
 When the $p$-axis is collapsed, we are looking at a __cross-section of gap width__. From this perspective, we can observe how the overall performance of an algorithm on a particular dataset changes as the width of the gaps increases ($g\rightarrow G$), as well as get a rough sense of how sensitive the algorithm is to the proportion of data missing. For example, ribbons that are 'thicker' indicate a greater disparity in performance between the best and worst interpolations, and `thinner' ribbons correspond to algorithms that seem to perform similarly, regardless of proportion missing.
 
-Below is an example of a $g$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$ of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, NN, KAF) with respect to gap width, across all values of $p$. 
+Below is an example of a $g$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$ of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, NN, EWMA) with respect to gap width, across all values of $p$. 
 
-```{r plotCS_g, cache = TRUE}
-plotCS(d = 1,
+```{r plotCS_g, cache = TRUE, fig.width = 6, fig.height = 6, fig.align = "center"}
+p <- plotCS(d = 1,
        m = c("LI","NN","EWMA"),
        crit = "MSE", 
        agEval = agEval, 
@@ -583,14 +660,16 @@ plotCS(d = 1,
        cross_section = "g",
        highlight = "LI", 
        highlight_color = "#33FFF9")
+p$MSE$D1
 ```
 
+#### Cross-section plot of **proportion missing**
 When the $g$-axis is collapsed, the plot is a __cross-section of proportion missing__. Here, we can see how the performance of an algorithm on a particular dataset changes as the *sheer amount* of missing data points increases ($p\rightarrow P$), as well as get a rough sense of how sensitive the algorithm is to gap width. For example, ribbons that are 'thicker' indicate a greater disparity in performance between the best and worst interpolations, and `thinner' ribbons correspond to algorithms that seem to perform similarly regardless of gap width.
 
-Below is an example of a $p$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$ of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, NN, KAF) with respect to proportion missing, across all values of $g$. 
+Below is an example of a $p$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$ of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, NN, EWMA) with respect to proportion missing, across all values of $g$. 
 
-```{r plotCS_p, cache = TRUE}
-plotCS(d = 1,
+```{r plotCS_p, cache = TRUE, fig.width = 6, fig.height = 6, fig.align = "center"}
+p <- plotCS(d = 1,
        m = c("LI","NN","EWMA"),
        crit = "MSE", 
        agEval = agEval, 
@@ -599,12 +678,13 @@ plotCS(d = 1,
        cross_section = "p",
        highlight = "LI",
        highlight_color = "#33FFF9")
+p$MSE$D1
 ```
 
-
+#### Arranging multiple cross-section plots with `multiCS()`
 The `multiCS()` function enables the user to arrange a grid of plots such that cross-sectional performance across either __dataset__ or __method__ can be assessed simultaneously. To obtain a grid of plots grouped by __dataset__, then each interior layer must represent a method (`layer_type = "method"`), as in the following example, where we have a set of $g$ cross-section plots describing the performance of each method in datasets 1-5:
 
-```{r multiCS_d, cache = TRUE}
+```{r multiCS_d, cache = TRUE, fig.width = 8, fig.height = 10, fig.align = "center"}
 multiCS(d = 1:5,
         agEval = agEval,
         m = c("LI","NN","EWMA"), 
@@ -618,7 +698,7 @@ multiCS(d = 1:5,
 
 To obtain a grid of plots grouped by __method__, then each interior layer must be represent a dataset (`layer_type = "dataset"`), as in the following example, where we have a set of $g$ cross-section plots describing the performance on each dataset by the LI, EWMA, and KAF:
 
-```{r multiCS_m, cache = TRUE}
+```{r multiCS_m, cache = TRUE, fig.width = 8, fig.height = 6, fig.align = "center"}
 multiCS(d = 1:5,
         agEval = agEval,
         m = c("LI","NN","EWMA"), 
@@ -630,12 +710,12 @@ multiCS(d = 1:5,
         highlight_color = "#33FFF9")
 ```
 
-### Uncollapsed
+### Generating **uncollapsed cross-section** plots with `plotCS_un()`
 The collapsed cross section plots can be further deconstructed using `plotCS_un()` such that the performance can be assessed with respect to changes in one variable ($p$ or $g$) across __each individual value of the other__.  Interpretable as 'slices' of the surface plot, these uncollapsed cross-section plots will give insight as to whether there are specific combinations of ($p,g$) for which the performance of a particular method is particularly sensitive. Each ribbon represents the distribution of a metric across the $K$ simulations, where the upper and lower bounds represent the 2.5% and 97.5% quantiles, and the interior line is is formed by the set of sample statistics from corresponding points on the parent surface plot. An advantage of viewing the data in this way is that it allows us to view the error bars at each ($p,g$) coordinate point without creating an over-crowded and hard-to-read surface plot visualization.
 
 Below is an example of a $p$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$  of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, NN, EWMA) with respect to each value of $g$. 
 
-```{r plotCS_un_p, cache = TRUE}
+```{r plotCS_un_p, cache = TRUE, fig.width = 6, fig.height = 8, fig.align = "center"}
 plotCS_un(d = 1,
           agEval = agEval,
           cross_section = "p", 
@@ -648,9 +728,7 @@ plotCS_un(d = 1,
 
 ```
 
-## Additional functionality
-
-### Gradient
+## Computing the gradient with `gradient()`
 The __gradient__ of a surface plot describes the degree of resilience of an algorithm to changes in gap structure. A low-grade slope in the neighborhood of $p,g$ gives evidence that an algorithm is more *stable* at that point, whereas a steeper slope may indicate that the algorithm is more *sensitive* to changes in the same region. Computing the gradient, $\nabla f(p,g)$, will help identify the particular gap configurations at which the statistical performance breaks down, according to a particular criterion.
 
 Since the data lies on a discrete mesh, the gradient can be approximated by calculating the slope of the line that connects all pairs of adjacent points on the surface. For any $i,j$ pair of coordinate points ($p_i,g_i,f(p_i,g_i)$) and ($p_j,g_j,f(p_j,g_j)$), the slope between them is given by:
@@ -679,6 +757,7 @@ The output is a list of tables of values, in the following format:
 
 
 
+### Evaluating areas of statistical instability with `gradEval()`
 The `gradient()` object can be passed into `gradEval()` to identify regions of statistical instability on a particular surface, which can then be compared to the performances of other select algorithms in that same ($p,g$) region using a ratio. The user can choose which method to compare to the others via `cm`, and the dataset of interest, via `cd`.
 
 Below is an example of the use of this tool, where the performance of the Linear Interpolation method on the third dataset, according to the Absolute Differences (AD) metric, is assessed with respect to its region of maximum instability (i.e., at which value of $p$ and $g$), and how it compares to the other metrics in that same region.
@@ -693,7 +772,7 @@ gradEval(agEval = agEval,
          f = "median")
 ```
 
-### Skewness of performance criteria
+## Determine skewness measures of the sampling distributions with `plotSkew()` 
 The user may wish to evaluate the degree of __skewness__ of the sampling distributions of each performance criterion. This may give helpful insight as to which statistic will best-measure central tendency (i.e., the __sample mean__ or __sample median__), assuming of course that the distributions are unimodal (this can be verified via the p-value of the `diptest` shown in the `agEvaluate` object). 
 
 On any set of $K$ interpolations, the skewness of the sampling distribution of a particular performance metric can be calculated as:
@@ -707,29 +786,30 @@ By plotting the distribution of the skewness values across all possible ($d,m,p,
 
 -Distributions of skewness values whose center is *not* in the neighbourhood of zero $(\bar{X}_\text{skew}>\left|s_\text{skew}/3\right|)$ indicate that on average the criterion has a __skewed distribution__, and the __median__ will better capture the essence of the data. 
 
-The `plotSkew()` function can be used to plot the distributions of the skewness values for the chosen performance metrics.  The user can toggle the `symmetric` argument to view subsets of skewness distributions: symmetric only, asymmetric only, or the full set. 
+### Plotting the distribution of the skewness measures
+The `plotSkew()` function can be used to plot the distributions of the skewness values for the chosen performance metrics by toggling `output = "plots"`.  The user can toggle the `symmetric` argument to view subsets of skewness distributions: symmetric only, asymmetric only, or the full set. 
 
-```{r plotSkew_plot, cache = TRUE}
+```{r plotSkew_plot, cache = TRUE, fig.width = 6, fig.height = 10, fig.align = "center"}
 plotSkew(agEval = agEval, cptwise=T, symmetric= NULL, output = "plots")
 ```
 
 Dotted lines represent the sample medians and solid lines represent the sample means. A darker colour is indicative of criteria which have a symmetric sampling distribution.
 
+### Producing a table of average skewness measures
 The `output` argument can be changed such that a table of values is shown instead, where bolded values are indicative of criteria that have a reasonably symmetric sampling distribution, on average.  
 
 ```{r plotSkew_tab, cache = TRUE}
 plotSkew(agEval = agEval, cptwise=T, symmetric= NULL, output = "table")
 ```
 
-## Viewing the raw data
-
-### Surface Plots 
+## Retrieving the raw data
 As a supplement to the surface plots, the user can easily retrieve the comprehensive list of raw data in table-form using the `compileMatrix()` function.
 
 ```{r compileMatrix, eval = FALSE}
 compileMatrix(agEval = agEval)
 ```
 
+### $\LaTeX$ tables of $f(p,g)$ with `ztable()`
 The `ztable()` function can be used to produce $\LaTeX$ data tables corresponding to the entire set of values $f(p,g)$ defining the performance surface. Note that in order for this action ito be performed, the user must toggle `sdist = F` and define the sample statistic of interest with `f`. For example, the table of values corresponding to each $(p,g)$ point on the the first surface plot generated in this vignette:
 
 ```{r ztable1, cache = TRUE}
@@ -737,7 +817,7 @@ ztable(agEval = agEval, d = 1, crit = "MSE", m = "LI", sdist = F, f = "median")
 ```
 
 
-#### Sampling Distributions
+#### $\LaTeX$ tables of sampling distributions with `ztable()`
 The `ztable()` function can also be used to generate a summary of the sampling distribution of the chosen metric at each $(p,g)$, with respect to the 2.5% quantile, the median, and the 97.5% quantile.  This action is performed by toggling `sdist = T`. For example, that of the Linear Interpolation method, on the first dataset according to the Mean Squared Error (MSE) criterion:
 
 ```{r ztable2, cache = TRUE}
@@ -745,7 +825,7 @@ ztable(agEval = agEval, d = 1 , crit = "MSE", m = "LI", sdist = T)
 ```
 
 
-### Cross-section Plots
+### Generate tables of cross-sectional data with `CStable()`
 The `CStable()` function shows the values used to construct the cross-section plots, with the optimal methods bolded.  
 
 To view the data for a particular __collapsed cross-section plot__, the user can set the argument `collapse = T`. For example, the data for the collapsed $g$ cross-section plot for the first dataset according to the median Mean Squared Error (MSE) metric would be computed as follows:
