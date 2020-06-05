@@ -16,7 +16,7 @@ plotXt <- function(d, simData, cptwise = T, axisLabels = F, plot.title = T, retu
   require(ggplot2) 
   require(gridExtra)
   
-stopifnot(class(simData) == "simList", (is.null(return) | return == "Mt" | return == "Tt" | return == "freq" | return == "Wt"))
+stopifnot((is.null(return) | return == "Mt" | return == "Tt" | return == "freq" | return == "Wt"))
 
 #if(cptwise & is.null(return)) stop("Please specify if you wish to return ")
   
