@@ -13,7 +13,7 @@ Gap structure is defined by two parameters: the proportion of data missing (p), 
 * p = [10%, 20%, 30%]
 * g = [1, 5, 10]
 
-Under each possible *(p,g)* combination, the function will produce *K* different gap configurations.
+Under each possible *(p,g)* combination, the function will produce *K* different gap configurations on the original time series.
 
 ## Interpolating the gappy data with `parInterpolate()`
 Interpolation is performed on the gappy data, using parallel computing for efficiency. The user can choose from a list of 18 built-in interpolators:
