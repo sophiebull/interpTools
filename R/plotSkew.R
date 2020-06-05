@@ -112,7 +112,7 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots", crit 
       my.data$colour[!my.data$key %in% symCrit] = "white"
       my.data$colour[my.data$key %in% symCrit] = "grey"
     
-      p <- ggplot(my.data, aes(x = value)) + 
+      thePlot <- ggplot(my.data, aes(x = value)) + 
         theme_light() + 
         facet_wrap(~ key, strip.position = "top", scales = "free", ncol = 3) + 
         theme(strip.background = element_rect(fill="white"),
@@ -129,8 +129,7 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots", crit 
         geom_vline(data = my.meds, aes(xintercept = value), lty = 2, lwd = 0.25, col = "black") +
         labs(x="skewness")+
         scale_colour_grey(start=0.1,end=0.6)
-      
-  return(p)
+  
   }
   
   else if(!cptwise){
@@ -152,7 +151,7 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots", crit 
         xlim(-5,5) + xlab("skewness") + labs(color = "criteria") + 
         scale_colour_manual(values = colorRampPalette(c("blue","pink","turquoise"))(C)) #tidyr
     }
-    
+  }
 
     vals <- format(round(skewMeans$value,2),nsmall = 2)
     
@@ -162,13 +161,13 @@ plotSkew <- function(agEval, cptwise=F, symmetric= NULL, output = "plots", crit 
     colnames(theTable) <- c("criterion","mean skewness")
     
     if(output == "plots"){
-    return(thePlot)
+      return(thePlot)
     }
     
     else if(output == "table"){
       return(theTable)
     }
-  }
+  
 
 }
 
