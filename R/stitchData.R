@@ -2,7 +2,7 @@
 #' 
 #' Function to stitch together data
 #' 
-#' @param directory The directory location of the .rda files to stitch. Must be devoid of other files, and each .rda must be identical in structure. 
+#' @param directory The directory location of the .rda files to stitch. Must be devoid of other files, and each .rda must be identical in structure and follow the same naming convention. 
 
 
 stitchData <- function(directory){
@@ -30,10 +30,6 @@ stitchData <- function(directory){
   stitchList <-  lapply(stitchList <- vector(mode = 'list',M), function(x)
     lapply(stitchList <- vector(mode = 'list', P), function(x) 
         x<-vector(mode='list',G)))
-  
-  names(stitchList) <- names(fileList[[1]])
-  names(stitchList[[1]]) <- names(fileList[[1]][[1]])
-  names(stitchList[[1]][[1]]) <- names(fileList[[1]][[1]][[1]])
 
     for(m in 1:M){
       for(p in 1:P){
@@ -41,9 +37,11 @@ stitchData <- function(directory){
           for(i in 1:split){
           stitchList[[m]][[p]][[g]] <- append(stitchList[[m]][[p]][[g]],fileList[[i]][[m]][[p]][[g]])
           }
-          names(stitchList[[m]][[p]]) <- names(fileList[[1]][[1]][[1]])
+          names(stitchList[[m]][[p]]) <- names(fileList[[i]][[m]][[p]])
+        }
+        names(stitchList[[m]]) <- names(fileList[[i]][[m]])
       }
-    }
+      names(stitchList) <- names(fileList[[i]])
   }
 
   return(stitchList)
