@@ -65,6 +65,8 @@ Here, *statistical performance* is defined as some measure that quantifies the o
   | Root Mean Square Standardized Error | RMSS | min |
   | Median Absolute Percentage Error | MdAPE | min |
 
+See `metric_definitions.pdf` in the package files for the mathematical definitions of each performance metric shown above.
+
 ## Aggregating the performance metrics within each gap specification with `agEvaluate()`
 Statistics are computed on the sampling distribution of the performance metrics across the *K* interpolations in each *(p,g)* gap specification. Below is a list of all the available aggregations:
 
