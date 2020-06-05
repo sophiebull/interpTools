@@ -18,7 +18,7 @@ plotXt <- function(d, simData, cptwise = T, axisLabels = F, plot.title = T, retu
   
 stopifnot(class(simData) == "simList", (is.null(return) | return == "Mt" | return == "Tt" | return == "freq" | return == "Wt"))
 
-if(cptwise & is.null(return)) stop("Please specify if you wish to return ")
+#if(cptwise & is.null(return)) stop("Please specify if you wish to return ")
   
   
 if(cptwise & axisLabels & is.null(return)){
@@ -127,7 +127,7 @@ if(cptwise & axisLabels & is.null(return)){
     theme_light()+
     
     theme(axis.text.y = element_blank(),
-          axis.text.x = axis.text.x,
+          axis.text.x = element_text(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.ticks.y = element_blank(),
