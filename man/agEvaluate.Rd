@@ -15,17 +15,17 @@ Function to aggregate the set of performance matrices, by criterion, using sampl
 \details{
 The statistics provided in the output are as follows:
 \itemize{
-\item mean
-\item standard deviation 
-\item minimum (0\% quantile)
-\item 2.5\% quantile
-\item 25\% quantile
-\item median (50\% quantile)
-\item 75\% quantile
-\item 97.5\% quantile
-\item maximum (100\% quantile)
-\item IQR (97.5\% quantile - 2.5\% quantile)
-\item skewness
-\item p-value of dip test for unimodality (see \code{?dip} for details)
+\item \code{(mean)}; mean
+\item \code{(sd)}; standard deviation 
+\item \code{(q0)}; minimum (0\% quantile)
+\item \code{(q2.5)}; 2.5\% quantile
+\item \code{(q25)}; 25\% quantile
+\item \code{(median)}; median (50\% quantile)
+\item \code{(q75)}; 75\% quantile
+\item \code{(q97.5)}; 97.5\% quantile
+\item \code{(q100)}; maximum (100\% quantile)
+\item \code{(iqr)}; IQR (75\% quantile - 25\% quantile)
+\item \code{(skewness)}; skewness
+\item \code{(dip)}; p-value of dip test for unimodality (see \code{?dip} for details)
 }
 }
