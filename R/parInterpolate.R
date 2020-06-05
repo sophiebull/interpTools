@@ -23,7 +23,7 @@
 #' 
 #' @param GappyList A list of dimension P x G x K containing gappy time series.
 #' @param methods vector of IDs for selected interpolation methods, where m = 1,...,M
-#' @param FUN_CALL User specified interpolation function to be applied to GappyList. Must be a character string in the form: `function_name(args = ..., x = `.
+#' @param FUN_CALL User specified interpolation function(s) to be applied to GappyList. Must be a character string in the form: `function_name(args = ..., x = `.
 #' @param numCores How many CPU cores to use. The default is to use the total number of available cores, as determined by `detectCores()`.
 #' @param parallel Over which index to parallelize. Possible choices: "p","g","k"
 #' 
