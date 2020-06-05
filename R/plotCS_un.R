@@ -99,13 +99,14 @@ plotCS_un <- function( agEval,
     #fixedCol <- paste0("sub('\\)','', gsub('.*,','',names(theTab)[",i,"]))")
   }
   
-  colorList <- colors
   
   if(layer_type == "method"){
+    colorList <- colorRampPalette(colors)(M)
     colorListMatch <- colorList[1:M]
     names(colorListMatch) <- method_vec_names
   }
   else if(layer_type == "dataset"){
+    colorList <- colorRampPalette(colors)(D)
     colorListMatch <- colorList[1:D]
     names(colorListMatch) <- data_vec_names
   }

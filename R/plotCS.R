@@ -86,7 +86,7 @@ plotCS <- function(d = 1:length(agEval),
   ## z_list[[criterion]][[method]][[dataset]]
   
   if(layer_type == "method"){ 
-    colorList <- colors
+    colorList <- colorRampPalette(colors)(M)
     
     colorListMatch <- colorList[1:M]
     names(colorListMatch) <- method_list_names
@@ -169,7 +169,7 @@ plotCS <- function(d = 1:length(agEval),
   
   
   else if(layer_type == "dataset"){ 
-    colorList <- colors
+    colorList <- colorRampPalette(colors)(D)
     
     colorListMatch <- colorList[1:D]
     names(colorListMatch) <- data_list_names
