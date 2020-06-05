@@ -20,25 +20,29 @@ parInterpolate(GappyList, methods = NULL, FUN_CALL = NULL,
 }
 \description{
 Function to perform interpolation on gappy series in parallel using user-specified and/or user-defined interpolation methods. Parallelization occurs over the K level. \cr\cr
-INTERPOLATION METHOD IDS\cr
-1 - Nearest Neighbor - NN\cr
-2 - Linear Interpolation - LI\cr
-3 - Natural Cubic Spline - NCS\cr
-4 - FMM Cubic Spline - FMM\cr 
-5 - Hermite Cubic Spline - HCS\cr
-6 - Stineman Interpolation - SI\cr
-7 - Kalman ARIMA - KAF\cr
-8 - Kalman StructTS - KSF\cr
-9 - Last Observation Carried Forward - LOCF\cr
-10 - Next Observation Carried Backward - NOCB\cr
-11 - Simple Moving Average - SMA\cr
-12 - Linear Weighted Moving Average - LWMA\cr
-13 - Exponential Weighted Moving Average - EWMA\cr
-14 - Replace with Mean - RMEA\cr
-15 - Replace with Median - REMD\cr
-16 - Replace with Mode - RMOD\cr
-17 - Replace with Random -RRND\cr
-18 - Hybrid Wiener Interpolator - HWI\cr
+}
+\details{
+Below is a list of the built-in interpolators:\cr
+\enumerate{
+\item \code{NN}; Nearest Neighbor
+\item \code{LI}; Linear Interpolation
+\item \code{NCS}; Natural Cubic Spline
+\item \code{FMM}; Cubic Spline
+\item \code{HCS}; Hermite Cubic Spline
+\item \code{SI}; Stineman Interpolation
+\item \code{KAF}; Kalman ARIMA
+\item \code{KSF}; Kalman StructTS
+\item \code{LOCF}; Last Observation Carried Forward
+\item \code{NOCB}; Next Observation Carried Backward
+\item \code{SMA}; Simple Moving Average
+\item \code{LWMA}; Linear Weighted Moving Average
+\item \code{EWMA}; Exponential Weighted Moving Average
+\item \code{RMEA}; Replace with Mean
+\item \code{RMED}; Replace with Median
+\item \code{RMOD}; Replace with Mode
+\item \code{RRND}; Replace with Random
+\item \code{HWI}; Hybrid Wiener Interpolato
+}
 }
 \examples{
 # Built-in interpolators
