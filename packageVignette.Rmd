@@ -1,6 +1,6 @@
 ---
 title: "interpTools: A Framework for Testing Time Series Interpolators"
-author: "Sophie Castel"
+author: "Sophie Castel stmcastel@gmail.com"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -16,10 +16,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r lib, message = FALSE, cache = TRUE}
+```{r lib, message = FALSE}
 # installing library
-#library(devtools)
-#install_github("castels/sophTools")
+library(devtools)
+install_github("castels/sophTools")
 
 # Loading library
 library(sophTools)
@@ -191,24 +191,7 @@ for(d in 1:D){
 
 ```
 
-The result is a nested list of dimension $D\times P \times G \times K$, saved as `~/toyData/toy_GappyData.rda`. The data structure can be visualized as:
-
-* D1
-* D2
-* D3
-* D4
-* D5
-  + p0.10
-  + p0.20
-  + p0.30
-    - g1
-    - g5
-    - g10
-      - [[1]]
-      - [[2]]
-      - [[...]]
-      - [[K]]
-        
+The result is a nested list of dimension $D\times P \times G \times K$, saved as `~/toyData/toy_GappyData.rda`.
 ## Step 3: Interpolating the gappy data with `parInterpolate()`
 
 The next step is to interpolate the list of gappy data using `parInterpolate()`.  The user can choose from a list of 18 algorithms pulled from external packages, shown in the table below, and/or pass their own functions into `FUN_CALL`. Calling multiple methods is useful for facilitating comparative assessment. 
@@ -287,26 +270,7 @@ for(d in 1:D){
 
 ```
 
-The resulting object is a nested list of dimension $D \times M \times P \times G \times K$, saved as `~/toyData/toy_IntData.rda`. The structure of the data can be visualized as:
-
-* D1
-* D2
-* D3
-* D4
-* D5
-  + LI
-  + NN
-  + EWMA
-    + p0.10
-    + p0.20
-    + p0.30
-      - g1
-      - g5
-      - g10
-        - [[1]]
-        - [[2]]
-        - [[...]]
-        - [[K]]
+The resulting object is a nested list of dimension $D \times M \times P \times G \times K$, saved as `~/toyData/toy_IntData.rda`. 
 
 ##### Reducing the computational burden: `splitData()` and `stitchData()`
 Considering the dimensionality of the data and complexity of some interpolation algorithms (especially that of the Hybrid Wiener Interpolator), the system requirements for this number of computations can be quite large. 
@@ -322,36 +286,7 @@ split = 2
 GappyData_split <- splitData(GappyData = GappyData, split = split)
 ```
 
-The resulting data structure can be visualized as:
-
-* D1
-* D2
-* D3
-* D4
-* D5
-  + $[1:(K/2)]$
-    + p0.10
-    + p0.20
-    + p0.30
-      - g1
-      - g5
-      - g10
-        - [[1]]
-        - [[2]]
-        - [[...]]
-        - [[K/2]]
-  + $[(K/2):K]$
-    + p0.10
-    + p0.20
-    + p0.30
-      - g1
-      - g5
-      - g10
-        - [[(K/2)]]
-        - [[...]]
-        - [[K]]
-
-The split data is saved as `~/toyData/toy_GappyData_split.rda`.  
+The toy split data is saved as `~/toyData/toy_GappyData_split.rda`.  
 
 #### Interpolating the split data with `parInterpolate()`
 The 'split' object can then be passed into `parInterpolate()` as normal, except with an additional nested loop, iterating over the number of sets.  It is also wise to save each set of interpolated data with each iteration in an __appropriately organized directory__, where the parent folder should contain __only .rda files organized into subfolders by dataset__.  See the example below:
@@ -499,7 +434,7 @@ Since this object stores all of the constituent pieces, the original data can al
 
 Here is an example of such a **grid**, showing $m_{t,1}$, $t_{t,1}$, $\xi_{t,1}$, and the constituent frequencies:
 
-```{r plotXtcpt, cache = TRUE, fig.width = 6, fig.height = 7, fig.align = "center"}
+```{r plotXtcpt, cache = TRUE, fig.width = 6, fig.height = 7, fig.align = "center", fig.keep = "last"}
 plotXt(d = 1, simData = xt, cptwise = T, axisLabels = F, plot.title = T, return = NULL)
 
 ```
@@ -599,7 +534,7 @@ Through R's interface, the user can interact with the surface plot widgets by ma
 
 See below an example of a heatmap of the performance of the Linear Interpolation (LI) method on the first dataset according to the median value of the Mean Squared Error (MSE) criterion. Convince yourself that this graphic corresponds to the first surface plot shown in this vignette.
 
-```{r heatmapGrid2, cache = TRUE, fig.width = 4, fig.height = 4, fig.align = "center"}
+```{r heatmapGrid2, cache = TRUE, fig.width = 4, fig.height = 4, fig.align = "center", fig.keep = "last", results = FALSE}
 heatmapGrid2(d = 1, 
              agEval = agEval, 
              f = "median", 
@@ -609,7 +544,7 @@ heatmapGrid2(d = 1,
 
 The `heatmapGrid2()` function allows for `d` to be vectorized to show heatmaps across any number of datasets:
 
-```{r heatmapGrid2_d, cache = TRUE, fig.width = 6, fig.height = 4, fig.align = "center"}
+```{r heatmapGrid2_d, cache = TRUE, fig.width = 6, fig.height = 4, fig.align = "center", fig.keep = "last",  results = FALSE}
 heatmapGrid2(d = c(1,3,5), 
              agEval = agEval, 
              f = "median", 
@@ -620,7 +555,7 @@ heatmapGrid2(d = c(1,3,5),
 #### Arranging multiple heatmaps with `multiHeatmap()`
 The `multiHeatmap()` function enables the user to arrange multiple heatmaps into a grid to facilitate cross-comparison between __criteria__: 
 
-```{r multiHeatmap_crit, cache = TRUE, fig.width = 6, fig.height = 5, fig.align = "center"}
+```{r multiHeatmap_crit, cache = TRUE, fig.width = 6, fig.height = 5, fig.align = "center", fig.keep = "last",  results = FALSE}
 multiHeatmap(crit = c("abs_differences","MSE","MAPE"), 
              agEval = agEval, 
              m = "LI", 
@@ -631,7 +566,7 @@ multiHeatmap(crit = c("abs_differences","MSE","MAPE"),
 
 or __methods__:
 
-```{r multiHeatmap_method, cache = TRUE, fig.width = 6, fig.height = 5, fig.align = "center"}
+```{r multiHeatmap_method, cache = TRUE, fig.width = 6, fig.height = 5, fig.align = "center", fig.keep = "last",  results = FALSE}
 multiHeatmap(crit = "MSE", 
              agEval = agEval, 
              m = c("LI","NN","EWMA"), 
@@ -650,7 +585,7 @@ When the $p$-axis is collapsed, we are looking at a __cross-section of gap width
 
 Below is an example of a $g$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$ of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, NN, EWMA) with respect to gap width, across all values of $p$. 
 
-```{r plotCS_g, cache = TRUE, fig.width = 6, fig.height = 6, fig.align = "center"}
+```{r plotCS_g, cache = TRUE, fig.width = 6, fig.height = 6, fig.align = "center", fig.keep = "last",  results = FALSE}
 p <- plotCS(d = 1,
        m = c("LI","NN","EWMA"),
        crit = "MSE", 
@@ -668,14 +603,14 @@ When the $g$-axis is collapsed, the plot is a __cross-section of proportion miss
 
 Below is an example of a $p$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$ of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, NN, EWMA) with respect to proportion missing, across all values of $g$. 
 
-```{r plotCS_p, cache = TRUE, fig.width = 6, fig.height = 6, fig.align = "center"}
+```{r plotCS_p, cache = TRUE, fig.width = 6, fig.height = 6, fig.align = "center", fig.keep = "last",  results = FALSE}
 p <- plotCS(d = 1,
        m = c("LI","NN","EWMA"),
        crit = "MSE", 
        agEval = agEval, 
        layer_type = "method", 
        f = "median", 
-       cross_section = "p",
+       cross_section ="p",
        highlight = "LI",
        highlight_color = "#33FFF9")
 p$MSE$D1
@@ -684,7 +619,7 @@ p$MSE$D1
 #### Arranging multiple cross-section plots with `multiCS()`
 The `multiCS()` function enables the user to arrange a grid of plots such that cross-sectional performance across either __dataset__ or __method__ can be assessed simultaneously. To obtain a grid of plots grouped by __dataset__, then each interior layer must represent a method (`layer_type = "method"`), as in the following example, where we have a set of $g$ cross-section plots describing the performance of each method in datasets 1-5:
 
-```{r multiCS_d, cache = TRUE, fig.width = 8, fig.height = 10, fig.align = "center"}
+```{r multiCS_d, cache = TRUE, fig.width = 8, fig.height = 10, fig.align = "center", fig.keep = "last",  results = FALSE}
 multiCS(d = 1:5,
         agEval = agEval,
         m = c("LI","NN","EWMA"), 
@@ -698,9 +633,9 @@ multiCS(d = 1:5,
 
 To obtain a grid of plots grouped by __method__, then each interior layer must be represent a dataset (`layer_type = "dataset"`), as in the following example, where we have a set of $g$ cross-section plots describing the performance on each dataset by the LI, EWMA, and KAF:
 
-```{r multiCS_m, cache = TRUE, fig.width = 8, fig.height = 6, fig.align = "center"}
+```{r multiCS_m, cache = TRUE, fig.width = 8, fig.height = 6, fig.align = "center", fig.keep = "last",  results = FALSE}
 multiCS(d = 1:5,
-        agEval = agEval,
+        agEval = agEval, 
         m = c("LI","NN","EWMA"), 
         crit = "MSE", 
         layer_type = "dataset", 
@@ -715,7 +650,7 @@ The collapsed cross section plots can be further deconstructed using `plotCS_un(
 
 Below is an example of a $p$ cross-section plot of dataset 1, where each ribbon represents the sampling distribution $\left[ Q_{2.5\%}, \text{median}, Q_{97.5\%} \right]$  of performance, according to the Mean Squared Error (MSE) criterion, of interpolation method (LI, NN, EWMA) with respect to each value of $g$. 
 
-```{r plotCS_un_p, cache = TRUE, fig.width = 6, fig.height = 8, fig.align = "center"}
+```{r plotCS_un_p, cache = TRUE, fig.width = 6, fig.height = 8, fig.align = "center", fig.keep = "last",  results = FALSE}
 plotCS_un(d = 1,
           agEval = agEval,
           cross_section = "p", 
@@ -856,7 +791,8 @@ CStable(d = 1,
 The tables are produced in $\LaTeX$ format.
 
 
-
+## Need support?
+Please email me at stmcastel@gmail.com if you have any additional questions.
 
 
 
