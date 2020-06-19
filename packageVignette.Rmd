@@ -336,11 +336,11 @@ Once the interpolations have completed, the split data can be recombined into a 
 
 ```{r stitchData, eval = FALSE}
 # Pasting together the segmented interpolated data
-IntData_stitch1 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D1")
-IntData_stitch2 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D2")
-IntData_stitch3 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D3")
-IntData_stitch4 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D4")
-IntData_stitch5 <- stitchData("/home/sophie/sophTools/toyData/toy_IntData_split/D5")
+IntData_stitch1 <- stitchData("toyData/toy_IntData_split/D1")
+IntData_stitch2 <- stitchData("toyData/toy_IntData_split/D2")
+IntData_stitch3 <- stitchData("toyData/toy_IntData_split/D3")
+IntData_stitch4 <- stitchData("toyData/toy_IntData_split/D4")
+IntData_stitch5 <- stitchData("toyData/toy_IntData_split/D5")
 
 IntData_stitch <- list(D1 = IntData_stitch1,
                        D2 = IntData_stitch2,
