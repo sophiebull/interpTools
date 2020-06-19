@@ -1,5 +1,5 @@
-# sophTools
-This package contains functions for generating artificial time series, simulating gaps, and interpolating the missing observations, with tools for subsequent analysis and visualization of the interpolators' statistical performance. A detailed analysis facilitated by these code files is provided in my Master's thesis: A Framework for Testing Time Series Interpolators, submitted in May 2020. 
+# interpTools
+This package contains functions for generating artificial time series, simulating gaps, and interpolating the missing observations, with tools for subsequent analysis and visualization of the interpolators' statistical performance. A detailed analysis facilitated by these code files is provided in Sophie Castel's MSc thesis "A Framework for Testing Time Series Interpolators", May 2020, Trent University. 
 
 A brief description of the package functionality can be found below.
 
