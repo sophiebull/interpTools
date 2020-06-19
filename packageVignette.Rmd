@@ -19,10 +19,10 @@ knitr::opts_chunk$set(
 ```{r lib, message = FALSE}
 # installing library
 library(devtools)
-install_github("castels/sophTools")
+install_github("wesleyburr/interpTools")
 
 # Loading library
-library(sophTools)
+library(interpTools)
 ```
 
 The intended use of this R package is to provide a set of tools for the systematic testing of time series interpolators in light of changing the __features of the data__ and its __gap structure__. The basic framework is as follows:
