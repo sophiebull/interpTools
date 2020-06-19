@@ -1,8 +1,8 @@
-Package: sophTools
+Package: interpTools
 Version: 0.1.0
 Type: Package
 Title: Tools for systematic testing and evaluation of interpolation algorithms.
-Author: Sophie Castel
+Author: [aut, cre] Sophie Castel, [aut] Wesley S. Burr
 Maintainer: The package maintainer <stmcastel@gmail.com>
 Description: This package contains functions for generating artificial time series, simulating gaps, interpolation, computation of performance metrics, and data visualization.
 Encoding: UTF-8
