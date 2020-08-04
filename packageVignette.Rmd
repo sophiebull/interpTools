@@ -406,7 +406,7 @@ Consider that for any $(d,m,p,g)$ set, there are a set of $K$ values for each cr
 * 75\% quantile
 * 97.5\% quantile
 * 100\% quantile (maximum)
-* IQR (97.5\% quantile - 2.5\% quantile)
+* IQR (75\% quantile - 25\% quantile)
 * skewness
 * p-value of dip test for unimodality
 
