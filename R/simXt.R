@@ -6,7 +6,7 @@
 #' For vary = "Wt", order variables 'p' or 'q' are subject to vary depending on the value of 'fix', which must also be specified.
 #' 
 #' @param D The number of datasets to generate.
-#' @param n The desired length of each complete time series.
+#' @param N The desired length of each complete time series.
 #' @param vary "Mt", "Tt", "Wt". A character string specifying which component of Xt to vary. Other components are held constant.
 #' @param numTrend If 'vary != Mt', this is the number of terms to include. Value represents the maximum degree of the mean component; all lower order terms included. 
 #' @param trendType If 'vary != Mt', this is the type of trends to include in the mean component.
@@ -21,22 +21,22 @@
 #' # Initializing basic parameters
 #' D = 5
 #' n=1000
-#' t=0:(n-1)
+#' t=0:(N-1)
 #' 
 #' # Vary Mt
-#' simData <- simXt(D=D, n=n, vary = "Mt", bandwidth = 3, numFreq = 30, 
+#' simData <- simXt(D=D, N=N, vary = "Mt", bandwidth = 3, numFreq = 30, 
 #'                  trendType = "polynomial", snr = 1.5)
 #' 
 #' # Vary Tt
-#' simData <- simXt(D=D, n=n, vary = "Tt", bandwidth = 3, numTrend = 0, 
+#' simData <- simXt(D=D, N=N, vary = "Tt", bandwidth = 3, numTrend = 0, 
 #'                  trendType = "polynomial", snr = 1.5)
 #' 
 #' # Vary Wt, p fixed
-#' simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
+#' simData <- simXt(D=D, N=N, vary = "Wt", bandwidth = 3, numFreq = 20, 
 #'                  numTrend = 0, trendType = "polynomial", p = 0, fix = "p", snr = 1.5)
 #' 
 #' # Vary Wt, q fixed
-#' simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
+#' simData <- simXt(D=D, N=N, vary = "Wt", bandwidth = 3, numFreq = 20, 
 #'                  numTrend = 10, trendType = "polynomial", q = 0, fix = "q", snr = 1.5)
 #' 
 #' # Creating list object for one of the above variations
@@ -50,7 +50,7 @@
 #'OriginalData = eval(parse(text=list_call))
 #'
 
-simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial", numFreq = 20, bandwidth = NULL, p=0, q=0, fix, snr = 1.5){
+simXt <- function(D, N=1000, vary = "all", numTrend = 0, trendType = "polynomial", numFreq = 20, bandwidth = NULL, p=0, q=0, fix, snr = 1.5){
    
   # STOPS 
   
@@ -64,8 +64,8 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
   
   # WARNINGS
   
-  if(missing(n)){
-    warning("n not specified- defaulting to 1000;")
+  if(missing(N)){
+    warning("N not specified- defaulting to 1000;")
   }
   
   if(missing(bandwidth)){
@@ -76,7 +76,7 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
     warning("trendType not specified- defaulting to 'polynomial';")
   }
   
-  t <- 0:(n-1)
+  t <- 0:(N-1)
   simList <- list()
   
   if(vary == "Mt"){
@@ -89,11 +89,11 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
       warning("numFreq not specified- defaulting to 20;")
     }
 
-    Tt <- simTt(n=n, numFreq=numFreq, bandwidth=bandwidth)
-    Wt <- simWt(n=n, p=p, q=q, var = var(Tt$value)/snr)
+    Tt <- simTt(N=N, numFreq=numFreq, bandwidth=bandwidth)
+    Wt <- simWt(N=N, p=p, q=q, var = var(Tt$value)/snr)
     
     for(d in 0:(D-1)){
-      Mt <- simMt(n=n, numTrend = d, trendType = trendType)
+      Mt <- simMt(N=N, numTrend = d, trendType = trendType)
       simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
       simList$Mt[[(d+1)]] <- Mt$value
       simList$Mt_mu[[(d+1)]] <- Mt$mu
@@ -119,12 +119,12 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
       warning("numTrend not specified- defaulting to 0;")
     }
     
-    Mt <- simMt(n=n, numTrend = numTrend)
-    #Wt <- simWt(n=n)  IF Tt IS TO VARY, THEN Wt VARIES AS WELL, TO MAINTAIN SNR
+    Mt <- simMt(N=N, numTrend = numTrend)
+    #Wt <- simWt(N=N)  IF Tt IS TO VARY, THEN Wt VARIES AS WELL, TO MAINTAIN SNR
     
     for(d in 0:(D-1)){
-      Tt <- simTt(n=n, numFreq = (d+1)*10, bandwidth = bandwidth)
-      Wt <- simWt(n=n, var = var(Tt$value)/snr) #P AND Q PARAMETERS DO NOT CHANGE; JUST THE VARIANCE OF Wt
+      Tt <- simTt(N=N, numFreq = (d+1)*10, bandwidth = bandwidth)
+      Wt <- simWt(N=N, var = var(Tt$value)/snr) #P AND Q PARAMETERS DO NOT CHANGE; JUST THE VARIANCE OF Wt
       
       simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
       simList$Mt[[(d+1)]] <- Mt$value
@@ -155,12 +155,12 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
       warning("numTrend not specified- defaulting to 0;")
     }
       
-      Mt <- simMt(n=n, numTrend = numTrend)
-      Tt <- simTt(n=n, numFreq = numFreq, bandwidth = bandwidth)
+      Mt <- simMt(N=N, numTrend = numTrend)
+      Tt <- simTt(N=N, numFreq = numFreq, bandwidth = bandwidth)
       
       for(d in 0:(D-1)){
         
-        Wt <- simWt(n=n,q=q,p=d, var = var(Tt$value)/snr)
+        Wt <- simWt(N=N,q=q,p=d, var = var(Tt$value)/snr)
         simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
         simList$Mt[[(d+1)]] <- Mt$value
         simList$Mt_mu[[(d+1)]] <- Mt$mu
@@ -181,12 +181,12 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
     if(!(missing(q))){
       warning("q cannot be assigned a constant value if Wt is to vary and p is already fixed- value will be replaced with d in 0:(D-1);")
     }
-      Mt <- simMt(n=n, numTrend = numTrend)
-      Tt <- simTt(n=n, numFreq = numFreq, bandwidth = bandwidth)
+      Mt <- simMt(N=N, numTrend = numTrend)
+      Tt <- simTt(N=N, numFreq = numFreq, bandwidth = bandwidth)
       
       for(d in 0:(D-1)){
         
-        Wt <- simWt(n=n,q=d,p=p, var = var(Tt$value)/snr)
+        Wt <- simWt(N=N,q=d,p=p, var = var(Tt$value)/snr)
         simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
         simList$Mt[[(d+1)]] <- Mt$value
         simList$Mt_mu[[(d+1)]] <- Mt$mu
@@ -215,9 +215,9 @@ simXt <- function(D, n=1000, vary = "all", numTrend = 0, trendType = "polynomial
     }
     
     for(d in 0:(D-1)){
-      Mt <- simMt(n=n, numTrend = d, trendType = trendType)
-      Tt <- simTt(n=n, numFreq = (d+1)*10, bandwidth = bandwidth)
-      Wt <- simWt(n=n, p=p, q=q, var = var(Tt$value)/snr)
+      Mt <- simMt(N=N, numTrend = d, trendType = trendType)
+      Tt <- simTt(N=N, numFreq = (d+1)*10, bandwidth = bandwidth)
+      Wt <- simWt(N=N, p=p, q=q, var = var(Tt$value)/snr)
       
       simList$Xt[[(d+1)]] <- Mt$value+Tt$value+Wt$value
       simList$Mt[[(d+1)]] <- Mt$value
