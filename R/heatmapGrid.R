@@ -1,246 +1,169 @@
-#'  Generate Heatmap Objects 
+#'  Generate Heatmaps of Performance
 #' 
-#'  A function to generate heatmaps to visualize results from objects of class "\code{agEvaluate}" (from \code{agEvaluate()}). \cr
+#'  A function to generate a set of heatmaps depicting the performances of particular sets of interpolations. This graphic can be considered as a series of 'compressed' surface plots, arranged by dataset.\cr
 #'  
-#'  
-#' @param agEval A list object of class "\code{agEvaluate}" (result of \code{agEvaluate()} of aggregated performance metrics
-#' @param f "\code{median}" (default): Which statistic should be used that will be represented in the heatmap
-#' @param crit numeric; a vector of performance criteria
-#' @param m character; a vector of interpolation methods
-#' @param d numeric; a vector describing the index positions of desired datasets (corresponding to \code{agEval})
-#' @param type "\code{z}" (default) or "\code{gradient}"; Generate heatmaps of the matrix of PxG values of the performance metrics\cr 
-#'        in \code{crit} (for \code{type} ='\code{z}'), or the values of the slopes between adjacent values in the performance matrices \cr
-#'        (for \code{type} = '\code{gradient}')
-#' @param output "\code{graphic}" (default) or "\code{matrix}"; If \code{type = "z"}, \code{output} is coerced to "\code{graphic}". Otherwise, if \cr
-#'        \code{type = "gradient"} and \code{output = "matrix"}, the function will return the matrix of slopes arranged in a grid corresponding to each\cr
-#'        adjacent point in the performance matrix. 
-#' @param col character; A vector of colours to use for the heatmap graphic.
+#' @param agEval \code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})
+#' @param f \code{character}; The statistic of interest that will be depicted by the heatmap. Possible choices are listed in \code{?agEvaluate}.
+#' @param crit \code{character}; A single element describing the performance metric of interest
+#' @param m \code{character}; A single element describing the interpolation methods of interest
+#' @param d \code{numeric}; A vector to indicate datasets of interest
+#' @param colors \code{character}; A vector of the desired color palette, with entries in HTML format (\code{"#xxxxxx"}) 
 
-heatmapGrid <- function(agEval, f = "median", crit, m, d, type = "z", output = "graphic", 
-                        col = c("#EAECEE", "#D5D8DC","#ABB2B9","#808B96", "#566573", "#2C3E50","#EE5C42")){
+heatmapGrid <- function(agEval, 
+                         f="median", 
+                         crit, 
+                         m, 
+                         d = 1:length(agEval), 
+                         colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
+
+  ## LOGICAL CHECKS ############
   
-  stopifnot((output == "graphic" | output == "matrix"),
-            (type == "z" | type == "gradient"),
-            f %in% names(agEval[[1]][[1]][[1]][[1]])[1:11],
-            length(d) <= length(agEval), 
-            length(m) <= length(agEval[[1]][[1]][[1]]),
-            length(crit) <=  length(rownames(agEval[[1]][[1]][[1]][[1]])),
-            crit %in% rownames(agEval[[1]][[1]][[1]][[1]]))
+  if(sum(duplicated(d) != 0)) stop(paste0("'d' contains redundant elements at position(s): ", paste0(c(1:length(d))[duplicated(d)], collapse = ", ") ))
+  if(sum(duplicated(m) != 0)) stop(paste0("'m' contains redundant elements at position(s): ", paste0(c(1:length(m))[duplicated(m)], collapse = ", ") ))
+  if(sum(duplicated(crit) != 0)) stop(paste0("'crit' contains redundant elements at position(s): ", paste0(c(1:length(crit))[duplicated(crit)], collapse = ", ") ))
   
-  if(type == "z" && output == "matrix"){
-    warning(paste("If type =",type,", output is coerced to 'graphic'. The matrix of z values is available using the function compileMatrix().",sep=""))
-    output = "graphic"
-  }
+  #if(by != "crit" & by != "method") stop("'by' must be either 'crit' or 'method'.")
   
-  P <- length(agEval[[1]])
-  G <- length(agEval[[1]][[1]])
-  C <- length(crit)
-  M <- length(m)
+  if(class(agEval) != "agEvaluate") stop("'agEval' object must be of class 'agEvaluate'. Please use agEvaluate().")
+  
+  if(length(crit) != 1) stop("'crit' must contain only a single character element.")
+  if(length(f) != 1) stop("'f' must contain only a single character element.")
+  if(length(m) != 1) stop("'m' must contain only a single character element.")
+  #if(length(by) != 1) stop("'by' must contain only a single character element.")
+  
+  if(!(m %in%  names(agEval[[1]][[1]][[1]]))) stop(paste0("Method '", m,"' not found. Possible choices are: '", paste0(names(agEval[[1]][[1]][[1]]), collapse = "', '"),"'."))
+  if(!all(paste0("D",d) %in% names(agEval))) stop("Dataset(s) ", paste0(d[!paste0("D",d) %in% names(agEval)], collapse = ", ")," not found. Possible choices are: ", paste0(gsub("D", "",names(agEval)), collapse = ", "))
+  if(!all(f %in% names(agEval[[1]][[1]][[1]][[1]]))) stop(paste0(c("f must be one of: '",paste0(names(agEval[[1]][[1]][[1]][[1]]), collapse = "', '"),"'."), collapse = ""))
+  if(!crit %in% rownames(agEval[[1]][[1]][[1]][[1]])) stop(paste0("Criterion '",crit,"' must be one of ", paste(rownames(agEval[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
+  
+  if(length(colors) <2) stop("'colors' must contain at least two colors (each in HTML format: '#xxxxxx')")
+  
+ ##################
+  
+  # get legend
+  g_legend<-function(a.gplot){
+    tmp <- ggplot_gtable(ggplot_build(a.gplot))
+    leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+    legend <- tmp$grobs[[leg]]
+    return(legend)}
+  
+  
+  z_list <- compileMatrix(agEval)[[f]]
   D <- length(d)
   
-  data_list_names <- names(agEval)[d]
-  prop_vec_names <- names(agEval[[1]])
-  gap_vec_names <- names(agEval[[1]][[1]])
-  method_list_names <- m
-  
-  heatmap_matrix <-  lapply(heatmap_matrix <- vector(mode = 'list', C),function(x)
-    lapply(heatmap_matrix <- vector(mode = 'list', M),function(x)
-      x <- vector(mode = 'list', D)))
-  
-  heatmap_graphic <- heatmap_matrix
-  
-  if(type == "z"){
+  plott <- list()
+  titles <- character()
+  for(vd in 1:D){
+    rownames(z_list[[crit]][[m]][[d[vd]]]) <- gsub("p","",rownames(z_list[[crit]][[m]][[d[vd]]]), fixed = TRUE)
+    colnames(z_list[[crit]][[m]][[d[vd]]]) <- gsub("g","",colnames(z_list[[crit]][[m]][[d[vd]]]), fixed = TRUE)
     
-    z_list <- compileMatrix(agEval)[[f]]
+    plott[[vd]] <- melt(z_list[[crit]][[m]][[d[vd]]])
+    colnames(plott[[vd]]) <- c("p","g", "value")
     
-    # Create a list of heatmaps    
-    for(s in 1:C){
-      for(vm in 1:M){
-        for(vd in 1:D){
-          
-          #heatmap_graphic[[s]][[vm]][[vd]] <-  stats::heatmap(z_list[[crit[s]]][[m[vm]]][[d[vd]]], Rowv = NA, Colv = NA, revC = T, scale = "none", 
-          #                                                    labRow = gsub("p","",prop_vec_names, fixed=TRUE),
-          #                                                    labCol = gsub("g","",gap_vec_names, fixed=TRUE),
-          #                                                    xlab = "gap width", ylab = "proportion missing",
-          #                                                    main =  paste("Criterion = ",crit[s],", f = ",f,", type = ", type,sep=""),
-          #                                                    col = colorRampPalette(col)(10000))
-          
-          rownames(z_list[[crit[s]]][[m[vm]]][[d[vd]]]) <- gsub("p","",rownames(z_list[[crit[s]]][[m[vm]]][[d[vd]]]), fixed = TRUE)
-          colnames(z_list[[crit[s]]][[m[vm]]][[d[vd]]]) <- gsub("g","",colnames(z_list[[crit[s]]][[m[vm]]][[d[vd]]]), fixed = TRUE)
-          
-          start <- melt(z_list[[crit[s]]][[m[vm]]][[d[vd]]])
-          colnames(start) <- c("p","g", "value")
-          
-          heatmap_graphic[[s]][[vm]][[vd]] <- ggplot(start, aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
-            scale_fill_gradientn(colours = col, values = c(0,1))+
-            
-            labs(x = "proportion missing", y = "gap width", fill = crit) + 
-            theme_minimal()
-        }
-        names(heatmap_graphic[[s]][[vm]]) <- data_list_names
-      }
-      names(heatmap_graphic[[s]]) <- method_list_names
-    }
-    names(heatmap_graphic) <- crit
+    titles[vd] <- paste0("Dataset ", vd," , '", m ,"'")
     
   }
   
-  else if(type == "gradient"){
-    
-    heatmap_grid_template <- matrix(nrow = 2*(P+1 + (P)*2), ncol = 2*(G+1 +(G)*2))
-    
-    prop_vec_names <- c("0",prop_vec_names)
-    gap_vec_names <- c("0",gap_vec_names)
-    
-    prop_vec <- c(0,as.numeric(gsub("p","",prop_vec_names, fixed = TRUE)),0)
-    gap_vec <- c(0,as.numeric(gsub("g","",gap_vec_names, fixed = TRUE)),0)
-    
-    # Initialize heatmap grid
-    
-    rownames_vec <- numeric(nrow(heatmap_grid_template))
-    colnames_vec <- numeric(ncol(heatmap_grid_template))
-    
-    for(i in 1:P+1){
-      rownames_vec[i + (i-1)*2] <- prop_vec_names[i]
-      for(j in 1:G+1){
-        colnames_vec[j + (j-1)*2] <- gap_vec_names[j]
-      }  
-    }
-    
-    rownames(heatmap_grid_template) <- rownames_vec
-    colnames(heatmap_grid_template) <- colnames_vec
-    
-    # SCHEMATIC
-    
-    #  for(i in 1:P){
-    
-    #    for(j in 1:G){
-    #      
-    #      heatmap_grid[i+(i-1)*2,j+(j-1)*2] <- paste("(",rownames(heatmap_grid)[i+(i-1)*2],",",
-    #                                                 colnames(heatmap_grid)[j+(j-1)*2],")",sep="")
-    #      
-    #      heatmap_grid[2*i+(i-1),2*j+(j-1)] <- paste("TL, (",i,",",j,"a)",sep="") # top left corners
-    #      heatmap_grid[2*i+i,2*j+j] <- paste("BR, (",i,",",j,"a)",sep="") # bottom right corners
-    #      
-    #      heatmap_grid[2*i+(i-1),2*j+(j)] <- paste("TR, (",i,",",j,"b)",sep="") # top right corners
-    #      heatmap_grid[2*i+i,2*j+j-1] <- paste("BL, (",i,",",j,"b)",sep="") # bottom left corners
-    #      
-    #      heatmap_grid[(i+1)+(i-1)*2,3*j-2] <- paste("VT, (",i,",",j,")",sep="") # vertical tops
-    #      heatmap_grid[(i+2)+(i-1)*2,3*j-2] <- paste("VB, (",i,",",j,")",sep="") # vertical bottoms
-    #      
-    #      heatmap_grid[3*i-2,(j+1)+(j-1)*2] <-  paste("HL, (",i,",",j,")",sep="") # horizontal lefts
-    #      heatmap_grid[3*i-2,(j+2)+(j-1)*2] <-  paste("HR, (",i,",",j,")",sep="") # horizontal rights
-    #      
-    #    }
-    #  }
-    
-    # Function to pull out slope based on each adjacent (p1,g1) (p2,g2) pair
-    
-    findSlope <- function(theGradientObject, p1,g1,p2,g2){
-      logic <- which(apply(theGradientObject[,c("g1","p1","g2","p2")], 1, function(x) all(x == c(g1,p1,g2,p2))))
-      if(length(theGradientObject[logic,"slope"]) == 0){
-        return(NA)
+  if(length(d)>1){
+  d_strand <- paste0("plott[[",1:(D-1),"]]$value,")
+  d_strand <- paste0(c("range(c(",d_strand,"plott[[",D,"]]$value))"), collapse = "")
+  }
+  else if(length(d) == 1){
+  d_strand <- paste0("range(c(plott[[1]]$value))")  
+  }
+  
+  rng = eval(parse(text = d_strand))
+  
+  col = colors
+  
+  mapList <- list()
+  
+  if(length(d)>1){
+    for(vd in 1:D){
+      if(vd == 1){
+        mapList[[vd]] <- ggplot(plott[[vd]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
+          scale_fill_gradientn(colors = col, values = c(0,1),
+                               limits = rng) +
+          
+          labs(x = "proportion missing", y = "gap width", fill = paste0(crit," (",f,")"), title = titles[vd]) + 
+          theme_minimal() + 
+          
+          theme(legend.position = "none",
+                axis.title.x = element_blank(),
+                axis.title.y = element_blank(),
+                plot.title = element_text(size = 12, hjust = 0.5))
       }
-      else if(length(theGradientObject[logic,"slope"]) !=0 ){
-        return(theGradientObject[logic,"slope"])
+      else if(vd != 1 && vd !=D){
+        mapList[[vd]] <- ggplot(plott[[vd]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
+          scale_fill_gradientn(colors = col, values = c(0,1),
+                               limits = rng) +
+          
+          labs(x = "proportion missing", y = "gap width", fill = paste0(crit," (",f,")"), title = titles[vd] ) + 
+          theme_minimal() + 
+          
+          theme(legend.position = "none",
+                axis.title.x = element_blank(),
+                axis.title.y = element_blank(),
+                axis.text.y = element_blank(),
+                plot.title = element_text(size = 12, hjust = 0.5))
+      }
+      else if(vd == D){
+        mapList[[vd]] <- ggplot(plott[[vd]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
+          scale_fill_gradientn(colors = col, values = c(0,1),
+                               limits = rng) +
+          
+          labs(x = "proportion missing", y = "gap width", fill = paste0(crit," (",f,")"), title = titles[vd]) + 
+          theme_minimal() + 
+          
+          theme(legend.position = "none",
+                axis.title.x = element_blank(),
+                axis.title.y = element_blank(),
+                axis.text.y = element_blank(),
+                plot.title = element_text(size = 12, hjust = 0.5))
       }
     }
+  
     
-    gradientObject <- gradient(d=d,m=m,crit=crit,agEval=agEval,f=f)
-    prop_vec <- prop_vec[-1]
-    gap_vec <- gap_vec[-1]
+    # make dummy plot to retrieve legend
+    dumPlot <- ggplot(plott[[D]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colors = col, values = c(0,1),
+                           limits = rng) +
+      theme(legend.position = "bottom") + 
+      labs(fill = paste0(crit," (",f,")"))
     
-    # Create a list of heatmaps
-    for(s in 1:C){
-      for(vm in 1:M){
-        for(vd in 1:D){
-          
-          theG <- gradientObject[[s]][[vm]][[vd]]
-          
-          # Populate the matrix of values based on gradient() object
-          heatmap_grid <- heatmap_grid_template
-          for(i in 1:P+1){
-            for(j in 1:G+1){
-              
-              heatmap_grid[i+(i-1)*2,j+(j-1)*2] <- 0
-              
-              # top left corners
-              heatmap_grid[2*i+(i-1),2*j+(j-1)] <- findSlope(theG,p1=prop_vec[i],g1=gap_vec[j],
-                                                             p2=prop_vec[i+1],g2=gap_vec[j+1])
-              # bottom right corners
-              heatmap_grid[2*i+i,2*j+j] <- findSlope(theG,p1=prop_vec[i+1],g1=gap_vec[j+1],
-                                                     p2=prop_vec[i],g2=gap_vec[j])  
-              
-              # top right corners
-              heatmap_grid[2*i+(i-1),2*j+(j)] <- findSlope(theG,p1=prop_vec[i],g1=gap_vec[j+1],
-                                                           p2=prop_vec[i+1],g2=gap_vec[j])  
-              
-              # bottom left corners
-              heatmap_grid[2*i+i,2*j+j-1] <- findSlope(theG,p1=prop_vec[i+1],g1=gap_vec[j],
-                                                       p2=prop_vec[i],g2=gap_vec[j+1])  
-              
-              # vertical tops
-              heatmap_grid[(i+1)+(i-1)*2,3*j-2] <- findSlope(theG,p1=prop_vec[i],g1=gap_vec[j],
-                                                             p2=prop_vec[i+1],g2=gap_vec[j])  
-              
-              # vertical bottoms
-              heatmap_grid[(i+2)+(i-1)*2,3*j-2] <- findSlope(theG,p1=prop_vec[i+1],g1=gap_vec[j],
-                                                             p2=prop_vec[i],g2=gap_vec[j])  
-              
-              # horizontal lefts
-              heatmap_grid[3*i-2,(j+1)+(j-1)*2] <- findSlope(theG,p1=prop_vec[i],g1=gap_vec[j],
-                                                             p2=prop_vec[i],g2=gap_vec[j+1])  
-              
-              # horizontal rights
-              heatmap_grid[3*i-2,(j+2)+(j-1)*2] <- findSlope(theG,p1=prop_vec[i],g1=gap_vec[j+1],
-                                                             p2=prop_vec[i],g2=gap_vec[j])  
-              
-            }
-          }
-          
-          heatmap_grid <- heatmap_grid[4:((P+1)+2*(P)), 4:((G+1)+2*(G))]
-          heatmap_matrix[[s]][[vm]][[vd]] <- heatmap_grid
-          
-        }
-        
-        names(heatmap_matrix[[s]][[vm]]) <- data_list_names
-      }
-      names(heatmap_matrix[[s]]) <- method_list_names
-    }
-    names(heatmap_matrix) <- crit
+    myLegend<-g_legend(dumPlot)
     
-    if(output == "graphic"){
-      for(s in 1:C){
-        for(vm in 1:M){
-          for(vd in 1:D){
-            
-            heatmap_graphic[[s]][[vm]][[vd]] <-  stats::heatmap(heatmap_matrix[[s]][[vm]][[vd]], Rowv = NA, Colv = NA, revC = T, scale = "none", 
-                                                                labRow = rownames(heatmap_matrix[[s]][[vm]][[vd]]),
-                                                                labCol = colnames(heatmap_matrix[[s]][[vm]][[vd]]),
-                                                                xlab = "gap width", ylab = "proportion missing",
-                                                                main =  paste("Criterion = ",crit[s],", f = ",f,", type = ", type,sep=""),
-                                                                col = colorRampPalette(col)(10000))
-            
-          
-          }
-          names(heatmap_graphic[[s]][[vm]]) <- data_list_names
-        }
-        names(heatmap_graphic[[s]]) <- method_list_names
-      }
-      names(heatmap_graphic) <- crit
+    h_strand <- paste0("mapList[[",1:(D-1),"]],")
+    h_strand <- paste0(c("grid.arrange(",h_strand,"mapList[[",D,"]], ncol = ",D,", bottom = 'proportion missing', left = 'gap width')"), collapse = "")
+  }
+  
+  else if(length(d) == 1){
+    mapList <- ggplot(plott[[1]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colors = col, values = c(0,1),
+                           limits = rng) +
       
-    }
+      labs(x = "proportion missing", y = "gap width", fill = paste0(crit," (",f,")"), title = titles[1]) + 
+      theme_minimal() + 
+      
+      theme(legend.position = "none",
+            axis.title.x = element_text(),
+            axis.title.y = element_text(),
+            plot.title = element_text(size = 12, hjust = 0.5)) 
+    
+    # make dummy plot to retrieve legend
+    dumPlot <- ggplot(plott[[1]], aes(as.numeric(p), as.factor(g), fill = value)) + geom_tile() + 
+      scale_fill_gradientn(colors = col, values = c(0,1),
+                           limits = rng) +
+      theme(legend.position = "bottom") + 
+      labs(fill = paste0(crit," (",f,")"))
+    
+    myLegend<-g_legend(dumPlot)
+    
+    h_strand <- paste0("mapList")
   }
   
-  if(output == "graphic"){
-    return(heatmap_graphic)
-  }
-  
-  else if(output == "matrix"){
-    return(heatmap_matrix)
-  }
+  plotWindow <- eval(parse(text = h_strand))
+  plotWindow <- grid.arrange(plotWindow, myLegend, heights = c(10,2))
+ 
+  return(plotWindow)
 }
-
-
-
-
