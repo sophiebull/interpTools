@@ -83,13 +83,12 @@ CStable <- function(d=1,
   
   criteria <- rownames(agEval[[1]][[1]][[1]][[1]])
   
-  poss_crit <- c("pearson_r","r_squared","abs_differences", "MBE", "ME", "MAE", "MRE", "MARE", "MAPE", "SSE", "MSE", "RMS", "NMSE", "RE", "RMSE", "NRMSD", "RMSS", "MdAPE", "TMAPE")
-  maximize <- c(1,1,rep(0,11),1,rep(0,5)) # 1 = yes, 0 = no
+  maximize <- c(1,1,rep(0,11),1,rep(0,4)) # 1 = yes, 0 = no
   optimal <- maximize
   optimal[which(optimal == "1")] <- "max"
   optimal[which(optimal == "0")] <- "min"
   
-  best <- data.frame(criteria = poss_crit, 
+  best <- data.frame(criteria = criteria, 
                      maximize = maximize,
                      optimal = optimal)
   
