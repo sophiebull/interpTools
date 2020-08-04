@@ -12,7 +12,7 @@
 #'      ...... \tab ........... \tab ......... \cr
 #'      1 \tab  pearson_r \tab max  \cr
 #'      2 \tab  r_squared \tab max  \cr
-#'      3 \tab  abs_differences \tab min  \cr
+#'      3 \tab  AD \tab min  \cr
 #'      4 \tab  MBE \tab min  \cr
 #'      5 \tab  ME \tab min  \cr
 #'      6 \tab  MAE \tab min  \cr
@@ -67,7 +67,7 @@ eval_performance <- function(x, X, gappyx) {
   return$r_squared <- return$pearson_r^2  
   
   # Absolute Differences
-  return$abs_differences <- sum(abs(X - x))
+  return$AD <- sum(abs(X - x))
   
   # Mean Bias Error 
   return$MBE <- sum(X - x) / n
