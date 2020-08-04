@@ -26,9 +26,9 @@ plotSurface <- function(d=1:length(agEval),
                         agEval, 
                         layer_type = "method", 
                         f = "median", 
-                        highlight = "HWI", 
-                        highlight_color = "#FA4032",
-                        colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){ 
+                        highlight = NULL, 
+                        highlight_color = "#FF0000",
+                        colors = c("#FF8633","#FFAF33","#FFD133","#FFEC33","#D7FF33","#96FF33")){ 
 
   ## LOGICAL CHECKS ############
   
@@ -46,19 +46,22 @@ plotSurface <- function(d=1:length(agEval),
   if(length(crit) != 1) stop("'crit' must contain only a single character element.")
   if(length(f) != 1) stop("'f' must contain only a single character element.")
   if(length(layer_type) != 1) stop("'layer_type' must contain only a single character element.")
-  if(length(highlight) != 1) stop("'highlight' must contain only a single character element.")
   if(length(highlight_color) != 1) stop("'highlight_color' must contain only a single character element.")
   
   if(class(agEval) != "agEvaluate") stop("'agEval' object must be of class 'agEvaluate'. Please use agEvaluate().")
   
-  if(layer_type == "method" & !highlight %in% m) stop(paste0(c("'highlight' must be an element of 'm'. Choose one of: '", paste0(m, collapse = "', '"),"'."), collapse = ""))
-  if(layer_type == "dataset" & !highlight %in% d) stop(paste0(c("'highlight' must be an element of 'd'. Choose one of: '", paste0(d, collapse = "', '"),"'."), collapse = ""))
+  if(!is.null(highlight)){
+    if(length(highlight) != 1) stop("'highlight' must contain only a single character element.")
+    if(layer_type == "method" & !highlight %in% m) stop(paste0(c("'highlight' must be an element of 'm'. Choose one of: '", paste0(m, collapse = "', '"),"'."), collapse = ""))
+    if(layer_type == "dataset" & !highlight %in% d) stop(paste0(c("'highlight' must be an element of 'd'. Choose one of: '", paste0(d, collapse = "', '"),"'."), collapse = ""))
+    if(layer_type == "dataset" & !is.numeric(highlight)) stop("If 'layer_type' = 'dataset', then 'highlight' must be of class 'numeric'.")
+    if(layer_type == "method" & !is.character(highlight)) stop("If 'layer_type' = 'method', then 'highlight' must be of class 'character'.")
+  }
   
-  if(length(colors) <2) stop("'colors' must contain at least two colors (each in HTML format: '#xxxxxx')")
+  if(layer_type == "method" & length(m) > 1 & length(colors) < length(m)) warning(paste0("'colors' should contain at least ", length(m), " elements (each in HTML format: '#xxxxxx') if layering more than one method."))
+  if(layer_type == "dataset" & length(d) > 1 & length(colors) < length(d)) warning(paste0("'colors' should contain at least ", length(d), " elements (each in HTML format: '#xxxxxx') if layering more than one dataset."))
   
-  if(layer_type == "dataset" & !is.numeric(highlight)) stop("If 'layer_type' = 'dataset', then 'highlight' must be of class 'numeric'.")
-  if(layer_type == "method" & !is.character(highlight)) stop("If 'layer_type' = 'method', then 'highlight' must be of class 'character'.")
-
+  
   ##################
   
   
@@ -83,7 +86,10 @@ plotSurface <- function(d=1:length(agEval),
     
     colorListMatch <- colorList[1:M]
     names(colorListMatch) <- method_list_names
+    
+    if(!is.null(highlight)){
     colorListMatch[[highlight]] <- highlight_color
+    }
     
     colorListMatch <- rep(colorListMatch, each = P*G)
     palette <- lapply(split(colorListMatch, names(colorListMatch)), unname)
@@ -95,7 +101,10 @@ plotSurface <- function(d=1:length(agEval),
 
     colorListMatch <- colorList[1:D]
     names(colorListMatch) <- data_list_names
+    
+    if(!is.null(highlight)){
     colorListMatch[grepl(highlight, data_list_names)] <- highlight_color
+    }
     
     colorListMatch <- rep(colorListMatch, each = P*G)
     palette <- lapply(split(colorListMatch, names(colorListMatch)), unname)
