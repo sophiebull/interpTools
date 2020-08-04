@@ -9,7 +9,7 @@
 #' @param sdist \code{logical}; \code{TRUE} returns a table of the sampling distribution \code{(Q2.5, median, Q97.5)} of the chosen metric at every combination of \code{(p,g)}. \code{FALSE} returns a table of values corresponding to \code{f(p,g)}, where each data point is the chosen sample statistic at each \code{(p,g)}.
 #' @param f \code{character}; If \code{sdist = F}, the sample statistic of interest defining \code{f(p,g)}. Possible choices are listed in \code{?agEvaluate}.
 
-ztable <- function(agEval, d, crit, m, sdist = T, f = NULL){
+ztable <- function(agEval, d = 1, crit, m, sdist = F, f = NULL){
   
   if(!is.logical(sdist)) stop("Object 'sdist' must either be TRUE or FALSE. TRUE returns the sampling distribution, FALSE returns the raw data according to 'crit' and 'f'.")
   
