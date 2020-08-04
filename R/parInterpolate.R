@@ -24,9 +24,9 @@
 #' \item \code{HWI}; Hybrid Wiener Interpolato
 #' }
 #' 
-#' @param GappyList A list of dimension P x G x K containing gappy time series.
+#' @param GappyData A list of dimension P x G x K containing gappy time series.
 #' @param methods vector of IDs for selected interpolation methods, where m = 1,...,M
-#' @param FUN_CALL User specified interpolation function(s) to be applied to GappyList. Must be a character string in the form: `function_name(args = ..., x = `.
+#' @param FUN_CALL User specified interpolation function(s) to be applied to GappyData. Must be a character string in the form: `function_name(args = ..., x = `.
 #' @param numCores How many CPU cores to use. The default is to use the total number of available cores, as determined by `detectCores()`.
 #' @param parallel Over which index to parallelize. Possible choices: "p","g","k"
 #' 
@@ -59,12 +59,12 @@
 #'IntData <- list()
 #'
 #'for(d in 1:length(OriginalData)){
-#'  IntData[[d]] <- parInterpolate(GappyList = GappyData[[d]], methods = methods, FUN_CALL = FUN_CALL)
+#'  IntData[[d]] <- parInterpolate(GappyData = GappyData[[d]], methods = methods, FUN_CALL = FUN_CALL)
 #'}
 #'names(IntData) <- names(OriginalData)
 
 
-parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores = detectCores(), parallel = "k"){
+parInterpolate <- function(GappyData, methods = NULL, FUN_CALL = NULL, numCores = detectCores(), parallel = "k"){
   # CALLING REQUIRED LIBRARIES
   #require(multitaper)
   #require(tsinterp)
@@ -76,7 +76,7 @@ parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores 
   #require(parallel)
   
   stopifnot(!(is.null(methods) && is.null(FUN_CALL)), 
-            !(is.null(GappyList)),
+            !(is.null(GappyData)),
             (parallel == "p" | parallel == "g" | parallel == "k"))
   
   # check that FUN_CALL is in the correct format
@@ -209,9 +209,9 @@ parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores 
   
   #Creating a list object to store interpolated series
   int_series <- lapply(int_series <- vector(mode = 'list',(length(methods)+length(FUN_CALL))),function(x)
-    lapply(int_series <- vector(mode = 'list', length(GappyList)),function(x) 
-      lapply(int_series <- vector(mode = 'list',length(GappyList[[1]])),function(x) 
-        x<-vector(mode='list',length(GappyList[[1]][[1]])))))
+    lapply(int_series <- vector(mode = 'list', length(GappyData)),function(x) 
+      lapply(int_series <- vector(mode = 'list',length(GappyData[[1]])),function(x) 
+        x<-vector(mode='list',length(GappyData[[1]][[1]])))))
   
   
   fun_names <- c(methods,user_fun)
@@ -229,7 +229,7 @@ parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores 
         function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
       }
       
-      int_series[[m]] <- mclapply(GappyList, function(x){
+      int_series[[m]] <- mclapply(GappyData, function(x){
         lapply(x, function(x){
           lapply(x, function(x){
             eval(parse(text = function_call))})})}, mc.cores = numCores)
@@ -246,7 +246,7 @@ parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores 
         function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
       }
       
-      int_series[[m]] <- lapply(GappyList, function(x){
+      int_series[[m]] <- lapply(GappyData, function(x){
         mclapply(x, function(x){
           lapply(x, function(x){
             eval(parse(text = function_call))})}, mc.cores = numCores)})
@@ -264,7 +264,7 @@ parInterpolate <- function(GappyList, methods = NULL, FUN_CALL = NULL, numCores 
         function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
       }
       
-      int_series[[m]] <- lapply(GappyList, function(x){
+      int_series[[m]] <- lapply(GappyData, function(x){
         lapply(x, function(x){
           mclapply(x, function(x){
             eval(parse(text = function_call))}, mc.cores = numCores)}
