@@ -46,7 +46,7 @@ simulateGaps <- function(data, prop_vec, gap_vec, K){
     for (g in 1:length(gap_vec)){
       gap_vec_names[g] <- c(paste("g", gap_vec[g],sep="")) # vector of names
       for(k in 1:K){   
-        samples[[k]] <- as.ts(gaps(data, prop_missing = prop_vec[p], gap_width = gap_vec[g]))
+        samples[[k]] <- as.numeric(gaps(data, prop_missing = prop_vec[p], gap_width = gap_vec[g]))
       }
       gapList[[g]] <- samples
       
