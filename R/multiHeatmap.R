@@ -19,7 +19,7 @@ multiHeatmap <- function(crit,
                          m, 
                          by = "crit", 
                          f = "median", 
-                         d = 1:5, 
+                         d = 1:length(agEval), 
                          colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
   
   ## LOGICAL CHECKS ############
@@ -29,8 +29,8 @@ multiHeatmap <- function(crit,
   if(sum(duplicated(crit) != 0)) stop(paste0("'crit' contains redundant elements at position(s): ", paste0(c(1:length(crit))[duplicated(crit)], collapse = ", ") ))
 
   if(by != "crit" & by != "method") stop("'by' must be either 'crit' or 'method'.")
-  if(by == "crit" & length(crit) < 2) stop("Only one criterion was chosen. Please specify at least one more, or use 'heatmapGrid2()' instead.")
-  if(by == "method" & length(m) < 2) stop("Only one method was chosen. Please specify at least one more, or use 'heatmapGrid2()' instead.")
+  if(by == "crit" & length(crit) < 2) stop("Only one criterion was chosen. Please specify at least one more, or use 'heatmapGrid()' instead.")
+  if(by == "method" & length(m) < 2) stop("Only one method was chosen. Please specify at least one more, or use 'heatmapGrid()' instead.")
   
   if(class(agEval) != "agEvaluate") stop("'agEval' object must be of class 'agEvaluate'. Please use agEvaluate().")
   
@@ -74,7 +74,7 @@ multiHeatmap <- function(crit,
     for(cr in 1:bound){
       
       if(cr == 1){
-        titles <- paste0("bquote(psi ==",d*10,")")
+        titles <- paste0("'Dataset ",d,"'")
         titles_theme <- element_text()
         axis.labels.x <- element_blank()
         axis.labels.y <- element_blank()
@@ -170,13 +170,23 @@ multiHeatmap <- function(crit,
         labs(fill = paste0(crit[cr]," (",f,")"))
       
       myLegend <-g_legend(dumPlot)
-
+      
+      if(D >= 3){
         h_string <- paste0("plotList[[",2:(D-1),"]],", collapse = "")
         rep_string <- c(paste0(rep("10,",D-1), collapse = ""),"10")
         rep_string <- paste0(rep_string, collapse = "")
         
-        h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"))", collapse = ""))
+        h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"), right = m[",cr,"])", collapse = ""))
+      }
       
+      else if(D == 2){
+        h_string <- paste0("grid.arrange(plotList[[1]], plotList[[2]], ncol = ",D,", widths = c(10,10), right = m[",cr,"])", collapse = "")
+      }
+      
+      else if(D == 1){
+        h_string <- paste0("grid.arrange(plotList[[1]], ncol = ",D,", widths = c(10), right = m[",cr,"])", collapse = "")
+      }
+       
       myHeatmaps <- eval(parse(text = h_string))
       
       heatmapList[[cr]] <- grid.arrange(myHeatmaps, myLegend, ncol = 2, widths = c(40,5))
@@ -198,7 +208,7 @@ multiHeatmap <- function(crit,
     for(cr in 1:bound){
       
       if(cr == 1){
-        titles <- paste0("bquote(psi ==",d*10,")")
+        titles <- paste0("'Dataset ",d,"'")
         titles_theme <- element_text()
         axis.labels.x <- element_blank()
         axis.labels.y <- element_blank()
@@ -289,12 +299,22 @@ multiHeatmap <- function(crit,
       
       myLegend <- g_legend(dumPlot)
       
+      if(D >= 3){
         h_string <- paste0("plotList[[",2:(D-1),"]],", collapse = "")
         rep_string <- c(paste0(rep("10,",D-1), collapse = ""),"10")
         rep_string <- paste0(rep_string, collapse = "")
         
         h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"), right = m[",cr,"])", collapse = ""))
-
+        }
+    
+      else if(D == 2){
+        h_string <- paste0("grid.arrange(plotList[[1]], plotList[[2]], ncol = ",D,", widths = c(10,10), right = m[",cr,"])", collapse = "")
+      }
+      
+      else if(D == 1){
+        h_string <- paste0("grid.arrange(plotList[[1]], ncol = ",D,", widths = c(10), right = m[",cr,"])", collapse = "")
+      }
+      
       heatmapList[[cr]] <- eval(parse(text = h_string))
     }
     
