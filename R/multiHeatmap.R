@@ -75,28 +75,28 @@ multiHeatmap <- function(crit,
       
       if(cr == 1){
         titles <- paste0("'Dataset ",d,"'")
-        titles_theme <- element_text()
-        axis.labels.x <- element_blank()
-        axis.labels.y <- element_blank()
-        axis.text.y <- element_text()
-        axis.ticks <- element_blank()
+        titles_theme <- element_text(hjust = 0.5)
+        axislabels.x <- element_blank()
+        axislabels.y <- element_blank()
+        axistext.y <- element_text()
+        axisticks <- element_blank()
         
       }
       else if(cr == bound){
         titles <- rep("",D)
-        axis.labels.x <- element_text()
-        axis.text.y <- element_blank()
-        axis.labels.y <- element_text()
-        axis.ticks <- element_blank()
+        axislabels.x <- element_text()
+        axistext.y <- element_blank()
+        axislabels.y <- element_blank()
+        axisticks <- element_blank()
         titles_theme <- element_blank()
       }
       else{
         titles <- rep("",D)
         titles_theme <- element_blank()
-        axis.labels.x <- element_blank()
-        axis.labels.y <- element_blank()
-        axis.text.y <- element_blank()
-        axis.ticks <- element_blank()
+        axislabels.x <- element_blank()
+        axislabels.y <- element_blank()
+        axistext.y <- element_blank()
+        axisticks <- element_blank()
       }
       
       plott <- list()
@@ -110,8 +110,18 @@ multiHeatmap <- function(crit,
         colnames(plott[[vd]]) <- c("p","g", "value")
       }
 
+      if(D >= 3){
         r_string <- paste0("plott[[",2:(D-1),"]]$value, ", collapse = "")
         r_string <- c("range(c(plott[[1]]$value,", r_string, paste0("plott[[",D,"]]$value))", collapse = ""))
+      }
+      
+      else if(D == 2){
+        r_string <- "range(c(plott[[1]]$value, plott[[2]]$value))"
+      }
+      
+      else if(D == 1){
+        r_string <- "range(plott[[1]]$value)"
+      }
 
       rng = eval(parse(text = r_string))
       
@@ -133,11 +143,11 @@ multiHeatmap <- function(crit,
                   
                   axis.title.x = element_blank(),
                   axis.title.y = element_blank(),
-                  axis.text.x = axis.labels.x,
+                  axis.text.x = axislabels.x,
                   axis.text.y = element_text(),
                   plot.title = titles_theme,
-                  axis.ticks.x = axis.ticks,
-                  axis.ticks.y = axis.ticks)
+                  axis.ticks.x = axisticks,
+                  axis.ticks.y = axisticks)
         }
         
         if(vd != 1){
@@ -152,11 +162,11 @@ multiHeatmap <- function(crit,
                   
                   axis.title.x = element_blank(),
                   axis.title.y = element_blank(),
-                  axis.text.x = axis.labels.x,
+                  axis.text.x = axislabels.x,
                   axis.text.y = element_blank(),
                   plot.title = titles_theme,
-                  axis.ticks.x = axis.ticks,
-                  axis.ticks.y = axis.ticks)
+                  axis.ticks.x = axisticks,
+                  axis.ticks.y = axisticks)
         }
         
       }
@@ -167,7 +177,7 @@ multiHeatmap <- function(crit,
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
         theme(legend.position = "right") + 
-        labs(fill = paste0(crit[cr]," (",f,")"))
+        labs(fill = paste0(crit[cr]," (",f,")"), x = "", y = "")
       
       myLegend <-g_legend(dumPlot)
       
@@ -176,15 +186,15 @@ multiHeatmap <- function(crit,
         rep_string <- c(paste0(rep("10,",D-1), collapse = ""),"10")
         rep_string <- paste0(rep_string, collapse = "")
         
-        h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"), right = m[",cr,"])", collapse = ""))
+        h_string <- c("grid.arrange(plotList[[1]],",h_string,paste0("plotList[[",D,"]], ncol = ",D,", widths = c(",rep_string,"))", collapse = ""))
       }
       
       else if(D == 2){
-        h_string <- paste0("grid.arrange(plotList[[1]], plotList[[2]], ncol = ",D,", widths = c(10,10), right = m[",cr,"])", collapse = "")
+        h_string <- paste0("grid.arrange(plotList[[1]], plotList[[2]], ncol = ",D,", widths = c(10,10))", collapse = "")
       }
       
       else if(D == 1){
-        h_string <- paste0("grid.arrange(plotList[[1]], ncol = ",D,", widths = c(10), right = m[",cr,"])", collapse = "")
+        h_string <- paste0("grid.arrange(plotList[[1]], ncol = ",D,", widths = c(10))", collapse = "")
       }
        
       myHeatmaps <- eval(parse(text = h_string))
@@ -194,7 +204,13 @@ multiHeatmap <- function(crit,
     
     names(heatmapList) <- by_vec
     
-    call <- paste0("heatmapList[[",1:(bound-1),"]],")
+    if(bound > 1){
+      call <- paste0("heatmapList[[",1:(bound-1),"]],")
+    }
+    
+    else if(bound == 1){
+      call = ""
+    }
     call <- c("grid.arrange(",call,paste0("heatmapList[[",bound,"]], nrow = ",bound,", bottom = 'proportion missing', left = 'gap width', top = m)"))
     
     plotWindow <- eval(parse(text = call))
@@ -209,27 +225,27 @@ multiHeatmap <- function(crit,
       
       if(cr == 1){
         titles <- paste0("'Dataset ",d,"'")
-        titles_theme <- element_text()
-        axis.labels.x <- element_blank()
-        axis.labels.y <- element_blank()
-        axis.text.y <- element_text()
-        axis.ticks <- element_blank()
+        titles_theme <- element_text(hjust = 0.5)
+        axislabels.x <- element_blank()
+        axislabels.y <- element_blank()
+        axistext.y <- element_text()
+        axisticks <- element_blank()
       }
       else if(cr == bound){
         titles <- rep("",D)
-        axis.labels.x <- element_text()
-        axis.labels.y <- element_text()
-        axis.ticks <- element_blank()
-        axis.text.y <- element_blank()
+        axislabels.x <- element_text()
+        axislabels.y <- element_text()
+        axisticks <- element_blank()
+        axistext.y <- element_blank()
         titles_theme <- element_blank()
       }
       else{
         titles <- rep("",D)
         titles_theme <- element_blank()
-        axis.labels.x <- element_blank()
-        axis.labels.y <- element_blank()
-        axis.text.y <- element_blank()
-        axis.ticks <- element_blank()
+        axislabels.x <- element_blank()
+        axislabels.y <- element_blank()
+        axistext.y <- element_blank()
+        axisticks <- element_blank()
       }
       
       plott <- list()
@@ -261,11 +277,11 @@ multiHeatmap <- function(crit,
                   
                   axis.title.x = element_blank(),
                   axis.title.y = element_blank(),
-                  axis.text.x = axis.labels.x,
+                  axis.text.x = axislabels.x,
                   axis.text.y = element_text(),
                   plot.title = titles_theme,
-                  axis.ticks.x = axis.ticks,
-                  axis.ticks.y = axis.ticks)
+                  axis.ticks.x = axisticks,
+                  axis.ticks.y = axisticks)
         }
         
         else if(vd != 1){
@@ -280,11 +296,11 @@ multiHeatmap <- function(crit,
                   
                   axis.title.x = element_blank(),
                   axis.title.y = element_blank(),
-                  axis.text.x = axis.labels.x,
+                  axis.text.x = axislabels.x,
                   axis.text.y = element_blank(),
                   plot.title = titles_theme,
-                  axis.ticks.x = axis.ticks,
-                  axis.ticks.y = axis.ticks)
+                  axis.ticks.x = axisticks,
+                  axis.ticks.y = axisticks)
         }
         
       }
@@ -294,8 +310,8 @@ multiHeatmap <- function(crit,
       dumPlot <- ggplot(plott[[1]], aes(as.factor(p), as.factor(g), fill = value)) + geom_tile() + 
         scale_fill_gradientn(colours = col, values = c(0,1),
                              limits = rng) +
-        theme(legend.position = "bottom") + 
-        labs(fill = paste0(crit," (",f,")"))
+        theme(legend.position = "bottom", legend.direction = "vertical") + 
+        labs(fill = paste0(crit," (",f,")"), x = "", y = "")
       
       myLegend <- g_legend(dumPlot)
       
@@ -320,7 +336,12 @@ multiHeatmap <- function(crit,
     
     names(heatmapList) <- by_vec
     
+    if(bound > 1){
     call <- paste0("heatmapList[[",1:(bound-1),"]],")
+    }
+    else if(bound == 1){
+      call = ""
+    }
     call <- c("grid.arrange(",call,paste0("heatmapList[[",bound,"]], nrow = ",bound,", bottom = 'proportion missing', left = 'gap width')"))
     
     plotWindow <- eval(parse(text = call))
