@@ -114,8 +114,10 @@ plotSurface <- function(d=1:length(agEval),
   
   ## Generating a list of surfaces 
   
-  prop_vec <- names(agEval[[1]]) # proportions
-  gap_vec <- names(agEval[[1]][[1]]) # gaps
+  prop_vec <- gsub(x = names(agEval[[1]]),"p", "") # proportions
+  
+  
+  gap_vec <- gsub(x = names(agEval[[1]][[1]]),"p", "") # gaps
   
   if(layer_type == "method"){
     
@@ -134,7 +136,7 @@ plotSurface <- function(d=1:length(agEval),
       title = "proportion missing"
     )
     
-    axz <- list(title = "value",
+    axz <- list(title = "f(p,g)",
                 nticks = 4)
     
     for(s in 1:C){
@@ -154,13 +156,13 @@ plotSurface <- function(d=1:length(agEval),
         plotList[[s]][[vd]] <-  eval(parse(text = paste('plot_ly(scene="',paste("scene",vd,sep=""),'") %>%',
                                                         "layout(xaxis = axx, yaxis = axy) %>%
                                                         layout(",paste("scene",vd,sep=""),"= list(
-                                                        xaxis = list(title = ''),
-                                                        yaxis = list(title = ''),
+                                                        xaxis = list(title = 'g'),
+                                                        yaxis = list(title = 'p'),
                                                         zaxis = axz
                                                         )) %>%",z,sep="")))
 
         plotList[[s]][[vd]] <- plotList[[s]][[vd]] %>%  
-          layout(title = paste0("\n Criterion = ", names(z_list[crit[s]])," (",f,")","\n Dataset = ",d[vd])) 
+          layout(title = paste0("\n f = ", names(z_list[crit[s]])," (",f,")","\n Dataset = ",d[vd])) 
         
         plotList[[s]][[vd]] <- hide_colorbar(plotList[[s]][[vd]])
         
@@ -189,7 +191,7 @@ plotSurface <- function(d=1:length(agEval),
       title = "proportion missing"
     )
     
-    axz <- list(nticks = 4, title = "value")
+    axz <- list(nticks = 4, title = "f(p,g)")
     
     
     for(s in 1:C){
@@ -209,13 +211,13 @@ plotSurface <- function(d=1:length(agEval),
         plotList[[s]][[vm]] <- eval(parse(text = paste('plot_ly(scene="',paste("scene",vm,sep=""),'") %>%',
                                                        "layout(xaxis = axx, yaxis = axy) %>%
                                                        layout(",paste("scene",vm,sep=""),"= list(
-                                                       xaxis = list(title = ''),
-                                                       yaxis = list(title = ''),
+                                                       xaxis = list(title = 'g'),
+                                                       yaxis = list(title = 'p'),
                                                        zaxis = axz
                                                        )) %>%",
                                                          z,sep="")))
         
-        plotList[[s]][[vm]] <- plotList[[s]][[vm]] %>%  layout(title = paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Method = ",method_list_names[vm], sep = ""))
+        plotList[[s]][[vm]] <- plotList[[s]][[vm]] %>%  layout(title = paste("\n f = ",names(z_list[crit[s]])," (",f,")","\n Method = ",method_list_names[vm], sep = ""))
         
         plotList[[s]][[vm]] <- hide_colorbar(plotList[[s]][[vm]])
         }
