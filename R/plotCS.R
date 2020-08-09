@@ -28,8 +28,8 @@ plotCS <- function(d = 1:length(agEval),
                    layer_type = "method", 
                    f = "median", 
                    cross_section = "p",
-                   highlight = "HWI", highlight_color = "#EE5C42",
-                   colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
+                   highlight = NULL, highlight_color = "#FF0000",
+                   colors = c("#FF8633","#FFAF33","#FFD133","#FFEC33","#D7FF33","#96FF33")){
   
   ## LOGICAL CHECKS ############
   
@@ -46,22 +46,33 @@ plotCS <- function(d = 1:length(agEval),
   
   if(class(agEval) != "agEvaluate") stop("'agEval' object must be of class 'agEvaluate'. Please use agEvaluate().")
   
-  if(layer_type == "method" & !highlight %in% m) stop(paste0(c("'highlight' must be an element of 'm'. Choose one of: '", paste0(m, collapse = "', '"),"'."), collapse = ""))
-  if(layer_type == "dataset" & !highlight %in% d) stop(paste0(c("'highlight' must be an element of 'd'. Choose one of: '", paste0(d, collapse = "', '"),"'."), collapse = ""))
-  
+
   if(length(crit) != 1) stop("'crit' must contain only a single character element.")
   if(length(f) != 1) stop("'f' must contain only a single character element.")
   if(length(layer_type) != 1) stop("'layer_type' must contain only a single character element.")
   if(length(cross_section) != 1) stop("'cross_section' must contain only a single character element.")
-  if(length(highlight) != 1) stop("'highlight' must contain only a single character element.")
-  if(length(highlight_color) != 1) stop("'highlight_color' must contain only a single character element.")
   
-  if(length(colors) < 2) stop("'colors' must contain at least two colors (each in HTML format: '#xxxxxx')")
+  if(!is.null(highlight)){
+    if(length(highlight) != 1) stop("'highlight' must contain only a single character element.")
+    if(length(highlight_color) != 1) stop("'highlight_color' must contain only a single character element.")
+    
+    if(layer_type == "dataset" & !is.numeric(highlight)) stop("If 'layer_type' = 'dataset', then 'highlight' must be of class 'numeric'.")
+    if(layer_type == "method" & !is.character(highlight)) stop("If 'layer_type' = 'method', then 'highlight' must be of class 'character'.")
+    
+    if(layer_type == "method" & !highlight %in% m) stop(paste0(c("'highlight' must be an element of 'm'. Choose one of: '", paste0(m, collapse = "', '"),"'."), collapse = ""))
+    if(layer_type == "dataset" & !highlight %in% d) stop(paste0(c("'highlight' must be an element of 'd'. Choose one of: '", paste0(d, collapse = "', '"),"'."), collapse = ""))
+  }
   
-  if(layer_type == "dataset" & !is.numeric(highlight)) stop("If 'layer_type' = 'dataset', then 'highlight' must be of class 'numeric'.")
-  if(layer_type == "method" & !is.character(highlight)) stop("If 'layer_type' = 'method', then 'highlight' must be of class 'character'.")
+  if(layer_type == "method" & length(m) > 1 & length(colors) < length(m)) warning(paste0("'colors' should contain at least ", length(m), " elements (each in HTML format: '#xxxxxx') if layering more than one method."))
+  if(layer_type == "dataset" & length(d) > 1 & length(colors) < length(d)) warning(paste0("'colors' should contain at least ", length(d), " elements (each in HTML format: '#xxxxxx') if layering more than one dataset."))
+  
+
   
   ##################
+
+  
+  
+  ###
 
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
@@ -90,17 +101,23 @@ plotCS <- function(d = 1:length(agEval),
     
     colorListMatch <- colorList[1:M]
     names(colorListMatch) <- method_list_names
-    colorListMatch[highlight] <- highlight_color
+    
+    if(!is.null(highlight)){
+      colorListMatch[[highlight]] <- highlight_color
+    }
+    
 
     if(cross_section == "p"){
     axx <- as.numeric(gsub("p","", rownames(z_list[[1]][[1]][[1]]), fixed = TRUE)) #prop_vec
     data <- z_list
     axxTitle <- "proportion missing"
+    ayyTitle <- "f(p)"
     fun <- function(x){return(x)} 
     }
     else if(cross_section == "g"){
     axx <- as.numeric(gsub("g","", colnames(z_list[[1]][[1]][[1]]), fixed = TRUE)) #gap_vec
     axxTitle <- "gap width" 
+    ayyTitle <- "f(g)"
     data <- z_list
     fun <- function(x){return(t(x))} 
 
@@ -154,8 +171,8 @@ plotCS <- function(d = 1:length(agEval),
                                                         z)))
         
         plotList[[s]][[vd]] <- plotList[[s]][[vd]] +  
-                                ggtitle(paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Dataset = ",d[vd], sep = "")) + 
-                                xlab(axxTitle) + ylab("value") + 
+                                ggtitle(paste("\n f = ",names(z_list[crit[s]])," (",f,")","\n Dataset = ",d[vd], sep = "")) + 
+                                xlab(axxTitle) + ylab(ayyTitle) + 
                                 scale_color_manual("", breaks = names(data[[crit[s]]]), values = colorListMatch, labels = names(data[[crit[s]]]))  +
                                 theme(panel.grid.major = element_blank(),
                                       panel.grid.minor = element_blank())
@@ -173,7 +190,11 @@ plotCS <- function(d = 1:length(agEval),
     
     colorListMatch <- colorList[1:D]
     names(colorListMatch) <- data_list_names
-    colorListMatch[which(grepl(highlight,data_list_names))] <- highlight_color
+    
+    if(!is.null(highlight)){
+      colorListMatch[which(grepl(highlight,data_list_names))] <- highlight_color
+    }
+
     
     if(cross_section == "p"){
       axx <- as.numeric(gsub("p","",rownames(z_list[[1]][[1]][[1]]))) #prop_vec
@@ -229,8 +250,8 @@ plotCS <- function(d = 1:length(agEval),
                                                         z)))
         
         plotList[[s]][[vm]] <- plotList[[s]][[vm]] +  
-          ggtitle(paste("\n Criterion = ",names(z_list[crit[s]])," (",f,")","\n Method = ",method_list_names[vm], sep = "")) + 
-          xlab(axxTitle) + ylab("value") + 
+          ggtitle(paste("\n f = ",names(z_list[crit[s]])," (",f,")","\n Method = ",method_list_names[vm], sep = "")) + 
+          xlab(axxTitle) + ylab(ayyTitle) + 
           scale_color_manual("", breaks = names(data[[crit[s]]][[m[vm]]]), 
                                   values = colorListMatch, labels = names(data[[crit[s]]][[m[vm]]])) + 
           theme(panel.grid.major = element_blank(),
