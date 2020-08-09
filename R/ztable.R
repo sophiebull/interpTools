@@ -8,9 +8,11 @@
 #' @param m \code{character}; A single element describing the interpolation method of interest
 #' @param sdist \code{logical}; \code{TRUE} returns a table of the sampling distribution \code{(Q2.5, median, Q97.5)} of the chosen metric at every combination of \code{(p,g)}. \code{FALSE} returns a table of values corresponding to \code{f(p,g)}, where each data point is the chosen sample statistic at each \code{(p,g)}.
 #' @param f \code{character}; If \code{sdist = F}, the sample statistic of interest defining \code{f(p,g)}. Possible choices are listed in \code{?agEvaluate}.
+#' @param LaTeX \code{logical}; \code{TRUE} returns a table in LaTeX format. \code{FALSE} returns a table in raw matrix format.
 
-ztable <- function(agEval, d = 1, crit, m, sdist = F, f = NULL){
+ztable <- function(agEval, d = 1, crit, m, sdist = F, f = NULL, LaTeX = T){
   
+  if(!is.logical(LaTeX)) stop("Object 'LaTeX' must either be TRUE or FALSE.  TRUE returns a table in LaTeX format, FALSE returns the raw matrix.")
   if(!is.logical(sdist)) stop("Object 'sdist' must either be TRUE or FALSE. TRUE returns the sampling distribution, FALSE returns the raw data according to 'crit' and 'f'.")
   
   
@@ -55,6 +57,8 @@ ztable <- function(agEval, d = 1, crit, m, sdist = F, f = NULL){
     
     tableMat <- eval(parse(text = string))
     
+    raw <- tableMat
+    
     bold_row <- c(2,5,8)
   
     for(i in 1:length(bold_row)){
@@ -73,9 +77,17 @@ ztable <- function(agEval, d = 1, crit, m, sdist = F, f = NULL){
     
     zlist_f <-  round(zlist[[f]][[crit]][[m]][[d]],digits = 2)
     
+    raw <- zlist_f
+    
     call <- "print(xtable(zlist_f), include.rownames = T,  sanitize.text.function = function(x) x)"
 
   }
   
-  return(eval(parse(text = call)))
+  if(LaTeX){
+    return(eval(parse(text = call)))
+  }
+  
+  else if(!LaTeX){
+    return(raw)
+  }
 }
