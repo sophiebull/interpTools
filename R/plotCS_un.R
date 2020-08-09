@@ -7,8 +7,8 @@
 #' Plots are arranged vertically, where each represents performance plotted against each fixed value in the variable not specified in \code{cross_section}.
 #' \itemize{
 #' \item The middle line is the \strong{median} value \cr
-#' \item The upper ribbon boundary is the \strong{maximum} value \cr
-#' \item The lower ribbon boundary is the \strong{minimum} value \cr
+#' \item The upper ribbon boundary is the \strong{97.5% quantile} value \cr
+#' \item The lower ribbon boundary is the \strong{2.5% quantile} value \cr
 #' }
 #'
 #' @param agEval \code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})
@@ -25,12 +25,12 @@
 plotCS_un <- function( agEval, 
                        cross_section = "p", 
                        crit, 
-                       d, 
+                       d = 1:length(agEval), 
                        m = names(agEval[[1]][[1]][[1]]), 
                        f = "median", 
                        layer_type = "method", 
                        highlight = "HWI", highlight_color = "#FA4032",
-                       colors = c("#F9E0AA","#F7C65B","#FAAF08","#FA812F","#FA4032","#F92111")){
+                       colors = c("#FF8633","#FFAF33","#FFD133","#FFEC33","#D7FF33","#96FF33")){
   
   ## LOGICAL CHECKS ############
   
@@ -46,9 +46,18 @@ plotCS_un <- function( agEval,
   if(!crit %in% rownames(agEval[[1]][[1]][[1]][[1]])) stop(paste0("Criterion '",crit,"' must be one of ", paste(rownames(agEval[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
   
   if(class(agEval) != "agEvaluate") stop("'agEval' object must be of class 'agEvaluate'. Please use agEvaluate().")
-  
-  if(layer_type == "method" & !highlight %in% m) stop(paste0(c("'highlight' must be an element of 'm'. Choose one of: '", paste0(m, collapse = "', '"),"'."), collapse = ""))
-  if(layer_type == "dataset" & !highlight %in% d) stop(paste0(c("'highlight' must be an element of 'd'. Choose one of: '", paste0(d, collapse = "', '"),"'."), collapse = ""))
+
+  if(!is.null(highlight)){
+    if(length(highlight) != 1) stop("'highlight' must contain only a single character element.")
+    if(length(highlight_color) != 1) stop("'highlight_color' must contain only a single character element.")
+    
+    if(layer_type == "method" & !highlight %in% m) stop(paste0(c("'highlight' must be an element of 'm'. Choose one of: '", paste0(m, collapse = "', '"),"'."), collapse = ""))
+    if(layer_type == "dataset" & !highlight %in% d) stop(paste0(c("'highlight' must be an element of 'd'. Choose one of: '", paste0(d, collapse = "', '"),"'."), collapse = ""))
+    
+    if(layer_type == "dataset" & !is.numeric(highlight)) stop("If 'layer_type' = 'dataset', then 'highlight' must be of class 'numeric'.")
+    if(layer_type == "method" & !is.character(highlight)) stop("If 'layer_type' = 'method', then 'highlight' must be of class 'character'.")
+    
+  }
   
   if(layer_type == "method" & length(d) != 1) stop("Sorry, only one dataset can be viewed at a time.")
   if(layer_type == "dataset" & length(m) != 1) stop("Sorry, only one method can be viewed at a time.")
@@ -60,15 +69,18 @@ plotCS_un <- function( agEval,
   if(length(f) != 1) stop("'f' must contain only a single character element.")
   if(length(layer_type) != 1) stop("'layer_type' must contain only a single character element.")
   if(length(cross_section) != 1) stop("'cross_section' must contain only a single character element.")
-  if(length(highlight) != 1) stop("'highlight' must contain only a single character element.")
-  if(length(highlight_color) != 1) stop("'highlight_color' must contain only a single character element.")
   
-  if(length(colors) < 2) stop("'colors' must contain at least two colors (each in HTML format: '#xxxxxx')")
+  if(layer_type == "method" & length(m) > 1 & length(colors) < length(m)) warning(paste0("'colors' should contain at least ", length(m), " elements (each in HTML format: '#xxxxxx') if layering more than one method."))
+  if(layer_type == "dataset" & length(d) > 1 & length(colors) < length(d)) warning(paste0("'colors' should contain at least ", length(d), " elements (each in HTML format: '#xxxxxx') if layering more than one dataset."))
   
-  if(layer_type == "dataset" & !is.numeric(highlight)) stop("If 'layer_type' = 'dataset', then 'highlight' must be of class 'numeric'.")
-  if(layer_type == "method" & !is.character(highlight)) stop("If 'layer_type' = 'method', then 'highlight' must be of class 'character'.")
+
   
   ##################
+
+  
+
+  ######
+  
   
   P <- length(agEval[[1]])
   G <- length(agEval[[1]][[1]])
@@ -83,7 +95,7 @@ plotCS_un <- function( agEval,
     bound = G
     xaxisTitle <- "proportion missing"
     yaxisTitle <- "gap width"
-    y2axisTitle <- "value"
+    y2axisTitle <- "f(p)"
     names <- gap_vec_names
     unfixedNames <- prop_vec_names
     #fixedCol <- paste0("sub('\\(', '', substr(names(theTab)[",i,"], 1, regexpr('\\,', names(theTab)[",i,"])-1))")
@@ -93,7 +105,7 @@ plotCS_un <- function( agEval,
     bound = P
     xaxisTitle <- "gap width"
     yaxisTitle <- "proportion missing"
-    y2axisTitle <- "value"
+    y2axisTitle <- "f(g)"
     names <- prop_vec_names
     unfixedNames <- gap_vec_names
     #fixedCol <- paste0("sub('\\)','', gsub('.*,','',names(theTab)[",i,"]))")
@@ -111,7 +123,9 @@ plotCS_un <- function( agEval,
     names(colorListMatch) <- data_vec_names
   }
   
+  if(!is.null(highlight)){
   colorListMatch[highlight] <- highlight_color
+  }
   
   theTabList <- list()
   
@@ -334,7 +348,7 @@ plotCS_un <- function( agEval,
     
     plotWindow <- grid.arrange(plotWindow, 
                                left = textGrob(yaxisTitle, rot = 90, vjust = 0.5, gp = gpar(fontsize = 12)),
-                               top = textGrob(paste0(crit," ('",f ,"'), Dataset ",d), gp=gpar(fontsize=15, lineheight = 3)),
+                               top = textGrob(paste0("f = ",crit," (",f ,") \n Dataset ",d), gp=gpar(fontsize=12, lineheight = 1)),
                                bottom = textGrob(xaxisTitle, gp = gpar(fontsize = 12, lineheight = 3)),
                                right = textGrob(y2axisTitle, rot = 270, vjust = 0.5, gp = gpar(fontsize = 12)))
   }
@@ -349,7 +363,7 @@ plotCS_un <- function( agEval,
     
     plotWindow <- grid.arrange(plotWindow, 
                                left = textGrob(yaxisTitle, rot = 90, vjust = 0.5, gp = gpar(fontsize = 12)),
-                               top = textGrob(paste0(crit," ('",f ,"'), ",m), gp=gpar(fontsize=15, lineheight = 3)),
+                               top = textGrob(paste0("f = ", crit," (",f ,") \n ",m), gp=gpar(fontsize=12, lineheight = 1)),
                                bottom = textGrob(xaxisTitle, gp = gpar(fontsize = 12, lineheight = 3)),
                                right = textGrob(y2axisTitle, rot = 270, vjust = 0.5, gp = gpar(fontsize = 12)))
   }
