@@ -4,10 +4,10 @@
 \alias{simWt}
 \title{Simulate W_t}
 \usage{
-simWt(n = 1000, p = 0, q = 0, var = 1)
+simWt(N = 1000, p = 0, q = 0, var = 1)
 }
 \arguments{
-\item{n}{The length of the output series}
+\item{N}{The length of the output series}
 
 \item{p}{The AR order}
 

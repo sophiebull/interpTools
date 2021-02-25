@@ -4,10 +4,10 @@
 \alias{simTt}
 \title{Simulate T_t}
 \usage{
-simTt(n = 1000, numFreq = 20, bandwidth = NULL)
+simTt(N = 1000, numFreq = 20, bandwidth = NULL)
 }
 \arguments{
-\item{n}{The length of the output series}
+\item{N}{The length of the output series}
 
 \item{numFreq}{The number of sinusoids to generate}
 

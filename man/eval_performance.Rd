@@ -23,7 +23,7 @@ The following is a description of the list of performance metrics that are gener
      ...... \tab ........... \tab ......... \cr
      1 \tab  pearson_r \tab max  \cr
      2 \tab  r_squared \tab max  \cr
-     3 \tab  abs_differences \tab min  \cr
+     3 \tab  AD \tab min  \cr
      4 \tab  MBE \tab min  \cr
      5 \tab  ME \tab min  \cr
      6 \tab  MAE \tab min  \cr

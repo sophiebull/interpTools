@@ -4,10 +4,10 @@
 \alias{agEvaluate}
 \title{Aggregate the Performance Matrices of Multiple Interpolations}
 \usage{
-agEvaluate(pmats)
+agEvaluate(pf)
 }
 \arguments{
-\item{pmats}{\code{list}; A nested list of dimension D x M x P x G x K (result of \code{performance.R}), where the terminal node is a performance matrix.}
+\item{pf}{\code{list}; A nested list of dimension D x M x P x G x K (result of \code{performance.R}), where the terminal node is a performance matrix.}
 }
 \description{
 Function to aggregate the set of performance matrices, by criterion, using sample statistics of the sampling distribution across K. Resulting object is of class \code{'agEvaluate'}.

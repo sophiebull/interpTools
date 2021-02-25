@@ -4,11 +4,18 @@
 \alias{plotCS}
 \title{Plot Collapsed Cross-sections by 'Gap Width' or 'Proportion Missing'}
 \usage{
-plotCS(d = 1:length(agEval), m = names(agEval[[1]][[1]][[1]]), crit,
-  agEval, layer_type = "method", f = "median", cross_section = "p",
-  highlight = "HWI", highlight_color = "#EE5C42",
-  colors = c("#F9E0AA", "#F7C65B", "#FAAF08", "#FA812F", "#FA4032",
-  "#F92111"))
+plotCS(
+  d = 1:length(agEval),
+  m = names(agEval[[1]][[1]][[1]]),
+  crit,
+  agEval,
+  layer_type = "method",
+  f = "median",
+  cross_section = "p",
+  highlight = NULL,
+  highlight_color = "#FF0000",
+  colors = c("#FF8633", "#FFAF33", "#FFD133", "#FFEC33", "#D7FF33", "#96FF33")
+)
 }
 \arguments{
 \item{d}{\code{numeric}; A vector to indicate datasets of interest}

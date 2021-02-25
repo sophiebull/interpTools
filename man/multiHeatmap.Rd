@@ -4,9 +4,15 @@
 \alias{multiHeatmap}
 \title{Arrange Multiple Heatmaps on a Grid}
 \usage{
-multiHeatmap(crit, agEval, m, by = "crit", f = "median", d = 1:5,
-  colors = c("#F9E0AA", "#F7C65B", "#FAAF08", "#FA812F", "#FA4032",
-  "#F92111"))
+multiHeatmap(
+  crit,
+  agEval,
+  m,
+  by = "crit",
+  f = "median",
+  d = 1:length(agEval),
+  colors = c("#F9E0AA", "#F7C65B", "#FAAF08", "#FA812F", "#FA4032", "#F92111")
+)
 }
 \arguments{
 \item{crit}{\code{character}; A vector describing the performance metrics of interest}

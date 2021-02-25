@@ -2,33 +2,30 @@
 % Please edit documentation in R/heatmapGrid.R
 \name{heatmapGrid}
 \alias{heatmapGrid}
-\title{Generate Heatmap Objects}
+\title{Generate Heatmaps of Performance}
 \usage{
-heatmapGrid(agEval, f = "median", crit, m, d, type = "z",
-  output = "graphic", col = c("#EAECEE", "#D5D8DC", "#ABB2B9",
-  "#808B96", "#566573", "#2C3E50", "#EE5C42"))
+heatmapGrid(
+  agEval,
+  f = "median",
+  crit,
+  m,
+  d = 1:length(agEval),
+  colors = c("#F9E0AA", "#F7C65B", "#FAAF08", "#FA812F", "#FA4032", "#F92111")
+)
 }
 \arguments{
-\item{agEval}{A list object of class "\code{agEvaluate}" (result of \code{agEvaluate()} of aggregated performance metrics}
+\item{agEval}{\code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})}
 
-\item{f}{"\code{median}" (default): Which statistic should be used that will be represented in the heatmap}
+\item{f}{\code{character}; The statistic of interest that will be depicted by the heatmap. Possible choices are listed in \code{?agEvaluate}.}
 
-\item{crit}{numeric; a vector of performance criteria}
+\item{crit}{\code{character}; A single element describing the performance metric of interest}
 
-\item{m}{character; a vector of interpolation methods}
+\item{m}{\code{character}; A single element describing the interpolation methods of interest}
 
-\item{d}{numeric; a vector describing the index positions of desired datasets (corresponding to \code{agEval})}
+\item{d}{\code{numeric}; A vector to indicate datasets of interest}
 
-\item{type}{"\code{z}" (default) or "\code{gradient}"; Generate heatmaps of the matrix of PxG values of the performance metrics\cr 
-in \code{crit} (for \code{type} ='\code{z}'), or the values of the slopes between adjacent values in the performance matrices \cr
-(for \code{type} = '\code{gradient}')}
-
-\item{output}{"\code{graphic}" (default) or "\code{matrix}"; If \code{type = "z"}, \code{output} is coerced to "\code{graphic}". Otherwise, if \cr
-\code{type = "gradient"} and \code{output = "matrix"}, the function will return the matrix of slopes arranged in a grid corresponding to each\cr
-adjacent point in the performance matrix.}
-
-\item{col}{character; A vector of colours to use for the heatmap graphic.}
+\item{colors}{\code{character}; A vector of the desired color palette, with entries in HTML format (\code{"#xxxxxx"})}
 }
 \description{
-A function to generate heatmaps to visualize results from objects of class "\code{agEvaluate}" (from \code{agEvaluate()}). \cr
+A function to generate a set of heatmaps depicting the performances of particular sets of interpolations. This graphic can be considered as a series of 'compressed' surface plots, arranged by dataset.\cr
 }

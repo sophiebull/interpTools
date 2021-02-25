@@ -4,10 +4,10 @@
 \alias{simMt}
 \title{Simulate M_t}
 \usage{
-simMt(n = 1000, numTrend = 0, trendType = "polynomial")
+simMt(N = 1000, numTrend = 0, trendType = "polynomial")
 }
 \arguments{
-\item{n}{The length of the output series}
+\item{N}{The length of the output series}
 
 \item{numTrend}{The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.}
 

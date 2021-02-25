@@ -4,14 +4,24 @@
 \alias{simXt}
 \title{Simulate X_t}
 \usage{
-simXt(D, n = 1000, vary = "all", numTrend = 0,
-  trendType = "polynomial", numFreq = 20, bandwidth = NULL, p = 0,
-  q = 0, fix, snr = 1.5)
+simXt(
+  D,
+  N = 1000,
+  vary = "all",
+  numTrend = 0,
+  trendType = "polynomial",
+  numFreq = 20,
+  bandwidth = NULL,
+  p = 0,
+  q = 0,
+  fix,
+  snr = 1.5
+)
 }
 \arguments{
 \item{D}{The number of datasets to generate.}
 
-\item{n}{The desired length of each complete time series.}
+\item{N}{The desired length of each complete time series.}
 
 \item{vary}{"Mt", "Tt", "Wt". A character string specifying which component of Xt to vary. Other components are held constant.}
 
@@ -41,22 +51,22 @@ For vary = "Wt", order variables 'p' or 'q' are subject to vary depending on the
 # Initializing basic parameters
 D = 5
 n=1000
-t=0:(n-1)
+t=0:(N-1)
 
 # Vary Mt
-simData <- simXt(D=D, n=n, vary = "Mt", bandwidth = 3, numFreq = 30, 
+simData <- simXt(D=D, N=N, vary = "Mt", bandwidth = 3, numFreq = 30, 
                  trendType = "polynomial", snr = 1.5)
 
 # Vary Tt
-simData <- simXt(D=D, n=n, vary = "Tt", bandwidth = 3, numTrend = 0, 
+simData <- simXt(D=D, N=N, vary = "Tt", bandwidth = 3, numTrend = 0, 
                  trendType = "polynomial", snr = 1.5)
 
 # Vary Wt, p fixed
-simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
+simData <- simXt(D=D, N=N, vary = "Wt", bandwidth = 3, numFreq = 20, 
                  numTrend = 0, trendType = "polynomial", p = 0, fix = "p", snr = 1.5)
 
 # Vary Wt, q fixed
-simData <- simXt(D=D, n=n, vary = "Wt", bandwidth = 3, numFreq = 20, 
+simData <- simXt(D=D, N=N, vary = "Wt", bandwidth = 3, numFreq = 20, 
                  numTrend = 10, trendType = "polynomial", q = 0, fix = "q", snr = 1.5)
 
 # Creating list object for one of the above variations

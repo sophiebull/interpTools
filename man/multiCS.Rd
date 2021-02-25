@@ -4,11 +4,18 @@
 \alias{multiCS}
 \title{Arrange Multiple Collapsed Cross-section Plots on a Grid}
 \usage{
-multiCS(agEval, d = 1:length(agEval), m = names(agEval[[1]][[1]][[1]]),
-  crit, layer_type = "method", f = "median", cross_section = "p",
-  highlight = "HWI", highlight_color = "#EE5C42",
-  colors = c("#F9E0AA", "#F7C65B", "#FAAF08", "#FA812F", "#FA4032",
-  "#F92111"))
+multiCS(
+  agEval,
+  d = 1:length(agEval),
+  m = names(agEval[[1]][[1]][[1]]),
+  crit,
+  layer_type = "method",
+  f = "median",
+  cross_section = "p",
+  highlight = "HWI",
+  highlight_color = "#EE5C42",
+  colors = c("#F9E0AA", "#F7C65B", "#FAAF08", "#FA812F", "#FA4032", "#F92111")
+)
 }
 \arguments{
 \item{agEval}{\code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})}

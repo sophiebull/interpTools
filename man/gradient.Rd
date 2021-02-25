@@ -4,8 +4,13 @@
 \alias{gradient}
 \title{Approximate the Gradient}
 \usage{
-gradient(d = 1:length(agEval), m = names(agEval[[1]][[1]][[1]]), crit,
-  agEval, f = "median")
+gradient(
+  d = 1:length(agEval),
+  m = names(agEval[[1]][[1]][[1]]),
+  crit,
+  agEval,
+  f = "median"
+)
 }
 \arguments{
 \item{d}{A vector of the indexes of the datasets of interest}

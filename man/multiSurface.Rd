@@ -4,11 +4,17 @@
 \alias{multiSurface}
 \title{Arrange Multiple Surface Plots on a Grid}
 \usage{
-multiSurface(d = 1:length(agEval), m = names(agEval[[1]][[1]][[1]]),
-  crit, agEval, layer_type = "method", f = "median",
-  highlight = "HWI", highlight_color = "#FA4032",
-  colors = c("#F9E0AA", "#F7C65B", "#FAAF08", "#FA812F", "#FA4032",
-  "#F92111"))
+multiSurface(
+  d = 1:length(agEval),
+  m = names(agEval[[1]][[1]][[1]]),
+  crit,
+  agEval,
+  layer_type = "method",
+  f = "median",
+  highlight = "HWI",
+  highlight_color = "#FA4032",
+  colors = c("#F9E0AA", "#F7C65B", "#FAAF08", "#FA812F", "#FA4032", "#F92111")
+)
 }
 \arguments{
 \item{d}{\code{numeric}; A vector to indicate datasets of interest}

@@ -4,16 +4,17 @@
 \alias{performance}
 \title{Evaluate Interpolation Performance Across Multiple Time Series}
 \usage{
-performance(OriginalData, IntData, GappyData)
+performance(OriginalList, IntList, GappyList)
 }
 \arguments{
-\item{OriginalData}{\code{list}; A list object of dimension D x N of original (complete) time series}
+\item{OriginalList}{\code{list}; A list object of dimension D x N of original (complete) time series}
 
-\item{IntData}{\code{list}; A list object of dimension D x M x P x G x K x N of interpolated time series (output of parInterpolate.R)}
+\item{IntList}{\code{list}; A list object of dimension D x M x P x G x K x N of interpolated time series (output of parInterpolate.R)}
 
-\item{GappyData}{\code{list}; A list object of dimension D x P x G x K x N of the gappy original time series (output of simulateGaps.R)}
+\item{GappyList}{\code{list}; A list object of dimension D x P x G x K x N of the gappy original time series (output of simulateGaps.R)}
 }
 \description{
 Function to calculate the performance metrics between lists of original and interpolated series. \cr \cr
-See \code{?eval_performance} and additional documentation provided in this package (\code{"~/metric_definitions.pdf/"}) for a full list and description of the the performance criteria.
+See \code{?eval_performance} and additional documentation provided in this package (\code{"~/metric_definitions.pdf/"}) for a full list and description of the the performance criteria.\cr
+Resulting object is of class '\code{pf}'.
 }

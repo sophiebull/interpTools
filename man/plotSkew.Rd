@@ -4,8 +4,13 @@
 \alias{plotSkew}
 \title{Aggregate and plot the skewness statistics over all simulations}
 \usage{
-plotSkew(agEval, cptwise = F, symmetric = NULL, output = "plots",
-  crit = rownames(agEval[[1]][[1]][[1]][[1]]))
+plotSkew(
+  agEval,
+  cptwise = F,
+  symmetric = NULL,
+  output = "plots",
+  crit = rownames(agEval[[1]][[1]][[1]][[1]])
+)
 }
 \arguments{
 \item{agEval}{A list object (result of agEval.R) of aggregated performance metrics}

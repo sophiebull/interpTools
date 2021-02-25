@@ -4,9 +4,17 @@
 \alias{CStable}
 \title{Display Performance Criteria Across Method}
 \usage{
-CStable(d = 1, agEval, m = names(agEval[[1]][[1]][[1]]),
-  crit = "MSE", f = "median", cross_section = "g",
-  layer_type = "method", fixedIndex = NULL, collapse = T)
+CStable(
+  d = 1,
+  agEval,
+  m = names(agEval[[1]][[1]][[1]]),
+  crit = "MSE",
+  f = "median",
+  cross_section = "g",
+  layer_type = "method",
+  fixedIndex = NULL,
+  collapse = T
+)
 }
 \arguments{
 \item{d}{An integer that is the index of the dataset of interest}

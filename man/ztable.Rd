@@ -4,7 +4,7 @@
 \alias{ztable}
 \title{Create a Table of Values (LaTeX)}
 \usage{
-ztable(agEval, d, crit, m, sdist = T, f = NULL)
+ztable(agEval, d = 1, crit, m, sdist = F, f = NULL, LaTeX = T)
 }
 \arguments{
 \item{agEval}{\code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})}
@@ -18,6 +18,8 @@ ztable(agEval, d, crit, m, sdist = T, f = NULL)
 \item{sdist}{\code{logical}; \code{TRUE} returns a table of the sampling distribution \code{(Q2.5, median, Q97.5)} of the chosen metric at every combination of \code{(p,g)}. \code{FALSE} returns a table of values corresponding to \code{f(p,g)}, where each data point is the chosen sample statistic at each \code{(p,g)}.}
 
 \item{f}{\code{character}; If \code{sdist = F}, the sample statistic of interest defining \code{f(p,g)}. Possible choices are listed in \code{?agEvaluate}.}
+
+\item{LaTeX}{\code{logical}; \code{TRUE} returns a table in LaTeX format. \code{FALSE} returns a table in raw matrix format.}
 }
 \description{
 A function to produce tables of data compatible with LaTeX. \cr

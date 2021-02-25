@@ -4,8 +4,7 @@
 \alias{plotXt}
 \title{Plot Each Component of Xt}
 \usage{
-plotXt(d, simData, cptwise = T, axisLabels = F, plot.title = T,
-  return = NULL)
+plotXt(d, simData, cptwise = T, axisLabels = F, plot.title = T, return = NULL)
 }
 \arguments{
 \item{d}{\code{numeric}; The index of the original time series to show}
