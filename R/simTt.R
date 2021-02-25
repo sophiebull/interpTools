@@ -93,6 +93,7 @@ simTt <- function(N=1000, numFreq = 20, bandwidth = NULL, b = NULL, w = NULL){
     }
     
     else if(is.null(bandwidth)){ # unspecified
+      warning("bandwidth not specified- frequencies will be selected randomly from Uniform(a=0,b=1);")
       w <- runif(numFreq, fourierFreq, pi) 
     }
     warning(c("Sinusoid period(s) = ", paste0(round(w,3), sep = " ")))
@@ -107,6 +108,6 @@ simTt <- function(N=1000, numFreq = 20, bandwidth = NULL, b = NULL, w = NULL){
   Tt_list$fn <- Tt_fn
   Tt_list$value <- Tt
   Tt_list$freq <- w/(2*pi)
-  Tt_list$bandwidth <- bandwidth
+  Tt_list$bandwidth <- 10^(-bandwidth)
   return(Tt_list)
 }
