@@ -1,10 +1,10 @@
 #' Simulate W_t
 #' 
 #' Function to simulate W_t: the noise component of X_t. Defaults to white noise. 
-#' @param N The length of the output series 
-#' @param p The AR order
-#' @param q The MA order
-#' @param var The variance of the stochastic process
+#' @param N \code{integer}; The length of the output series 
+#' @param p \code{integer}; The AR order
+#' @param q \code{integer}; The MA order
+#' @param var \code{numeric}; The variance of the stochastic process
 
 simWt <- function(N = 1000, p = 0, q = 0, var = 1){
   
