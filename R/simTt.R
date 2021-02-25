@@ -108,6 +108,6 @@ simTt <- function(N=1000, numFreq = 20, bandwidth = NULL, b = NULL, w = NULL){
   Tt_list$fn <- Tt_fn
   Tt_list$value <- Tt
   Tt_list$freq <- w/(2*pi)
-  Tt_list$bandwidth <- 10^(-bandwidth)
+  Tt_list$bandwidth <- bandwidth
   return(Tt_list)
 }
