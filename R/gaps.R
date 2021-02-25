@@ -1,9 +1,9 @@
 #' Generate Gaps in a Vector
 #' 
-#' Function to generate gaps of a specified length constrained by proportion of missingness. Meant to be paired with simulateGaps.R
-#' @param x The complete vector from which to remove values
-#' @param prop_missing Proportion of observations to remove, P
-#' @param gap_width Length of gap (how many successive observations to remove), G
+#' Subroutine of \code{simulateGaps()}. Function to generate gaps of a specified length constrained by proportion of missingness.
+#' @param x \code{numeric}; The complete time series vector from which to remove values
+#' @param prop_missing \code{numeric}; Proportion of observations to remove, *P*
+#' @param gap_width \code{integer}; Length of gap (how many successive observations to remove), *G*
 #' @examples  
 #' n = 100
 #' 
@@ -14,11 +14,13 @@
 #' 
 #' # will generate 30 missing points, with <15 holes
 #' 
+
 gaps <- function(x, prop_missing, gap_width){
   
   n <- length(x)
   
-  stopifnot(is.numeric(x), 
+  stopifnot(sum(is.na(x) == 0),
+            is.numeric(x), 
             is.numeric(prop_missing), 
             is.numeric(gap_width),
             gap_width %% 1 == 0,
