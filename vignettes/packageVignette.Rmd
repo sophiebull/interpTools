@@ -2,9 +2,12 @@
 title: "interpTools: A Framework for Testing Time Series Interpolators"
 author: "Sophie Castel stmcastel@gmail.com"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: rmarkdown::html_vignette:
+  toc: true
+  toc_depth: 1
+  number_sections: true
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{interpTools Workflow}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -25,6 +28,8 @@ install_github("wesleyburr/interpTools")
 library(interpTools)
 ```
 
+# Introduction
+
 The intended use of this R package is to provide a set of tools for the systematic testing of time series interpolators in light of changing the __features of the data__ and its __gap structure__. The basic framework is as follows:
 
 1. Generate artificial time series
@@ -32,7 +37,7 @@ The intended use of this R package is to provide a set of tools for the systemat
 3. Interpolate the gappy data
 4. Compare the interpolated series with the original
 
-This document will describe how to navigate steps 1-4, and also how to assess the results, using the package functions.  The example code is that which was used to generate the built-in 'toy data' contained in this package.
+This vignette will demonstrate the appropriate workflow for steps 1-4.  The example code is that which was used to generate the built-in 'toy data' contained in this package.
 
 ## Step 1 --- Generate artificial time series with `simXt()`
 
@@ -176,19 +181,10 @@ gap_vec <- c(1, 5, 10)
 A single time series can be passed into `simulateGaps()`, along with arguments `prop_vec` and `gap_vec` to remove observations according to the desired gap specification.  The user can also define `K` to set the number of gappy series to generate for each original dataset.  Note that in each iteration, gap locations are chosen randomly under the specified gap parameterization.
 
 ```{r simulateGaps, cache = TRUE}
+set.seed(23)
+
 # Using a loop to apply gaps to each of the five original time series
-D <- length(OriginalData)
-
-GappyData <- list()
-
-for(d in 1:D){
-  set.seed(23)
-  
-  GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = 10)
-  
-  names(GappyData)[d] <- names(OriginalData)[d]
-}
-
+GappyData <- simulateGaps(data = OriginalData, prop_vec = prop_vec, gap_vec = gap_vec, K = 10)
 ```
 
 The result is a nested list of dimension $D\times P \times G \times K$, saved as `~/toyData/toy_GappyData.rda`.
@@ -529,23 +525,23 @@ multiSurface(d = 1:5,
              highlight_color = "#33FFF9")
 ```
 
-### Generating heatmaps with `heatmapGrid2()`
+### Generating heatmaps with `heatmapGrid()`
 Through R's interface, the user can interact with the surface plot widgets by manipulating the camera perspective, adjusting the zoom, and hovering over data points for precise numerical information. When constrained to static visualizations, like when writing papers, __heatmap__ are more effective at communicating the data. Using `heatmapGrid2()`, a three-dimensional surface can be collapsed into a heatmap through conversion of the third dimension to __colour__, to which the __value of the metric__ is proportional. 
 
 See below an example of a heatmap of the performance of the Linear Interpolation (LI) method on the first dataset according to the median value of the Mean Squared Error (MSE) criterion. Convince yourself that this graphic corresponds to the first surface plot shown in this vignette.
 
 ```{r heatmapGrid2, cache = TRUE, fig.width = 4, fig.height = 4, fig.align = "center", fig.keep = "last", results = FALSE}
-heatmapGrid2(d = 1, 
+heatmapGrid(d = 1, 
              agEval = agEval, 
              f = "median", 
              crit = c("MSE"), 
              m = "LI")
 ```
 
-The `heatmapGrid2()` function allows for `d` to be vectorized to show heatmaps across any number of datasets:
+The `heatmapGrid()` function allows for `d` to be vectorized to show heatmaps across any number of datasets:
 
-```{r heatmapGrid2_d, cache = TRUE, fig.width = 6, fig.height = 4, fig.align = "center", fig.keep = "last",  results = FALSE}
-heatmapGrid2(d = c(1,3,5), 
+```{r heatmapGrid_d, cache = TRUE, fig.width = 6, fig.height = 4, fig.align = "center", fig.keep = "last",  results = FALSE}
+heatmapGrid(d = c(1,3,5), 
              agEval = agEval, 
              f = "median", 
              crit = "MSE", 
