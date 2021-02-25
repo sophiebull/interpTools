@@ -24,11 +24,11 @@
 #' \item \code{HWI}; Hybrid Wiener Interpolato
 #' }
 #' 
-#' @param GappyData A list of dimension P x G x K containing gappy time series.
-#' @param methods vector of IDs for selected interpolation methods, where m = 1,...,M
-#' @param FUN_CALL User specified interpolation function(s) to be applied to GappyData. Must be a character string in the form: `function_name(args = ..., x = `.
-#' @param numCores How many CPU cores to use. The default is to use the total number of available cores, as determined by `detectCores()`.
-#' @param parallel Over which index to parallelize. Possible choices: "p","g","k"
+#' @param GappyData \code{list}; A list of dimension D x P x G x K containing gappy time series.
+#' @param methods \code{character}; A vector of IDs for selected interpolation methods, where m = 1,...,M
+#' @param FUN_CALL \code{character}; User-specified interpolation function(s) to be applied to GappyData. Must be a character string in the form: `function_name(args = ..., x = `.
+#' @param numCores \code{integer}; How many CPU cores to use. The default is to use the total number of available cores, as determined by `detectCores()`.
+#' @param parallel \code{character}; Over which index to parallelize. Possible choices: "p","g","k"
 #' 
 #' 
 #' @examples
@@ -56,15 +56,17 @@
 #'
 #'FUN_CALL <- c("plus(","minus(")
 #'
-#'IntData <- list()
-#'
-#'for(d in 1:length(OriginalData)){
-#'  IntData[[d]] <- parInterpolate(GappyData = GappyData[[d]], methods = methods, FUN_CALL = FUN_CALL)
-#'}
-#'names(IntData) <- names(OriginalData)
+#' # Interpolation
+#' 
+#'  IntData <- parInterpolate(GappyData = GappyData, methods = methods, FUN_CALL = FUN_CALL)
+#'  
+#'  # dimension D x M x P x G x K 
+#'  
+
 
 
 parInterpolate <- function(GappyData, methods = NULL, FUN_CALL = NULL, numCores = detectCores(), parallel = "k"){
+  
   # CALLING REQUIRED LIBRARIES
   #require(multitaper)
   #require(tsinterp)
@@ -139,6 +141,9 @@ parInterpolate <- function(GappyData, methods = NULL, FUN_CALL = NULL, numCores 
     return(x)
   }
   
+  
+  
+  
   # ACCEPTABLE ALGORITHM CALLS AND ABBREVIATIONS
   
   algorithm_calls <- c("nearestNeighbor(", 
@@ -207,73 +212,87 @@ parInterpolate <- function(GappyData, methods = NULL, FUN_CALL = NULL, numCores 
                                                        paste0(algorithm_names, collapse = "' , '"), "'."))
   }
   
-  #Creating a list object to store interpolated series
-  int_series <- lapply(int_series <- vector(mode = 'list',(length(methods)+length(FUN_CALL))),function(x)
-    lapply(int_series <- vector(mode = 'list', length(GappyData)),function(x) 
-      lapply(int_series <- vector(mode = 'list',length(GappyData[[1]])),function(x) 
-        x<-vector(mode='list',length(GappyData[[1]][[1]])))))
-  
-  
   fun_names <- c(methods,user_fun)
   method_index <- match(fun_names,algorithm_names)
   
+  D <- length(OriginalData)
+  M <- length(fun_names)
+  P <- length(GappyData[[1]])
+  G <- length(GappyData[[1]][[1]])
+  K <- length(GappyData[[1]][[1]][[1]])
+    
+  #Creating a list object to store interpolated series
+  int_series <- lapply(int_series <- vector(mode = 'list', M),function(x)
+                    lapply(int_series <- vector(mode = 'list', P),function(x) 
+                      lapply(int_series <- vector(mode = 'list', G),function(x) 
+                        x<-vector(mode='list', K))))
+  
   ## INTERPOLATION
+  int_data <- list()
   
-  if(parallel == "p"){
-    for(m in 1:length(method_index)){ 
+  for(d in 1:D){
+   
+    if(parallel == "p"){
       
-      if(fun_names[m] == "HWI"){
-        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")","[[1]]")
+      for(m in 1:length(method_index)){ 
+        
+        if(fun_names[m] == "HWI"){
+          function_call <- paste0(algorithm_calls[method_index[m]], "x", ")","[[1]]")
+        }
+        else{
+          function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
+        }
+        
+        int_series[[m]] <- mclapply(GappyData[[d]], function(x){
+                            lapply(x, function(x){
+                              lapply(x, function(x){
+                                eval(parse(text = function_call))})})}, mc.cores = numCores)
       }
-      else{
-        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
-      }
-      
-      int_series[[m]] <- mclapply(GappyData, function(x){
-        lapply(x, function(x){
-          lapply(x, function(x){
-            eval(parse(text = function_call))})})}, mc.cores = numCores)
     }
-  }
-  
-  if(parallel == "g"){
-    for(m in 1:length(method_index)){ 
-      
-      if(fun_names[m] == "HWI"){
-        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")","[[1]]")
+    
+    if(parallel == "g"){
+      for(m in 1:length(method_index)){ 
+        
+        if(fun_names[m] == "HWI"){
+          function_call <- paste0(algorithm_calls[method_index[m]], "x", ")","[[1]]")
+        }
+        else{
+          function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
+        }
+        
+        int_series[[m]] <- lapply(GappyData[[d]], function(x){
+                              mclapply(x, function(x){
+                                lapply(x, function(x){
+                                  eval(parse(text = function_call))})}, mc.cores = numCores)})
       }
-      else{
-        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
-      }
-      
-      int_series[[m]] <- lapply(GappyData, function(x){
-        mclapply(x, function(x){
-          lapply(x, function(x){
-            eval(parse(text = function_call))})}, mc.cores = numCores)})
     }
-  }
-  
-  
-  if(parallel == "k"){
-    for(m in 1:length(method_index)){ 
-      
-      if(fun_names[m] == "HWI"){
-        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")","[[1]]")
+    
+    
+    if(parallel == "k"){
+      for(m in 1:length(method_index)){ 
+        
+        if(fun_names[m] == "HWI"){
+          function_call <- paste0(algorithm_calls[method_index[m]], "x", ")","[[1]]")
+        }
+        else{
+          function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
+        }
+        
+        int_series[[m]] <- lapply(GappyData[[d]], function(x){
+                            lapply(x, function(x){
+                              mclapply(x, function(x){
+                                eval(parse(text = function_call))}, mc.cores = numCores)}
+          )})
       }
-      else{
-        function_call <- paste0(algorithm_calls[method_index[m]], "x", ")")
-      }
-      
-      int_series[[m]] <- lapply(GappyData, function(x){
-        lapply(x, function(x){
-          mclapply(x, function(x){
-            eval(parse(text = function_call))}, mc.cores = numCores)}
-        )})
     }
-  }
+    
+    names(int_series) <- c(fun_names) 
+    int_data[[d]] <- int_series
+    }
   
-  names(int_series) <- c(fun_names)
-  return(int_series)
+  names(int_data) <- names(GappyData)
+  
+  return(int_data)
 }
 
 
