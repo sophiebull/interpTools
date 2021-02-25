@@ -1,31 +1,26 @@
 #' Simulate Gappy Data
 #' 
-#' Function to simulate the gappy data for a single dataset and store in a list. Function requires gaps.R
-#' @param data The original time series vector
-#' @param prop_vec Vector of missingness proportions
-#' @param gap_vec Vector of gap lengths
-#' @param K Number of gappy series to simulate for each gap width and proportion missing specification
+#' Function to simulate the MCAR gappy data for a list of complete original time series according to various combinations of gap structure parameters *p* and *g*. and store in a list.  
+#' @param data \code{list}; List object containing the complete original time series vectors (as separate elements)
+#' @param prop_vec \code{numeric}; Vector of unique proportions representing the different 'proportion-of-data missing' (*p*) scenarios to simulate
+#' @param gap_vec \code{integer}; Vector of unique integer values representing the different 'gap length' scenarios (*g*) to simulate
+#' @param K \code{integer}; Number of gappy series to simulate for each (*p,g*) gap specification
 #' @examples  
+#' 
 #' prop_vec = c(0.05,0.10,0.15,0.20)
 #' gap_vec = c(1,5,10)
 #' K = 10 # number of gappy series to simulate under each p,g specification
 #'
-#' GappyData <- list()
-#'
-#' for(d in 1:length(OriginalData)){
-#'   GappyData[[d]] <- simulateGaps(data = as.numeric(OriginalData[[d]]), prop_vec = prop_vec, gap_vec = gap_vec, K = K)
-#' }
-#' names(GappyData) <- names(OriginalData)
-
-#'# dimension (d, p, g, k) 
+#' GappyData <- simulateGaps(data = OriginalData, prop_vec = prop_vec, gap_vec = gap_vec, K = K)
+#' 
+#' # dimension (d, p, g, k) 
 
 simulateGaps <- function(data, prop_vec, gap_vec, K){
   
   if( !(all(prop_vec > 0) && all(prop_vec < 1))) stop("Values in prop_vec must be between 0 and 1.")
   if( !(all(gap_vec %% 1 == 0) | all(gap_vec >=1 ) )) stop("Values in gap_vec must be positive integers.")
   
-  stopifnot(is.vector(data),
-            is.numeric(data),
+  stopifnot(is.list(data),
             is.numeric(prop_vec),
             is.numeric(gap_vec),
             !is.null(prop_vec),
@@ -36,25 +31,28 @@ simulateGaps <- function(data, prop_vec, gap_vec, K){
   
   gapList <- list()
   propList <- list()
+  dataList <- list()
   samples <- list()
   
-  prop_vec_names <- numeric(length(prop_vec))
-  gap_vec_names <- numeric(length(gap_vec))
+  data_vec_names <- paste0("D", 1:length(data))
+  prop_vec_names <- paste0("p", prop_vec)
+  gap_vec_names <- paste0("g", gap_vec)
   
-  for(p in 1:length(prop_vec)){  
-    prop_vec_names[p] <- c(paste("p", prop_vec[p],sep="")) # vector of names
-    for (g in 1:length(gap_vec)){
-      gap_vec_names[g] <- c(paste("g", gap_vec[g],sep="")) # vector of names
-      for(k in 1:K){   
-        samples[[k]] <- as.numeric(gaps(data, prop_missing = prop_vec[p], gap_width = gap_vec[g]))
+  for(d in 1:length(data)){
+    for(p in 1:length(prop_vec)){  
+      for (g in 1:length(gap_vec)){
+        for(k in 1:K){   
+          samples[[k]] <- as.numeric(gaps(data[[d]], prop_missing = prop_vec[p], gap_width = gap_vec[g]))
+        }
+        gapList[[g]] <- samples
       }
-      gapList[[g]] <- samples
-      
+      names(gapList) <- gap_vec_names
+      propList[[p]] <- gapList
     }
-    names(gapList) <- gap_vec_names
-    propList[[p]] <- gapList
-    
+    names(propList) <- prop_vec_names
+    dataList[[d]] <- propList
   }
-  names(propList) <- prop_vec_names
-  return(propList)
+  names(dataList) <- data_vec_names
+  
+  return(dataList)
 }
