@@ -1,21 +1,25 @@
 # interpTools
-This package contains functions for generating artificial time series, simulating gaps, and interpolating the missing observations, with tools for subsequent analysis and visualization of the interpolators' statistical performance. A detailed analysis facilitated by these code files is provided in Sophie Castel's MSc thesis "A Framework for Testing Time Series Interpolators", May 2020, Trent University. 
+`interpTools` provides a framework for performing comprehensive analysis on the statistical performance of time series interpolators in a test-environment.
+
+The workflow involves the generation of artifical time series, simulation of MCAR observations subject to two key gap structure parameters ('proportion missing' and 'gap width'), application of interpolation algorithm candidates, and subsequent computation of a set of performance metrics.  Tools for both singular and comparative data visualization allows practitioners to elucidate the most suitable algorithm for similarly-structured datasets in practice, especially in the context of a changing gap structure.
+
+An example of a detailed and comprehensive analysis facilitated by this package is written in S. Castel's MSc thesis "A Framework for Testing Time Series Interpolators" (2020), with free access via [this link](http://digitalcollections.trentu.ca/objects/etd-814). 
 
 A brief description of the package functionality can be found below.
 
-## Simulating time series data with `simXt()`
+### Simulating time series data with `simXt()`
 Data is generated based on the general model of a time series: the addition of a mean, periodic trend, and noise component.  
 
-## Generating gaps with `simulateGaps()`
-Gap structure is defined by two parameters: the proportion of data missing (p), and the gap width (g). 
+### Generating gaps with `simulateGaps()`
+Gap structure is simulated as Missing Completely at Random (MCAR), and defined by two parameters: the proportion of data missing (*p*), and the gap width (*g*). 
 
-### Example
-* p = [10%, 20%, 30%]
-* g = [1, 5, 10]
+#### Example
+* *p = [10%, 20%, 30%]*
+* *g = [1, 5, 10]*
 
 Under each possible *(p,g)* combination, the function will produce *K* different gap configurations on the original time series.
 
-## Interpolating the gappy data with `parInterpolate()`
+### Interpolating the gappy data with `parInterpolate()`
 Interpolation is performed on the gappy data, using parallel computing for efficiency. The user can choose from a list of 18 built-in interpolators:
 
 | Package | Function | Algorithm name | Abbreviation |
@@ -41,7 +45,7 @@ Interpolation is performed on the gappy data, using parallel computing for effic
 
 or pass in their own functions, so long as its returned value  is a single numeric vector. 
 
-## Evaluating statistical performance with `performance()`
+### Evaluating statistical performance with `performance()`
 Here, *statistical performance* is defined as some measure that quantifies the overall degree of **deviation** between the original values and the interpolated values.  Performance metrics that are built-in to the package are shown below:
 
 | Criterion | Abbreviation | Optimal |
@@ -67,8 +71,8 @@ Here, *statistical performance* is defined as some measure that quantifies the o
 
 See `metric_definitions.pdf` in the package files for the mathematical definitions of each performance metric shown above.
 
-## Aggregating the performance metrics within each gap specification with `agEvaluate()`
-Statistics are computed on the sampling distribution of the performance metrics across the *K* interpolations in each *(p,g)* gap specification. Below is a list of all the available aggregations:
+### Aggregating the performance metrics within each gap specification with `agEvaluate()`
+Statistics are computed on the sampling distribution of the performance metrics across the *K* interpolations in each *(p,g)* gap specification. Below is a list of all the available aggregation methods:
 
 * mean
 * standard deviation
@@ -81,21 +85,21 @@ Statistics are computed on the sampling distribution of the performance metrics 
 * 100\% quantile (maximum)
 * IQR (75\% quantile - 25\% quantile)
 * skewness
-* p-value of dip test for unimodality
+* p-value of *dip* test for unimodality
 
-## Visualizing performance as a **surface plot** with `plotSurface()`
+### Visualizing performance as a **surface plot** with `plotSurface()`
 A three-dimensional interactive surface is used to visualize the aggregated performance of an interpolator as the structure of the gappy data changes. Through R's interface, the user can interact with the surface plot widgets by manipulating the camera perspective, adjusting the zoom, and hovering over data points for precise numerical information.
 
 *Optimal* performance corresponds to an extreme point on the surface; either a maximum or minimum, depending on the definition of *optimal* (see table of performance criteria above). Multiple interpolations can be compared by layering surfaces on top of one another, where the *best* interpolation for a particular gap structure will be at an extremum at the corresponding *(p,g)* coordinate point.    
 
-The example below shows multiple surfaces layered; each corresponding to a different interpolation method. 
+The example below shows multiple surfaces layered; each corresponding to the statistical performance of a particular interpolation method according to the median MSE criterion. 
 <div align=”center”><img src = "img/sp.png"></div>
 
-## Visualizing performance as a **heatmap** with `heatmapGrid2()`
-When constrained to static visualizations, like when writing papers, heatmaps are more effective at communicating the data. Using `heatmapGrid2()`, a three-dimensional surface can be collapsed into a heatmap through conversion of the third dimension to colour, to which the value of the metric is proportional. 
+### Visualizing performance as a **heatmap** with `heatmapGrid()`
+When constrained to a static visualization environment, such as in the case of academic papers, heatmaps are more effective at communicating the data. Using `heatmapGrid()`, a three-dimensional surface can be collapsed into a heatmap through conversion of the third dimension to colour, to which the value of the metric is proportional. 
 
-The heatmap plot below conforms with the surface plot above. 
+The heatmap plot below corresponds to the surface plot above. 
 ![heatmap](img/hm.png)
 
-## Support
+### Support
 Please see the package vignette or email me stmcastel@gmail.com for further assistance.
