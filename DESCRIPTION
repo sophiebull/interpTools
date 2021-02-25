@@ -1,31 +1,41 @@
 Package: interpTools
 Version: 0.1.0
 Type: Package
-Title: Tools for systematic testing and evaluation of interpolation algorithms.
+Title: Tools for the Systematic Testing of Interpolation Algorithms
 Author: [aut, cre] Sophie Castel, [aut] Wesley S. Burr
 Maintainer: The package maintainer <stmcastel@gmail.com>
-Description: This package contains functions for generating artificial time series, simulating gaps, interpolation, computation of performance metrics, and data visualization.
+Description: interpTools provides a framework for performing comprehensive analysis
+                on the statistical performance of time series interpolators in a test-environment.
+                The workflow involves the generation of artifical time series, simulation of 
+                MCAR observations subject to two key gap structure parameters ('proportion missing' and
+                'gap width'), application of interpolation algorithm candidates, and subsequent 
+                computation of a set of performance metrics.  Tools for both singular and comparative 
+                data visualization allows practitioners to elucidate the most suitable algorithm
+                for similarly-structured datasets in practice, especially in the context of a changing 
+                gap structure.
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1.9000
-Depends:  R (>= 3.5),
-          multitaper,
-          tsinterp,
-          imputeTS,
-          zoo,
-          forecast,
-          MASS,
-          snow,
-          parallel,
-          ggplot2,
-          gridExtra,
-          grid,
-          plotly,
-          dplyr,
-          RColorBrewer,
-          tidyr,
-          diptest,
-          xtable,
-          plyr,
-          reshape2,
-          lifecycle
+RoxygenNote: 7.1.1
+Depends: R (>= 3.5.0),
+          multitaper (>= 1.0-14),
+          tsinterp (>= 0.2-0),
+          imputeTS (>= 3.0),
+          zoo (>= 1.8-5),
+          forecast (>= 8.8),
+          MASS (>= 7.3-51.4),
+          snow (>= 0.4-3),
+          parallel (>= 3.6.2),
+          ggplot2 (>= 3.1.1),
+          gridExtra (>= 2.3),
+          grid (>= 3.6.2),
+          plotly (>= 4.9.0),
+          dplyr (>= 0.8.1),
+          RColorBrewer (>= 1.1-2),
+          tidyr (>= 0.8.3),
+          diptest (>= 0.75-7),
+          xtable (>= 1.8-4),
+          plyr (>= 1.8.6),
+          reshape2 (>= 1.4.4),
+          lifecycle (>= 0.1.0)
+Suggests: knitr, rmarkdown, testthat
+VignetteBuilder: knitr
