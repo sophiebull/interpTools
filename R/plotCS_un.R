@@ -4,12 +4,10 @@
 #' as the \strong{proportion of missing data} and \strong{gap width increase}. Instead of three axes, as in the surface plots, 
 #' either \code{p} or \code{g} can be broken down such that changes in performance are depicted with respect to one variable, 
 #' across each value of the other. The variable to form the x-axis is specified in \code{cross_section}.
-#' Plots are arranged vertically, where each represents performance plotted against each fixed value in the variable not specified in \code{cross_section}.
-#' \itemize{
-#' \item The middle line is the \strong{median} value \cr
-#' \item The upper ribbon boundary is the \strong{97.5% quantile} value \cr
-#' \item The lower ribbon boundary is the \strong{2.5% quantile} value \cr
-#' }
+#' Plots are arranged vertically, where each represents performance plotted against each fixed value in the 
+#' variable not specified in \code{cross_section}. The middle line is the \strong{median} value, the upper 
+#' ribbon boundary is the \strong{97.5th quantile} value, and the lower ribbon boundary is the
+#' \strong{2.5th quantile} value.
 #'
 #' @param agEval \code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})
 #' @param cross_section \code{character}; An element describing the gap structure variable to represent on the x-axis: either \code{"p"} or \code{"g"}

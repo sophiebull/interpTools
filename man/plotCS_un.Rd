@@ -4,11 +4,18 @@
 \alias{plotCS_un}
 \title{Plot Uncollapsed Cross-sections by 'Gap Width' or 'Proportion Missing'}
 \usage{
-plotCS_un(agEval, cross_section = "p", crit, d,
-  m = names(agEval[[1]][[1]][[1]]), f = "median",
-  layer_type = "method", highlight = "HWI",
-  highlight_color = "#FA4032", colors = c("#F9E0AA", "#F7C65B",
-  "#FAAF08", "#FA812F", "#FA4032", "#F92111"))
+plotCS_un(
+  agEval,
+  cross_section = "p",
+  crit,
+  d = 1:length(agEval),
+  m = names(agEval[[1]][[1]][[1]]),
+  f = "median",
+  layer_type = "method",
+  highlight = "HWI",
+  highlight_color = "#FA4032",
+  colors = c("#FF8633", "#FFAF33", "#FFD133", "#FFEC33", "#D7FF33", "#96FF33")
+)
 }
 \arguments{
 \item{agEval}{\code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})}
@@ -36,10 +43,8 @@ Function to generate uncollapsed cross-section plots to visualize changes in the
 as the \strong{proportion of missing data} and \strong{gap width increase}. Instead of three axes, as in the surface plots, 
 either \code{p} or \code{g} can be broken down such that changes in performance are depicted with respect to one variable, 
 across each value of the other. The variable to form the x-axis is specified in \code{cross_section}.
-Plots are arranged vertically, where each represents performance plotted against each fixed value in the variable not specified in \code{cross_section}.
-\itemize{
-\item The middle line is the \strong{median} value \cr
-\item The upper ribbon boundary is the \strong{maximum} value \cr
-\item The lower ribbon boundary is the \strong{minimum} value \cr
-}
+Plots are arranged vertically, where each represents performance plotted against each fixed value in the 
+variable not specified in \code{cross_section}. The middle line is the \strong{median} value, the upper 
+ribbon boundary is the \strong{97.5th quantile} value, and the lower ribbon boundary is the
+\strong{2.5th quantile} value.
 }
