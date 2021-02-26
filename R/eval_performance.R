@@ -7,7 +7,7 @@
 #' @param gappyx \code{numeric}; The \strong{gappy} time series vector. Gaps must be indicated by \code{NA}.
 #' @param custom \code{character}; A vector of names of user-defined functions used to calculate custom performance metrics (see details) 
 #' 
-#' @details The following is a description of the list of performance metrics that are generated: \cr
+#' @details The following is a description of the list of base performance metrics included in the returned object: \cr
 #' \tabular{ccc}{
 #'      ID \tab Criterion \tab Optimal \cr
 #'      ...... \tab ........... \tab ......... \cr
@@ -201,7 +201,7 @@ eval_performance <- function(x, X, gappyx, custom = NULL) {
       is_fn <- !inherits(try(match.fun(custom), silent = TRUE), "try-error") # FALSE if not a function
     }
     else if(n_custom > 1){
-      is_fn <- logical(length(custom))
+      is_fn <- logical(n_custom)
       for(k in 1:n_custom){
         is_fn[k] <- !inherits(try(match.fun(custom[k]), silent = TRUE), "try-error") # FALSE if not a function
       }
