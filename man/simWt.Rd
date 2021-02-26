@@ -7,13 +7,13 @@
 simWt(N = 1000, p = 0, q = 0, var = 1)
 }
 \arguments{
-\item{N}{The length of the output series}
+\item{N}{\code{integer}; The length of the output series}
 
-\item{p}{The AR order}
+\item{p}{\code{integer}; The AR order}
 
-\item{q}{The MA order}
+\item{q}{\code{integer}; The MA order}
 
-\item{var}{The variance of the stochastic process}
+\item{var}{\code{numeric}; The variance of the stochastic process}
 }
 \description{
 Function to simulate W_t: the noise component of X_t. Defaults to white noise.

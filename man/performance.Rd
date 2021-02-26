@@ -13,7 +13,7 @@ performance(OriginalData, IntData, GappyData, custom = NULL)
 
 \item{GappyData}{\code{list}; A list object of dimension D x P x G x K x N of the gappy original time series (output of simulateGaps.R)}
 
-\item{custom}{\code{function};  A user-defined function (or vector of functions) to calculate a custom performance metric (see example)}
+\item{custom}{\code{character}; A vector of names of user-defined functions used to calculate custom performance metrics (see details)}
 }
 \description{
 Function to calculate the performance metrics between lists of original and interpolated series. \cr \cr
@@ -21,7 +21,7 @@ See \code{?eval_performance} and additional documentation provided in this packa
 Resulting object is of class '\code{pf}'.
 }
 \examples{
- # User-defined function to calculate a custom performance metric
+ # User-defined functions to calculate a custom performance metric (see Details for rules)
  
  my_metric1 <- function(x,X){
  
@@ -32,8 +32,6 @@ Resulting object is of class '\code{pf}'.
   return(val) # return value must be a single numeric element
   
   }
-  
- # User-defined function to calculate a custom performance metric
   
  my_metric2 <- function(x,X){
  
@@ -47,6 +45,6 @@ Resulting object is of class '\code{pf}'.
  
  # Implementing in eval_performance()
  
- performance(OriginalData = OriginalData, IntData = IntData, GappyData = GappyData, custom = c(my_metric1, my_metric2))
+ performance(OriginalData = OriginalData, IntData = IntData, GappyData = GappyData, custom = c("my_metric1", "my_metric2"))
 
 }

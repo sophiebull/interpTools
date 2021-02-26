@@ -4,14 +4,18 @@
 \alias{simTt}
 \title{Simulate T_t}
 \usage{
-simTt(N = 1000, numFreq = 20, bandwidth = NULL)
+simTt(N = 1000, numFreq = 20, bandwidth = NULL, b = NULL, w = NULL)
 }
 \arguments{
-\item{N}{The length of the output series}
+\item{N}{\code{integer}; The length of the output series}
 
-\item{numFreq}{The number of sinusoids to generate}
+\item{numFreq}{\code{integer}; The number of sinusoids to generate}
 
-\item{bandwidth}{Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If specified, 'bandwidth' must be at least -log10(1/numFreq). If unspecified, freq =  runif(numFreq,0,1)}
+\item{bandwidth}{\code{integer}; Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If specified, 'bandwidth' must be at least -log10(1/numFreq). If unspecified, freq =  runif(numFreq,0,1)}
+
+\item{b}{\code{numeric}; If specified, a vector of custom coefficients on each sinusoid}
+
+\item{w}{\code{numeric}; If specified, a vector of custom periods for each sinusoid}
 }
 \description{
 Function to simulate T_t: the trend component of X_t.

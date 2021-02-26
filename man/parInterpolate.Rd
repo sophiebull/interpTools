@@ -13,15 +13,15 @@ parInterpolate(
 )
 }
 \arguments{
-\item{GappyData}{A list of dimension P x G x K containing gappy time series.}
+\item{GappyData}{\code{list}; A list of dimension D x P x G x K containing gappy time series.}
 
-\item{methods}{vector of IDs for selected interpolation methods, where m = 1,...,M}
+\item{methods}{\code{character}; A vector of IDs for selected interpolation methods, where m = 1,...,M}
 
-\item{FUN_CALL}{User specified interpolation function(s) to be applied to GappyData. Must be a character string in the form: `function_name(args = ..., x = `.}
+\item{FUN_CALL}{\code{character}; User-specified interpolation function(s) to be applied to GappyData. Must be a character string in the form: `function_name(args = ..., x = `.}
 
-\item{numCores}{How many CPU cores to use. The default is to use the total number of available cores, as determined by `detectCores()`.}
+\item{numCores}{\code{integer}; How many CPU cores to use. The default is to use the total number of available cores, as determined by `detectCores()`.}
 
-\item{parallel}{Over which index to parallelize. Possible choices: "p","g","k"}
+\item{parallel}{\code{character}; Over which index to parallelize. Possible choices: "p","g","k"}
 }
 \description{
 Function to perform interpolation on gappy series in parallel using user-specified and/or user-defined interpolation methods. Parallelization occurs over the K level. \cr\cr
@@ -74,10 +74,10 @@ minus <- function(x){
 
 FUN_CALL <- c("plus(","minus(")
 
-IntData <- list()
+# Interpolation
 
-for(d in 1:length(OriginalData)){
- IntData[[d]] <- parInterpolate(GappyData = GappyData[[d]], methods = methods, FUN_CALL = FUN_CALL)
-}
-names(IntData) <- names(OriginalData)
+ IntData <- parInterpolate(GappyData = GappyData, methods = methods, FUN_CALL = FUN_CALL)
+ 
+ # dimension D x M x P x G x K 
+ 
 }

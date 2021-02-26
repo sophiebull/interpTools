@@ -7,14 +7,14 @@
 gaps(x, prop_missing, gap_width)
 }
 \arguments{
-\item{x}{The complete vector from which to remove values}
+\item{x}{\code{numeric}; The complete time series vector from which to remove values}
 
-\item{prop_missing}{Proportion of observations to remove, P}
+\item{prop_missing}{\code{numeric}; Proportion of observations to remove, *P*}
 
-\item{gap_width}{Length of gap (how many successive observations to remove), G}
+\item{gap_width}{\code{integer}; Length of gap (how many successive observations to remove), *G*}
 }
 \description{
-Function to generate gaps of a specified length constrained by proportion of missingness. Meant to be paired with simulateGaps.R
+Subroutine of \code{simulateGaps()}. Function to generate gaps of a specified length constrained by proportion of missingness.
 }
 \examples{
  

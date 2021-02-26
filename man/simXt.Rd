@@ -5,78 +5,61 @@
 \title{Simulate X_t}
 \usage{
 simXt(
-  D,
   N = 1000,
-  vary = "all",
   numTrend = 0,
-  trendType = "polynomial",
+  a = NULL,
+  mu = NULL,
+  center = NULL,
   numFreq = 20,
   bandwidth = NULL,
+  b = NULL,
+  w = NULL,
   p = 0,
   q = 0,
-  fix,
   snr = 1.5
 )
 }
 \arguments{
-\item{D}{The number of datasets to generate.}
+\item{N}{\code{integer}; The desired length of the time series}
 
-\item{N}{The desired length of each complete time series.}
+\item{numTrend}{\code{integer}; The degree of the polynomial in the mean component; all lower order terms are included}
 
-\item{vary}{"Mt", "Tt", "Wt". A character string specifying which component of Xt to vary. Other components are held constant.}
+\item{a}{\code{numeric}; If specified, a vector of custom coefficients for each term in the polynomial mean component}
 
-\item{numTrend}{If 'vary != Mt', this is the number of terms to include. Value represents the maximum degree of the mean component; all lower order terms included.}
+\item{mu}{\code{numeric}; If specified, a single value representing the grand mean of the polynomial mean component}
 
-\item{trendType}{If 'vary != Mt', this is the type of trends to include in the mean component.}
+\item{center}{\code{numeric}; If specified, a vector of custom centering parameters for each term in the polynomial mean component}
 
-\item{numFreq}{If 'vary != Tt', this is the number of sinusoids to generate in the trend component.}
+\item{numFreq}{\code{integer}; The number of sinusoids to generate in the trend component}
 
-\item{bandwidth}{If 'vary != Tt', this value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies for the trend component. If specified, 'bandwidth' must be at least -log10(1/numFreq). If unspecified, frequencies are distributed ~Uniform(a=0,b=1).}
+\item{bandwidth}{\code{integer}; This value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies for the trend component. If specified, 'bandwidth' must be at least *-log10(1/*\code{numFreq}*)*. If unspecified, frequencies are distributed *~Uniform(a=0,b=1)*}
 
-\item{p}{If 'fix != p', this is the AR order of the noise component.}
+\item{b}{\code{numeric}; If specified, a vector of custom coefficients on each sinusoid in the trend component}
 
-\item{q}{If 'fix != q', this is the MA order of the noise component.}
+\item{w}{\code{numeric}; If specified, a vector of custom periods for each sinusoid in the trend component}
 
-\item{fix}{Which order variable in ARMA(p,q) to fix if 'vary = Wt' (must be either "p" or "q").}
+\item{p}{\code{integer}; The *AR* order of the noise component}
 
-\item{snr}{Specify the signal-to-noise ratio.}
+\item{q}{\code{integer}; The *MA* order of the noise component}
+
+\item{snr}{\code{numeric}; The desired signal-to-noise ratio}
 }
 \description{
-Function to simulate X_t. The component that is selected to vary will hold all required variables constant: \cr\cr
-For vary = "Mt", only 'numTrend' is subject to vary. \cr
-For vary = "Tt", only 'numFreq' is subject to vary. \cr
-For vary = "Wt", order variables 'p' or 'q' are subject to vary depending on the value of 'fix', which must also be specified.
+Function to simulate X_t. Output is a list object containing the defining parameters. Access the actual time series using $Xt.
 }
 \examples{
-# Initializing basic parameters
-D = 5
-n=1000
-t=0:(N-1)
+# Define four different time series
 
-# Vary Mt
-simData <- simXt(D=D, N=N, vary = "Mt", bandwidth = 3, numFreq = 30, 
-                 trendType = "polynomial", snr = 1.5)
+simData_1 <- simXt(N = 1000, numTrend = 2, numFreq = 10, bandwidth = 2, snr = 1.5)
+simData_2 <- simXt(N = 1000, numTrend = 4, numFreq = 30, bandwidth = 1, snr = 3)
+simData_3 <- simXt(N = 1000, numTrend = 3, a = c(1/3, 2/3, 5/3), mu = 5, numFreq = 20, snr = 0.7)
+simData_4 <- simXt(N = 1000, numTrend = 6, numFreq = 40, p = 1, q = 2)                 
+                 
+# Creating list object containing the time series themselves in preparation for simulateGaps()
 
-# Vary Tt
-simData <- simXt(D=D, N=N, vary = "Tt", bandwidth = 3, numTrend = 0, 
-                 trendType = "polynomial", snr = 1.5)
-
-# Vary Wt, p fixed
-simData <- simXt(D=D, N=N, vary = "Wt", bandwidth = 3, numFreq = 20, 
-                 numTrend = 0, trendType = "polynomial", p = 0, fix = "p", snr = 1.5)
-
-# Vary Wt, q fixed
-simData <- simXt(D=D, N=N, vary = "Wt", bandwidth = 3, numFreq = 20, 
-                 numTrend = 10, trendType = "polynomial", q = 0, fix = "q", snr = 1.5)
-
-# Creating list object for one of the above variations
-sets <- numeric(D)
-for(d in 1:(D-1)){
- sets[d] <- paste("D",d,"=simData$Xt[[",d,"]],",sep="")
-}
-sets[D] <- paste("D",D,"=simData$Xt[[",D,"]]",sep="")
-list_call <- paste("list(",paste(sets,collapse=""),")")
-
-OriginalData = eval(parse(text=list_call))
+ OriginalData = list(D1 = simData_1$Xt,
+                     D2 = simData_2$Xt,
+                     D3 = simData_3$Xt,
+                     D4 = simData_4$Xt)
 
 }

@@ -4,14 +4,18 @@
 \alias{simMt}
 \title{Simulate M_t}
 \usage{
-simMt(N = 1000, numTrend = 0, trendType = "polynomial")
+simMt(N = 1000, numTrend = 0, a = NULL, mu = NULL, center = NULL)
 }
 \arguments{
-\item{N}{The length of the output series}
+\item{N}{\code{integer}; The length of the output series}
 
-\item{numTrend}{The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.}
+\item{numTrend}{\code{integer}; The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.}
 
-\item{trendType}{The type of trends to include. Either "polynomial" or "exponential".}
+\item{a}{\code{numeric}; If specified, a vector of custom coefficients for each term in the polynomial.}
+
+\item{mu}{\code{numeric}; If specified, a single value representing the grand mean of the polynomial.}
+
+\item{center}{\code{numeric}; If specified, a vector of custom centering parameters for each term in the polynomial.}
 }
 \description{
 Function to simulate M_t: the mean component of X_t.
