@@ -1,10 +1,11 @@
 #' Evaluate Interpolation Performance of a Single Time Series
 #' 
-#' Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated.
+#' Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated. Subroutine of \code{performance()}.
 #'    
 #' @param x \code{numeric}; The \strong{original} time series vector.
 #' @param X \code{numeric}; The \strong{interpolated} time series vector.
 #' @param gappyx \code{numeric}; The \strong{gappy} time series vector. Gaps must be indicated by \code{NA}.
+#' @param custom \code{character}; A vector of names of user-defined functions used to calculate custom performance metrics (see details) 
 #' 
 #' @details The following is a description of the list of performance metrics that are generated: \cr
 #' \tabular{ccc}{
@@ -29,9 +30,45 @@
 #'      17 \tab  RMSS \tab min  \cr
 #'      18 \tab  MdAPE \tab min  \cr
 #'    }
+#'
+#' @details
+#' Users can define and pass-in their own custom performance metric functions, but must adhere to the following rules:
+#' \itemize{
+#'   \item Inputs are limited to *ONLY* \code{x} (lowercase; the original time series) and \code{X} (uppercase; the interpolated time series)\cr
+#'   \item Output must be a single numeric value\cr
+#'   }
+#'        
+#' @examples 
+#'  # User-defined functions to calculate a custom performance metric (see Details for rules)
+#'  
+#'  my_metric1 <- function(x,X){
+#'  
+#'   # Sum of original + interpolated values
+#'   
+#'   val <- x + X
+#'   
+#'   return(val) # return value must be a single numeric element
+#'   
+#'   }
+#'   
+#'  my_metric2 <- function(x,X){
+#'  
+#'   # Sum of index positions of interpolated values
+#'  
+#'   val <- sum(which(x != X))
+#'  
+#'   return(val) # return value must be a single numeric element
+#'  
+#'  } 
+#'  
+#'  # Implementing in eval_performance()
+#'  
+#'  eval_performance(x = x, X = X, gappyx = gappyx, custom = c("my_metric1", "my_metric2"))
+#'  
+#'
 #' 
 
-eval_performance <- function(x, X, gappyx) {
+eval_performance <- function(x, X, gappyx, custom = NULL) {
 
   # x = original , X = interpolated 
   
@@ -149,6 +186,68 @@ eval_performance <- function(x, X, gappyx) {
   #  } else {
   #    return$TMAPE <- NA 
   #  }
+  
+  # Custom functions
+  
+  if(!is.null(custom)){
+    
+    ####################
+    ### LOGICAL CHECKS
+    ####################
+    
+    n_custom <- length(custom)
+    
+    if(n_custom == 1){
+      is_fn <- !inherits(try(match.fun(custom), silent = TRUE), "try-error") # FALSE if not a function
+    }
+    else if(n_custom > 1){
+      is_fn <- logical(length(custom))
+      for(k in 1:n_custom){
+        is_fn[k] <- !inherits(try(match.fun(custom[k]), silent = TRUE), "try-error") # FALSE if not a function
+      }
+    }
+   
+    if(!all(is_fn)){
+      not <- which(!is_fn)
+      stop(c("Custom function(s): ", paste0(custom[not], sep = " ") ,", are not of class 'function'."))
+    }
+    
+    # Check that the output of the function is a single value
+    
+    check_single <- function(fn){
+      
+      x <- rnorm(10)
+      X <- rnorm(10)
+  
+      val <- match.fun(fn)(x = x, X = X)
+      
+      return(all(length(val) == 1, is.numeric(val)))
+    }
+    
+    logic <- logical(n_custom)
+    
+    for(k in 1:n_custom){
+      logic[k] <- check_single(custom[k])
+    }
+    
+    if(!all(logic)){
+      stop(c("Custom function(s): ", paste0(custom[!logic], sep = " "), ", do not return a single numeric value."))
+    }
+    
+    # Computing custom metric values
+    
+    return_call <- character(n_custom)
+    
+    for(k in 1:n_custom){
+      
+      return_call[k] <- paste0("return$",custom[k]," <- match.fun(",custom[k],")(x = x, X = X)")
+      
+      eval(parse(text = return_call[k]))
+      
+    }
+    
+  }
+  
   
   return(return)
   }

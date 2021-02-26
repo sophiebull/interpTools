@@ -7,10 +7,37 @@
 #' @param OriginalData \code{list}; A list object of dimension D x N of original (complete) time series 
 #' @param IntData \code{list}; A list object of dimension D x M x P x G x K x N of interpolated time series (output of parInterpolate.R)
 #' @param GappyData \code{list}; A list object of dimension D x P x G x K x N of the gappy original time series (output of simulateGaps.R)
+#' @param custom \code{character}; A vector of names of user-defined functions used to calculate custom performance metrics (see details) 
 #' 
+#' @examples 
+#'  # User-defined functions to calculate a custom performance metric (see Details for rules)
+#'  
+#'  my_metric1 <- function(x,X){
+#'  
+#'   # Sum of original + interpolated values
+#'   
+#'   val <- x + X
+#'   
+#'   return(val) # return value must be a single numeric element
+#'   
+#'   }
+#'   
+#'  my_metric2 <- function(x,X){
+#'  
+#'   # Sum of index positions of interpolated values
+#'  
+#'   val <- sum(which(x != X))
+#'  
+#'   return(val) # return value must be a single numeric element
+#'  
+#'  } 
+#'  
+#'  # Implementing in eval_performance()
+#'  
+#'  performance(OriginalData = OriginalData, IntData = IntData, GappyData = GappyData, custom = c("my_metric1", "my_metric2"))
 #' 
 
-performance <- function(OriginalData,IntData,GappyData){
+performance <- function(OriginalData, IntData, GappyData, custom = NULL){
   
   D <- length(IntData)
   M <- length(IntData[[1]])
@@ -49,7 +76,7 @@ performance <- function(OriginalData,IntData,GappyData){
         for(g in 1:G){
           gap_vec_names[g] <- c(paste("g", gap_vec[g],sep="")) # vector of names
           for(k in 1:K) { 
-            Performance[[d]][[m]][[p]][[g]][[k]] <- unlist(eval_performance(x = OriginalData[[d]], X = IntData[[d]][[m]][[p]][[g]][[k]], gappyx = GappyData[[d]][[p]][[g]][[k]]))
+            Performance[[d]][[m]][[p]][[g]][[k]] <- unlist(eval_performance(x = OriginalData[[d]], X = IntData[[d]][[m]][[p]][[g]][[k]], gappyx = GappyData[[d]][[p]][[g]][[k]], custom = custom))
           }
           names(Performance[[d]][[m]][[p]]) <- gap_vec_names
         }

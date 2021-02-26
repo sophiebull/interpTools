@@ -4,7 +4,7 @@
 \alias{eval_performance}
 \title{Evaluate Interpolation Performance of a Single Time Series}
 \usage{
-eval_performance(x, X, gappyx)
+eval_performance(x, X, gappyx, custom = NULL)
 }
 \arguments{
 \item{x}{\code{numeric}; The \strong{original} time series vector.}
@@ -12,9 +12,11 @@ eval_performance(x, X, gappyx)
 \item{X}{\code{numeric}; The \strong{interpolated} time series vector.}
 
 \item{gappyx}{\code{numeric}; The \strong{gappy} time series vector. Gaps must be indicated by \code{NA}.}
+
+\item{custom}{\code{character}; A set of names of user-defined functions used to calculate custom performance metrics (see example)}
 }
 \description{
-Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated.
+Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated. Subroutine of \code{performance()}.
 }
 \details{
 The following is a description of the list of performance metrics that are generated: \cr
@@ -40,4 +42,42 @@ The following is a description of the list of performance metrics that are gener
      17 \tab  RMSS \tab min  \cr
      18 \tab  MdAPE \tab min  \cr
    }
+
+Users can define and pass-in their own custom performance metric functions, but must adhere to the following rules:
+\itemize{
+  \item Inputs are limited to *ONLY* \code{x} (the original time series) and \code{X} (the interpolated time series)\cr
+  \item Output must be a single numeric value\cr
+  }
+}
+\examples{
+ # User-defined function to calculate a custom performance metric
+ ## Functions must contain two arguments: x (the original series)
+ my_metric1 <- function(x,X){
+ 
+  # Sum of original + interpolated values
+  
+  val <- x + X
+  
+  return(val) # return value must be a single numeric element
+  
+  }
+  
+ # User-defined function to calculate a custom performance metric
+  
+ my_metric2 <- function(x,X){
+ 
+  # Sum of index positions of interpolated values
+ 
+  val <- sum(which(x != X))
+ 
+  return(val) # return value must be a single numeric element
+ 
+ } 
+ 
+ # Implementing in eval_performance()
+ 
+ eval_performance(x = x, X = X, gappyx = gappyx, custom = c("my_metric1", "my_metric2"))
+ 
+
+
 }

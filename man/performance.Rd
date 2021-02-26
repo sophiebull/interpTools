@@ -4,17 +4,49 @@
 \alias{performance}
 \title{Evaluate Interpolation Performance Across Multiple Time Series}
 \usage{
-performance(OriginalList, IntList, GappyList)
+performance(OriginalData, IntData, GappyData, custom = NULL)
 }
 \arguments{
-\item{OriginalList}{\code{list}; A list object of dimension D x N of original (complete) time series}
+\item{OriginalData}{\code{list}; A list object of dimension D x N of original (complete) time series}
 
-\item{IntList}{\code{list}; A list object of dimension D x M x P x G x K x N of interpolated time series (output of parInterpolate.R)}
+\item{IntData}{\code{list}; A list object of dimension D x M x P x G x K x N of interpolated time series (output of parInterpolate.R)}
 
-\item{GappyList}{\code{list}; A list object of dimension D x P x G x K x N of the gappy original time series (output of simulateGaps.R)}
+\item{GappyData}{\code{list}; A list object of dimension D x P x G x K x N of the gappy original time series (output of simulateGaps.R)}
+
+\item{custom}{\code{function};  A user-defined function (or vector of functions) to calculate a custom performance metric (see example)}
 }
 \description{
 Function to calculate the performance metrics between lists of original and interpolated series. \cr \cr
 See \code{?eval_performance} and additional documentation provided in this package (\code{"~/metric_definitions.pdf/"}) for a full list and description of the the performance criteria.\cr
 Resulting object is of class '\code{pf}'.
+}
+\examples{
+ # User-defined function to calculate a custom performance metric
+ 
+ my_metric1 <- function(x,X){
+ 
+  # Sum of original + interpolated values
+  
+  val <- x + X
+  
+  return(val) # return value must be a single numeric element
+  
+  }
+  
+ # User-defined function to calculate a custom performance metric
+  
+ my_metric2 <- function(x,X){
+ 
+  # Sum of index positions of interpolated values
+ 
+  val <- sum(which(x != X))
+ 
+  return(val) # return value must be a single numeric element
+ 
+ } 
+ 
+ # Implementing in eval_performance()
+ 
+ performance(OriginalData = OriginalData, IntData = IntData, GappyData = GappyData, custom = c(my_metric1, my_metric2))
+
 }
