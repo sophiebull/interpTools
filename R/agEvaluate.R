@@ -3,8 +3,9 @@
 #' Function to aggregate the set of performance matrices, by criterion, using sample statistics of the sampling distribution across K. Resulting object is of class \code{'agEvaluate'}.
 #'  
 #' @param pf \code{list}; A nested list of dimension D x M x P x G x K (result of \code{performance.R}), where the terminal node is a performance matrix.
+#' @param custom \code{character}; A vector of names of user-defined functions used to perform aggregation with custom statistics (see details) 
 #' 
-#' @details The statistics provided in the output are as follows:
+#' @details The base statistics provided in the output are as follows:
 #' \itemize{
 #' \item \code{(mean)}; mean
 #' \item \code{(sd)}; standard deviation 
@@ -19,10 +20,93 @@
 #' \item \code{(skewness)}; skewness
 #' \item \code{(dip)}; p-value of dip test for unimodality (see \code{?dip} for details)
 #' }
+#' 
+#' @details 
+#' Users can define and pass-in their own custom statistics used for the aggregation of the performance metrics, but must adhere to the following rules:
+#' \itemize{
+#'   \item Inputs are limited to *ONLY* single numeric vectors \cr
+#'   \item Outputs must be a single numeric value
+#'   }
+#'   
+#' @examples
+#' 
+#'  # User-defined functions to calculate a custom aggregation statistic (see Details for rules)
+#'  
+#'  my_stat1 <- function(x){
+#'   
+#'   val <- sum(x)/length(x) + 34
+#'   
+#'   return(val) # return value must be a single numeric element
+#'   
+#'   }
+#'   
+#'  my_metric2 <- function(x){
+#'  
+#'   val <- (sum(x)-min(x))/6
+#'  
+#'   return(val) # return value must be a single numeric element
+#'  
+#'  } 
+#'  
+#'  # Implementing in agEvaluate()
+#'  
+#'  agEvaluate(pf = pf, custom = c("my_stat1", "my_stat2"))
+#'      
 
-agEvaluate <- function(pf){
+agEvaluate <- function(pf, custom = NULL){
   
   if(class(pf) != "pf") stop("'pf' object must be of class 'pf'. Use performance() to generate such objects.")
+  
+  if(!is.null(custom)){
+    
+    ####################
+    ### LOGICAL CHECKS
+    ####################
+    
+    n_custom <- length(custom)
+    
+    if(n_custom == 1){
+      is_fn <- !inherits(try(match.fun(custom), silent = TRUE), "try-error") # FALSE if not a function
+    }
+    else if(n_custom > 1){
+      is_fn <- logical(length(custom))
+      for(k in 1:n_custom){
+        is_fn[k] <- !inherits(try(match.fun(custom[k]), silent = TRUE), "try-error") # FALSE if not a function
+      }
+    }
+    
+    if(!all(is_fn)){
+      not <- which(!is_fn)
+      stop(c("Custom statistic(s): ", paste0(custom[not], sep = " ") ,", are not of class 'function'."))
+    }
+    
+    # Check that the output of the function is a single value
+    
+    check_single <- function(fn){
+      
+      x <- rnorm(10)
+      
+      val <- match.fun(fn)(x = x)
+      
+      return(all(length(val) == 1, is.numeric(val)))
+    }
+    
+    logic <- logical(n_custom)
+    
+    for(k in 1:n_custom){
+      logic[k] <- check_single(custom[k])
+    }
+    
+    if(!all(logic)){
+      stop(c("Custom function(s): ", paste0(custom[!logic], sep = " "), ", do not return a single numeric value."))
+    }
+  }
+    
+
+    ########################
+    # DEFINING SKEW FUNCTION
+    ########################
+      
 
     skew <- function(x, na.rm = TRUE){
     stopifnot(is.numeric(x))
@@ -37,7 +121,11 @@ agEvaluate <- function(pf){
     }
     
     return(sk)
-  }
+    }
+    
+  ###############################
+  # CONSTRUCTING AGGREGATED DATA
+  ###############################  
 
   D <- length(pf)
   M <- length(pf[[1]])
@@ -112,13 +200,30 @@ agEvaluate <- function(pf){
               dip = apply(sapply(pf[[d]][[m]][[p]][[g]],unlist),1,
                           FUN = function(x){dip.test(x,simulate.p.value = TRUE)$p.value
                             
+                            
               }),
               
               gap_width = c(rep(gap_vec[g], C)),
               prop_missing = c(rep(prop_vec[p],C)),
               dataset = c(rep(dataset[d],C)), 
               method = rep(method_names[m],C) 
-            )  
+            )
+            
+            if(!is.null(custom)){
+              
+              # Computing custom aggregate statistics
+              
+              return_call <- character(n_custom)
+              
+              for(k in 1:n_custom){
+              
+                return_call[k] <- paste0("Evaluation[[d]][[p]][[g]][[m]] <- cbind(Evaluation[[d]][[p]][[g]][[m]], ",
+                                         custom[k]," = apply(sapply(pf[[d]][[m]][[p]][[g]], unlist), 1, match.fun(",custom[k],")))")
+                
+                eval(parse(text = return_call[k]))
+              
+              }
+            }
           
             
         }
@@ -133,4 +238,5 @@ agEvaluate <- function(pf){
   class(Evaluation) <- "agEvaluate"
     return(Evaluation)
 
+  
 } 
