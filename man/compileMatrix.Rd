@@ -2,14 +2,14 @@
 % Please edit documentation in R/compileMatrix.R
 \name{compileMatrix}
 \alias{compileMatrix}
-\title{Compile agEvaluate Objects into Matrices}
+\title{Compile 'aggregate' Objects into Matrices}
 \usage{
-compileMatrix(agEval)
+compileMatrix(agObject)
 }
 \arguments{
-\item{agEval}{A list object (result of agEvaluate.R) of aggregated performance metrics}
+\item{agObject}{A list object (result of \code{aggregate()}) of aggregated performance metrics}
 }
 \description{
-A function to compile objects of class "agEvaluate" (from agEvaluate()) into matrices of dimension PxG.\cr
- Elements of agEvaluate are arranged into this matrix corresponding to (p,g).
+A function to compile objects of class \code{"aggregate"} (from \code{aggregate()}) into matrices of dimension PxG.\cr
+ Elements of \code{aggregate} are arranged into this matrix corresponding to (p,g).
 }
