@@ -1,8 +1,8 @@
 #' Aggregate the Performance Matrices of Multiple Interpolations
 #' 
-#' Function to aggregate the set of performance matrices, by criterion, using sample statistics of the sampling distribution across K. Resulting object is of class \code{'agEvaluate'}.
+#' Function to aggregate the set of performance matrices, by criterion, using sample statistics of the sampling distribution across K. Resulting object is of class \code{'aggregate'}.
 #'  
-#' @param pf \code{list}; A nested list of dimension D x M x P x G x K (result of \code{performance.R}), where the terminal node is a performance matrix.
+#' @param pf \code{pf}; A nested list of dimension D x M x P x G x K (result of \code{performance()}), where the terminal node is a performance matrix.
 #' @param custom \code{character}; A vector of names of user-defined functions used to perform aggregation with custom statistics (see details) 
 #' 
 #' @details The base statistics provided in the output are as follows:
@@ -48,12 +48,12 @@
 #'  
 #'  } 
 #'  
-#'  # Implementing in agEvaluate()
+#'  # Implementing in aggregate()
 #'  
-#'  agEvaluate(pf = pf, custom = c("my_stat1", "my_stat2"))
+#'  aggregate(pf = pf, custom = c("my_stat1", "my_stat2"))
 #'      
 
-agEvaluate <- function(pf, custom = NULL){
+aggregate <- function(pf, custom = NULL){
   
   if(class(pf) != "pf") stop("'pf' object must be of class 'pf'. Use performance() to generate such objects.")
   
@@ -138,9 +138,9 @@ agEvaluate <- function(pf, custom = NULL){
   
   # Initializing nested list object
   
-  Evaluation <- lapply(Evaluation <- vector(mode = 'list', D),function(x)
-    lapply(Evaluation <- vector(mode = 'list', P),function(x) 
-      lapply(Evaluation <- vector(mode = 'list', G),function(x) 
+  agObject <- lapply(agObject <- vector(mode = 'list', D),function(x)
+    lapply(agObject <- vector(mode = 'list', P),function(x) 
+      lapply(agObject <- vector(mode = 'list', G),function(x) 
         x<-vector(mode='list',M))))
   
   prop_vec_names <- numeric(P)
@@ -165,7 +165,7 @@ agEvaluate <- function(pf, custom = NULL){
             quantiles <- apply(sapply(pf[[d]][[m]][[p]][[g]],unlist),1, 
                                FUN=function(x) quantile(x, probs = c(0, 0.025, 0.25, 0.75, 0.975, 1.0), na.rm = TRUE))
             
-            Evaluation[[d]][[p]][[g]][[m]] <- data.frame(
+            agObject[[d]][[p]][[g]][[m]] <- data.frame(
               
               mean = rowMeans(sapply(pf[[d]][[m]][[p]][[g]],unlist), na.rm = TRUE),
               
@@ -217,7 +217,7 @@ agEvaluate <- function(pf, custom = NULL){
               
               for(k in 1:n_custom){
               
-                return_call[k] <- paste0("Evaluation[[d]][[p]][[g]][[m]] <- cbind(Evaluation[[d]][[p]][[g]][[m]], ",
+                return_call[k] <- paste0("agObject[[d]][[p]][[g]][[m]] <- cbind(agObject[[d]][[p]][[g]][[m]], ",
                                          custom[k]," = apply(sapply(pf[[d]][[m]][[p]][[g]], unlist), 1, match.fun(",custom[k],")))")
                 
                 eval(parse(text = return_call[k]))
@@ -227,16 +227,16 @@ agEvaluate <- function(pf, custom = NULL){
           
             
         }
-        names(Evaluation[[d]][[p]][[g]]) <- method_names 
+        names(agObject[[d]][[p]][[g]]) <- method_names 
       }
-      names(Evaluation[[d]][[p]]) <- gap_vec_names 
+      names(agObject[[d]][[p]]) <- gap_vec_names 
     }
-    names(Evaluation[[d]]) <- prop_vec_names 
+    names(agObject[[d]]) <- prop_vec_names 
   }
-  names(Evaluation) <- names(pf)
+  names(agObject) <- names(pf)
   
-  class(Evaluation) <- "agEvaluate"
-    return(Evaluation)
+  class(agObject) <- "aggregate"
+    return(agObject)
 
   
 } 
