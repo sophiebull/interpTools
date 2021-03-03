@@ -4,11 +4,9 @@
 \alias{plotXt}
 \title{Plot Each Component of Xt}
 \usage{
-plotXt(d, simData, cptwise = T, axisLabels = F, plot.title = T, return = NULL)
+plotXt(simData, cptwise = T, axisLabels = F, plot.title = T, return = NULL)
 }
 \arguments{
-\item{d}{\code{numeric}; The index of the original time series to show}
-
 \item{simData}{\code{simList}; An object containing the information about the original data}
 
 \item{cptwise}{\code{logical}; Whether to display Xt componentwise, or not}

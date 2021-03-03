@@ -1,8 +1,7 @@
 #' Plot Each Component of Xt
 #' 
 #' A function to generate a series of plots to visualize each component of the original time series
-#' @param d \code{numeric}; The index of the original time series to show
-#' @param cptwise \code{logical}; Whether to display Xt componentwise, or not
+#' @param cptwise \code{logical}; Whether to display \eqn{X_t} componentwise, or not
 #' @param simData \code{simList}; An object containing the information about the original data
 #' @param axisLabels \code{logical}; Set to \code{TRUE} if returning a single plot (i.e. \code{cptwise = TRUE} and \code{return != NULL}), and \code{FALSE} otherwise.
 #' @param plot.title \code{logical}; Whether to include individual plot titles
@@ -12,7 +11,7 @@
 #'                            If \code{cptwise = FALSE}, \code{return} must be the default (\code{NULL}) to display the sum total (this is \code{Xt}).
 #'                            
 #'                               
-plotXt <- function(d, simData, cptwise = T, axisLabels = F, plot.title = T, return = NULL){
+plotXt <- function(simData, cptwise = T, axisLabels = F, plot.title = T, return = NULL){
   require(ggplot2) 
   require(gridExtra)
   
@@ -25,7 +24,7 @@ if(cptwise & axisLabels & is.null(return)){
   warning("axisLabels should be set to FALSE if the function is to return all cptwise plots")
 }
 
-  t <- 0:(length(simData$Xt[[d]])-1)
+  t <- 0:(length(simData$Xt)-1)
   
   if(axisLabels){
     xlab = "time"
@@ -55,14 +54,14 @@ if(cptwise & axisLabels & is.null(return)){
   
   mt <- ggplot()+
     
-    ylim(min(simData$Xt[[d]]), max(simData$Xt[[d]])) + 
+    ylim(min(simData$Xt), max(simData$Xt)) + 
     
-    geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2) +
-    geom_line(aes(x=t,y=simData$Mt_mu[[d]]), lty = 2, lwd = 0.2)+
+    geom_line(aes(x=t,y=simData$Mt), lwd = 0.2) +
+    geom_line(aes(x=t,y=simData$Mt_mu), lty = 2, lwd = 0.2)+
     
-    ggtitle(bquote(m[t] == mu[t] + mu*", polynomial of order"~.(simData$Mt_numTrend[[d]]))) + 
+    ggtitle(bquote(m[t] == mu[t] + mu*", polynomial of order"~.(simData$Mt_numTrend))) + 
     
-    annotate("text",x=(length(simData$Mt[[d]])+5),y=simData$Mt_mu[[d]], label = "\U003BC")+
+    annotate("text",x=(length(simData$Mt)+5),y=simData$Mt_mu, label = "\U003BC")+
     
     labs(x = xlab, y = ylab)+
     theme_light() +
@@ -75,18 +74,18 @@ if(cptwise & axisLabels & is.null(return)){
           axis.title.y = axis.title.y,
           plot.title = plot.title)
   
-  if(is.null(simData$Tt_bandwidth[[d]])){
+  if(is.null(simData$Tt_bandwidth)){
     bw = "unspecified"
   }
   
-  else if(!(is.null(simData$Tt_bandwidth[[d]]))){
-    bw = eval(substitute(paste(10^-bandwidth), list(bandwidth = simData$Tt_bandwidth[[d]])))
+  else if(!(is.null(simData$Tt_bandwidth))){
+    bw = eval(substitute(paste(10^-bandwidth), list(bandwidth = simData$Tt_bandwidth)))
   }
   
   
   tt <- ggplot()+
     
-    geom_line(aes(x=t,y=simData$Tt[[d]]), lwd = 0.2) +
+    geom_line(aes(x=t,y=simData$Tt), lwd = 0.2) +
     ggtitle(bquote(t[t] == sum(b[i]*sin*"("~omega[i]*t*")",i==1,psi)))+
     
     labs(x = xlab, y = ylab)+
@@ -103,9 +102,9 @@ if(cptwise & axisLabels & is.null(return)){
   
   wt <- ggplot()+
     
-    geom_line(aes(x=t,y=as.numeric(simData$Wt[[d]])), lwd = 0.2) +
+    geom_line(aes(x=t,y=as.numeric(simData$Wt)), lwd = 0.2) +
     
-    ggtitle(bquote(xi[t]*"~ ARMA("~.(simData$Wt_p[[d]])*","~.(simData$Wt_q[[d]])*"), SNR ="~.(simData$SNR[[d]]))) + 
+    ggtitle(bquote(xi[t]*"~ ARMA("~.(simData$Wt_p)*","~.(simData$Wt_q)*"), SNR ="~.(simData$SNR))) + 
     
     labs(x = xlab, y = ylab)+
     theme_light()+
@@ -117,9 +116,9 @@ if(cptwise & axisLabels & is.null(return)){
 
   freq <- ggplot() + 
     
-    geom_point(aes(x = simData$Tt_freq[[d]], y = rep(0,length(simData$Tt_freq[[d]]))), size = 0.4) + 
-    geom_vline(xintercept = simData$Tt_freq[[d]], lwd = 0.05) + 
-    ggtitle(bquote(psi == .(length(simData$Tt_freq[[d]]))*","~'bandwidth' == .(bw))) +
+    geom_point(aes(x = simData$Tt_freq, y = rep(0,length(simData$Tt_freq))), size = 0.4) + 
+    geom_vline(xintercept = simData$Tt_freq, lwd = 0.05) + 
+    ggtitle(bquote(psi == .(length(simData$Tt_freq))*","~'bandwidth' == .(bw))) +
     
     labs(x = bquote(f == omega/(2*pi)), y = "") +
     xlim(0,0.5) + 
@@ -139,10 +138,10 @@ if(cptwise & axisLabels & is.null(return)){
   
     xt <- ggplot()+
     
-    geom_line(aes(x=t,y=as.numeric(simData$Xt[[d]])), lwd = 0.2) +
-    geom_line(aes(x=t,y=simData$Mt[[d]]), lwd = 0.2, col = "white")+
+    geom_line(aes(x=t,y=as.numeric(simData$Xt)), lwd = 0.2) +
+    geom_line(aes(x=t,y=simData$Mt), lwd = 0.2, col = "white")+
       
-    ggtitle(bquote(x["t,"~.(d)] == m["t,"~.(d)] + t["t,"~.(d)] + xi["t,"~.(d)]))+
+    ggtitle(bquote(x[t] == m[t] + t[t] + xi[t]))+
       
     labs(x = xlab, y = ylab)+
     theme_light() +
