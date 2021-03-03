@@ -11,8 +11,8 @@
 #' @param bandwidth \code{integer}; This value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies for the trend component. If specified, 'bandwidth' must be at least *-log10(1/*\code{numFreq}*)*. If unspecified, frequencies are distributed *~Uniform(a=0,b=1)*
 #' @param b \code{numeric}; If specified, a vector of custom coefficients on each sinusoid in the trend component
 #' @param w \code{numeric}; If specified, a vector of custom periods for each sinusoid in the trend component
-#' @param p \code{integer}; The *AR* order of the noise component
-#' @param q \code{integer}; The *MA* order of the noise component
+#' @param p \code{integer}; The \emph{AR} order of the noise component
+#' @param q \code{integer}; The \emph{MA order of the noise component
 #' @param snr \code{numeric}; The desired signal-to-noise ratio
 #' 
 #' @examples 

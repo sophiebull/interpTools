@@ -1,6 +1,6 @@
 #' Simulate W_t
 #' 
-#' Function to simulate W_t: the noise component of X_t. Defaults to white noise. 
+#' Subroutine of \code{simXt()}. Function to simulate \eqn{W_t}: the noise component of \eqn{X_t}. Defaults to white noise (\code{p = 0, q = 0}). 
 #' @param N \code{integer}; The length of the output series 
 #' @param p \code{integer}; The AR order
 #' @param q \code{integer}; The MA order
