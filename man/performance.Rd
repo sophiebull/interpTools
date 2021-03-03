@@ -9,16 +9,47 @@ performance(OriginalData, IntData, GappyData, custom = NULL)
 \arguments{
 \item{OriginalData}{\code{list}; A list object of dimension D x N of original (complete) time series}
 
-\item{IntData}{\code{list}; A list object of dimension D x M x P x G x K x N of interpolated time series (output of parInterpolate.R)}
+\item{IntData}{\code{list}; A list object of dimension D x M x P x G x K x N of interpolated time series (output of \code{parInterpolate()})}
 
-\item{GappyData}{\code{list}; A list object of dimension D x P x G x K x N of the gappy original time series (output of simulateGaps.R)}
+\item{GappyData}{\code{list}; A list object of dimension D x P x G x K x N of the gappy original time series (output of \code{simulateGaps()})}
 
 \item{custom}{\code{character}; A vector of names of user-defined functions used to calculate custom performance metrics (see details)}
 }
 \description{
 Function to calculate the performance metrics between lists of original and interpolated series. \cr \cr
-See \code{?eval_performance} and additional documentation provided in this package (\code{"~/metric_definitions.pdf/"}) for a full list and description of the the performance criteria.\cr
+See additional documentation provided in this package (\code{"~/metric_definitions.pdf/"}) for a full descriptions of the the performance criteria.\cr
 Resulting object is of class '\code{pf}'.
+}
+\details{
+The following is a description of the list of base performance metrics included in the returned object: \cr
+\tabular{ccc}{
+     ID \tab Criterion \tab Optimal \cr
+     ...... \tab ........... \tab ......... \cr
+     1 \tab  pearson_r \tab max  \cr
+     2 \tab  r_squared \tab max  \cr
+     3 \tab  AD \tab min  \cr
+     4 \tab  MBE \tab min  \cr
+     5 \tab  ME \tab min  \cr
+     6 \tab  MAE \tab min  \cr
+     7 \tab  MRE \tab min  \cr
+     8 \tab  MARE \tab min  \cr
+     9 \tab  MAPE \tab min  \cr
+     10 \tab  SSE \tab min  \cr
+     11 \tab  MSE \tab min  \cr
+     12 \tab  RMS \tab min  \cr
+     13 \tab  NMSE \tab min  \cr
+     14 \tab  RE \tab max  \cr
+     15 \tab  RMSE \tab min  \cr
+     16 \tab  NRMSD \tab min  \cr
+     17 \tab  RMSS \tab min  \cr
+     18 \tab  MdAPE \tab min  \cr
+   }
+
+Users can define and pass-in their own custom performance metric functions, but must adhere to the following rules:
+\itemize{
+  \item Inputs are limited to *ONLY* \code{x} (lowercase; the original time series) and \code{X} (uppercase; the interpolated time series)\cr
+  \item Output must be a single numeric value\cr
+  }
 }
 \examples{
  # User-defined functions to calculate a custom performance metric (see Details for rules)
