@@ -2,15 +2,15 @@
 #' 
 #' Subroutine of \code{simulateGaps()}. Function to generate gaps of a specified length constrained by proportion of missingness.
 #' @param x \code{numeric}; The complete time series vector from which to remove values
-#' @param prop_missing \code{numeric}; Proportion of observations to remove, *P*
-#' @param gap_width \code{integer}; Length of gap (how many successive observations to remove), *G*
+#' @param prop_missing \code{numeric}; Proportion of observations to remove, P
+#' @param gap_width \code{integer}; Length of gap (how many successive observations to remove), G
 #' @examples  
 #' n = 100
 #' 
 #' # Remove prop_missing*n points where the number of consecutive missing
 #' # observations (gaps) is a multiple of gap_width
 #' 
-#' gaps(rnorm(n), prop_missing = 0.30, gap_width = 2)
+#' gappyx <- gaps(rnorm(n), prop_missing = 0.30, gap_width = 2)
 #' 
 #' # will generate 30 missing points, with <15 holes
 #' 
