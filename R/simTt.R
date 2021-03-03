@@ -1,9 +1,9 @@
 #' Simulate T_t
 #' 
-#' Function to simulate T_t: the trend component of X_t.
+#' Subroutine of \code{simXt()}. Function to simulate \eqn{T_t}: the trend component of \eqn{X_t}.
 #' @param N \code{integer}; The length of the output series
 #' @param numFreq \code{integer}; The number of sinusoids to generate
-#' @param bandwidth \code{integer}; Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If specified, 'bandwidth' must be at least -log10(1/numFreq). If unspecified, freq =  runif(numFreq,0,1)
+#' @param bandwidth \code{integer}; Value is plugged into a negative exponent (base 10) and defines some interval in which to sample frequencies. If specified, \code{'bandwidth'} must be at least \code{-log10(1/numFreq)}. If unspecified, \code{freq =  runif(numFreq,0,1)}
 #' @param b \code{numeric}; If specified, a vector of custom coefficients on each sinusoid
 #' @param w \code{numeric}; If specified, a vector of custom periods for each sinusoid
 
