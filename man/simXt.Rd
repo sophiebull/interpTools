@@ -38,9 +38,7 @@ simXt(
 
 \item{w}{\code{numeric}; If specified, a vector of custom periods for each sinusoid in the trend component}
 
-\item{p}{\code{integer}; The *AR* order of the noise component}
-
-\item{q}{\code{integer}; The *MA* order of the noise component}
+\item{p}{\code{integer}; The \emph{AR} order of the noise component}
 
 \item{snr}{\code{numeric}; The desired signal-to-noise ratio}
 }
