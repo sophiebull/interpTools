@@ -1,8 +1,8 @@
 #' Simulate M_t
 #' 
-#' Function to simulate M_t: the mean component of X_t. 
+#' Subroutine of \code{simXt()}. Function to simulate \eqn{M_t}: the mean component of \eqn{X_t}. 
 #' @param N \code{integer}; The length of the output series
-#' @param numTrend \code{integer}; The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.
+#' @param numTrend \code{integer}; The number of terms to include in the varying trend component of \eqn{M_t}. Value represents the maximum degree; all lower order terms included.
 #' @param a \code{numeric}; If specified, a vector of custom coefficients for each term in the polynomial.
 #' @param mu \code{numeric}; If specified, a single value representing the grand mean of the polynomial.
 #' @param center \code{numeric}; If specified, a vector of custom centering parameters for each term in the polynomial. 

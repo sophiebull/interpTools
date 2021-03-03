@@ -9,7 +9,7 @@ simMt(N = 1000, numTrend = 0, a = NULL, mu = NULL, center = NULL)
 \arguments{
 \item{N}{\code{integer}; The length of the output series}
 
-\item{numTrend}{\code{integer}; The number of terms to include in the varying trend component of M_t. Value represents the maximum degree; all lower order terms included.}
+\item{numTrend}{\code{integer}; The number of terms to include in the varying trend component of \eqn{M_t}. Value represents the maximum degree; all lower order terms included.}
 
 \item{a}{\code{numeric}; If specified, a vector of custom coefficients for each term in the polynomial.}
 
@@ -18,5 +18,5 @@ simMt(N = 1000, numTrend = 0, a = NULL, mu = NULL, center = NULL)
 \item{center}{\code{numeric}; If specified, a vector of custom centering parameters for each term in the polynomial.}
 }
 \description{
-Function to simulate M_t: the mean component of X_t.
+Function to simulate \eqn{M_t}: the mean component of \eqn{X_t}. Subroutine of \code{simXt()}.
 }
