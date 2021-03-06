@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 ```{r lib, message = FALSE}
 # installing library
 library(devtools)
-install_github("wesleyburr/interpTools")
+install_github("castels/interpTools")
 
 # Loading library
 library(interpTools)
