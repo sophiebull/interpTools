@@ -19,7 +19,7 @@ simTt <- function(N=1000, numFreq = 20, bandwidth = NULL, b = NULL, w = NULL){
   
   if(any(is.null(b), is.null(w))){
     nulls <- c(b = is.null(b), w = is.null(w))
-    warning(c("Value(s): '", paste0(names(nulls)[which(nulls)], sep = ", "), "' unspecified. Defaulting to random generation."))
+    warning(c("Value(s): '", paste0(names(nulls)[which(nulls)], sep = ", "), "' unspecified. Defaulting to random generation. \n"))
   }
   
   stopifnot(N%%1 == 0, N >= 10, numFreq%%2 == 0, numFreq > 0, (is.null(bandwidth) || (bandwidth >= 1 && (numFreq <= 1/(10^-bandwidth)))),
@@ -35,7 +35,7 @@ simTt <- function(N=1000, numFreq = 20, bandwidth = NULL, b = NULL, w = NULL){
   
   if(is.null(b)){
     b <- rnorm(numFreq, mean = 0, sd = N/200) #95% runs from -N/100 to N/100
-    warning(c("Sinusoid coefficient(s) = ", paste0(round(b,3), sep = " ")))
+    warning(c("Sinusoid coefficient(s) = ", paste0(round(b,3), sep = " ")," \n"))
   }
   
   else if(!is.null(b)){
@@ -56,7 +56,7 @@ simTt <- function(N=1000, numFreq = 20, bandwidth = NULL, b = NULL, w = NULL){
   if(!is.null(w)){
     
     if(!is.null(bandwidth)){
-      warning("Ignoring 'bandwidth' parameter since 'w' is already specified.")
+      warning("Ignoring 'bandwidth' parameter since 'w' is already specified. \n")
     }
     
     if(length(w) != numFreq){
@@ -93,10 +93,10 @@ simTt <- function(N=1000, numFreq = 20, bandwidth = NULL, b = NULL, w = NULL){
     }
     
     else if(is.null(bandwidth)){ # unspecified
-      warning("bandwidth not specified- frequencies will be selected randomly from Uniform(a=0,b=1);")
+      warning("bandwidth not specified- frequencies will be selected randomly from Uniform(a=0,b=1); \n")
       w <- runif(numFreq, fourierFreq, pi) 
     }
-    warning(c("Sinusoid period(s) = ", paste0(round(w,3), sep = " ")))
+    warning(c("Sinusoid period(s) = ", paste0(round(w,3), sep = " ")," \n"))
   }
   
   Tt <- paste("(",b,")*sin(", w,"*t)+", sep = "", collapse = "")

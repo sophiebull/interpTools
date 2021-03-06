@@ -43,7 +43,7 @@ simXt <- function(N=1000,
   # WARNINGS
   
   if(missing(N)){
-    warning("N not specified- defaulting to 1000;")
+    warning("N not specified- defaulting to 1000; \n")
   }
   
   t <- 0:(N-1)

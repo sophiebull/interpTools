@@ -13,7 +13,7 @@ simMt <- function(N = 1000, numTrend = 0, a = NULL, mu = NULL, center = NULL){
   
   if(any(is.null(a), is.null(mu), is.null(center))){
     nulls <- c(a = is.null(a), mu = is.null(mu), center = is.null(center))
-    warning(c("Value(s): '", paste0(names(nulls)[which(nulls)], sep = ", "), "' unspecified. Defaulting to random generation."))
+    warning(c("Value(s): '", paste0(names(nulls)[which(nulls)], sep = ", "), "' unspecified. Defaulting to random generation. \n"))
   }
   
   Mt_list <- list()
@@ -34,7 +34,7 @@ simMt <- function(N = 1000, numTrend = 0, a = NULL, mu = NULL, center = NULL){
     if(numTrend == 0){
       a = 0
     }
-    warning(c("Polynomial coefficient(s) = ", paste0(round(a,3), sep = " ")))
+    warning(c("Polynomial coefficient(s) = ", paste0(round(a,3), sep = " ")," \n"))
   }
   
   else if(!is.null(a)){
@@ -57,7 +57,7 @@ simMt <- function(N = 1000, numTrend = 0, a = NULL, mu = NULL, center = NULL){
     if(numTrend == 0){
       center <- 0
     }
-    warning(paste0("Centering parameter = ", center))
+    warning(paste0("Centering parameter = ", center," \n"))
   }
      
   else if(!is.null(center)){ 
@@ -77,7 +77,7 @@ simMt <- function(N = 1000, numTrend = 0, a = NULL, mu = NULL, center = NULL){
   
   if(is.null(mu)){
     mu <- runif(1, -N/100, N/100) # randomly generate grand mean
-    warning(paste0("mu = ", round(mu,3)))
+    warning(paste0("mu = ", round(mu,3)," \n"))
   } 
   
   else if(!is.null(mu)){
