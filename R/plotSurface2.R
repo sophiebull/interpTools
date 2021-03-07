@@ -31,7 +31,7 @@ plotSurface2 <- function(agObject,
                          f = "median",
                          
                          highlight = NULL,
-                         highlight_color = NULL,
+                         highlight_color = "yellow",
                          colors = c("red","blue")){
   
   
@@ -46,17 +46,17 @@ plotSurface2 <- function(agObject,
   
   if(toggle != "method" & toggle != "dataset") stop("'toggle' must equal either 'method' or 'dataset'.")
   
+  if(length(metric) != 1) stop("'metric' must contain only a single character element.")
+  if(length(f) != 1) stop("'f' must contain only a single character element.")
+  if(length(toggle) != 1) stop("'toggle' must contain only a single character element.")
+  if(length(highlight_color) != 1 & !is.null(highlight_color)) stop("'highlight_color' must contain only a single character element.")
   
   if(!all(m %in%  names(agObject[[1]][[1]][[1]]))) stop("Method(s) '", paste0(m[!m %in% names(agObject[[1]][[1]][[1]])], collapse = ", ' "),"' not found. Possible choices are: '", paste0(names(agObject[[1]][[1]][[1]]), collapse = "', '"),"'.")
   if(!all(d %in% names(agObject))) stop("Dataset(s) ", paste0(d[!d %in% names(agObject)], collapse = ", ")," not found. Possible choices are: ", paste(names(agObject), collapse = ','))
   if(!all(f %in% names(agObject[[1]][[1]][[1]][[1]]))) stop(paste0(c("f must be one of: '",paste0(names(agObject[[1]][[1]][[1]][[1]]), collapse = "', '"),"'."), collapse = ""))
   if(!metric %in% rownames(agObject[[1]][[1]][[1]][[1]])) stop(paste0("Metric '",metric,"' must be one of ", paste(rownames(agObject[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
   
-  if(length(metric) != 1) stop("'metric' must contain only a single character element.")
-  if(length(f) != 1) stop("'f' must contain only a single character element.")
-  if(length(toggle) != 1) stop("'toggle' must contain only a single character element.")
-  if(length(highlight_color) != 1 & !is.null(highlight_color)) stop("'highlight_color' must contain only a single character element.")
-  
+
   if(class(agObject) != "aggregate") stop("'agObject' object must be of class 'aggregate'. Please use aggregate().")
   
   if(!is.null(highlight)){
@@ -332,7 +332,7 @@ plotSurface2 <- function(agObject,
   
   plot<- hide_colorbar(plot) 
   
-  message(paste("Please make your selection of ",toggle,"on the Viewer."))
+  message(paste("Please make your ",toggle,"selection on the Viewer."))
   
   return(plot)
 }
