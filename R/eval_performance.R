@@ -1,6 +1,6 @@
 #' Evaluate Interpolation Performance of a Single Time Series
 #' 
-#' Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated. Subroutine of \code{performance()}.
+#' Subroutine of \code{performance()}. Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated. 
 #'    
 #' @param x \code{numeric}; The \strong{original} time series vector.
 #' @param X \code{numeric}; The \strong{interpolated} time series vector.
