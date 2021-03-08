@@ -2,7 +2,7 @@
 #' 
 #' A function that will produce a report on the stability of the input interpolation algorithms according to the gradient.
 #' 
-#' @param agObject \code{aggregate}; A list object (result of \code{aggregate()}) of aggregated performance metrics
+#' @param agObject \code{aggregate_pf}; A list object (result of \code{aggregate_pf()}) of aggregated performance metrics
 #' @param d \code{character}; A vector of the datasets of interest
 #' @param m \code{character}; A vector of the interpolation methods of interest 
 #' @param cm \code{character}; The chosen method(s) of interest 
@@ -19,9 +19,26 @@ eval_gradient <- function(agObject, metric, m = names(agObject[[1]][[1]][[1]]), 
   if(length(cm) != 1) stop("Chosen method of interest must be a single character element.")
   if(length(cd) != 1) stop("Chosen dataset of interest must be a single character element.")
   
+  
+  if(!all(m %in%  names(agObject[[1]][[1]][[1]]))) stop("Method(s) '", paste0(m[!m %in% names(agObject[[1]][[1]][[1]])], collapse = ", ' "),"' not found. Possible choices are: '", paste0(names(agObject[[1]][[1]][[1]]), collapse = "', '"),"'.")
+  if(!all(d %in% names(agObject))) stop("Dataset(s) ", paste0(d[!d %in% names(agObject)], collapse = ", ")," not found. Possible choices are: ", paste(names(agObject), collapse = ','))
+  if(!f %in% names(agObject[[1]][[1]][[1]][[1]])) stop(paste0(c("f must be one of: '",paste0(names(agObject[[1]][[1]][[1]][[1]]), collapse = "', '"),"'."), collapse = ""))
+  if(!all(metric %in% rownames(agObject[[1]][[1]][[1]][[1]]))) stop(paste0("Metric(s) '",paste(metric, collapse = ","),"' must be one of ", paste(rownames(agObject[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
+  
+  
   if(!(cm %in% m)) stop(paste0("Chosen method '", cm, "' must be one of ", paste0(m, collapse = ", ") ,"." ))
   if(!(cd %in% d)) stop(paste0("Chosen method '", cd, "' must be one of ", paste0(d, collapse = ", ") ,"." ))
-  if(class(agObject) != "aggregate") stop("'agObject' must be of class 'aggregate'")
+  if(class(agObject) != "aggregate_pf") stop("'agObject' must be of class 'aggregate_pf'")
+  
+  if(length(f) != 1) stop("'f' must contain only a single character element.")
+
+  
+  if(class(agObject) != "aggregate_pf") stop("'agObject' object must be of class 'aggregate_pf'. Please use aggregate_pf().")
+  
+  
+  
+  
+  
   
   #####################
   # Defining 'optimal'
