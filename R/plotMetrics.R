@@ -33,7 +33,7 @@ plotMetrics <- function(agObject,
   
   if(!all(m %in%  names(agObject[[1]][[1]][[1]]))) stop("Method(s) '", paste0(m[!m %in% names(agObject[[1]][[1]][[1]])], collapse = ", ' "),"' not found. Possible choices are: '", paste0(names(agObject[[1]][[1]][[1]]), collapse = "', '"),"'.")
   if(!all(d %in% names(agObject))) stop("Dataset(s) ", paste0(d[!d %in% names(agObject)], collapse = ", ")," not found. Possible choices are: ", paste(names(agObject), collapse = ','))
-  if(!all(metric %in% rownames(agObject[[1]][[1]][[1]][[1]]))) stop(paste0("Metric(s) '",paste(metric, collapse = ","),"' must be one of ", paste(rownames(agObject[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
+  if(!all(metric %in% rownames(agObject[[1]][[1]][[1]][[1]]))) stop(paste0("Metric(s) '",paste(metric[which(!metric %in% rownames(agObject[[1]][[1]][[1]][[1]]))], collapse = ","),"' must be one of ", paste(rownames(agObject[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
   
   if(class(agObject) != "aggregate_pf") stop("'agObject' must be of class 'aggregate_pf'")
   
