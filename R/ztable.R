@@ -2,15 +2,15 @@
 #' 
 #'  A function to produce tables of data compatible with LaTeX. \cr
 #'  
-#' @param agEval \code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})
+#' @param agObject \code{aggregate}; An object containing the aggregated performance metrics (result of \code{aggregate()})
 #' @param d \code{numeric}; A single value to indicate the dataset of interest
 #' @param crit \code{character}; A single element describing the performance metric of interest
 #' @param m \code{character}; A single element describing the interpolation method of interest
 #' @param sdist \code{logical}; \code{TRUE} returns a table of the sampling distribution \code{(Q2.5, median, Q97.5)} of the chosen metric at every combination of \code{(p,g)}. \code{FALSE} returns a table of values corresponding to \code{f(p,g)}, where each data point is the chosen sample statistic at each \code{(p,g)}.
-#' @param f \code{character}; If \code{sdist = F}, the sample statistic of interest defining \code{f(p,g)}. Possible choices are listed in \code{?agEvaluate}.
+#' @param f \code{character}; If \code{sdist = F}, the sample statistic of interest defining \code{f(p,g)}. Possible choices are listed in \code{?aggregate}.
 #' @param LaTeX \code{logical}; \code{TRUE} returns a table in LaTeX format. \code{FALSE} returns a table in raw matrix format.
 
-ztable <- function(agEval, d = 1, crit, m, sdist = F, f = NULL, LaTeX = T){
+ztable <- function(agObject, d, crit, m, sdist = F, f = NULL, LaTeX = T){
   
   if(!is.logical(LaTeX)) stop("Object 'LaTeX' must either be TRUE or FALSE.  TRUE returns a table in LaTeX format, FALSE returns the raw matrix.")
   if(!is.logical(sdist)) stop("Object 'sdist' must either be TRUE or FALSE. TRUE returns the sampling distribution, FALSE returns the raw data according to 'crit' and 'f'.")
@@ -21,18 +21,18 @@ ztable <- function(agEval, d = 1, crit, m, sdist = F, f = NULL, LaTeX = T){
   if(is.null(f) && !sdist) stop("If 'sdist = F' then the user must specify the sample statistic of interest.")
   
   
-  if(class(agEval) != "agEvaluate") stop("'agEval' object must be of class 'agEvaluate'. Please use agEvaluate().")
-  if(length(d) != 1 | class(d) != "numeric") stop("Object 'd' must be of class 'numeric' and of length one.")
+  if(class(agObject) != "aggregate") stop("'agObject' object must be of class 'aggregate'. Please use aggregate().")
+  if(length(d) != 1 | class(d) != "character") stop("Object 'd' must be of class 'character' and of length one.")
   if(length(m) != 1 | class(m) != "character") stop("Object 'm' must be of class 'character' and of length one.")
   if(!sdist && (length(f) != 1 | class(f) != "character")) stop("Object 'f' must be of class 'character' and of length one.")
   if(length(crit) != 1 | class(crit) != "character") stop("Object 'crit' must be of class 'character' and of length one.")
   
-  if(!all(paste0("D",d) %in% names(agEval))) stop("Dataset(s) ", paste0(d[!paste0("D",d) %in% names(agEval)], collapse = ", ")," not found. Possible choices are: ", paste0(gsub("D", "",names(agEval)), collapse = ", "))
-  if(!all(f %in% names(agEval[[1]][[1]][[1]][[1]]))) stop(paste0(c("f must be one of: '",paste0(names(agEval[[1]][[1]][[1]][[1]]), collapse = "', '"),"'."), collapse = ""))
-  if(!crit %in% rownames(agEval[[1]][[1]][[1]][[1]])) stop(paste0("Criterion '",crit,"' must be one of ", paste(rownames(agEval[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
-  if(!all(m %in%  names(agEval[[1]][[1]][[1]]))) stop("Method(s) '", paste0(m[!m %in% names(agEval[[1]][[1]][[1]])], collapse = ", ' "),"' not found. Possible choices are: '", paste0(names(agEval[[1]][[1]][[1]]), collapse = "', '"),"'.")
+  if(!(d %in% names(agObject))) stop("Dataset(s) ", d[!d %in% names(agObject)]," not found. Possible choices are: ", paste0(names(agObject), collapse = ", "))
+  if(!all(f %in% names(agObject[[1]][[1]][[1]][[1]]))) stop(paste0(c("f must be one of: '",paste0(names(agObject[[1]][[1]][[1]][[1]]), collapse = "', '"),"'."), collapse = ""))
+  if(!crit %in% rownames(agObject[[1]][[1]][[1]][[1]])) stop(paste0("Criterion '",crit,"' must be one of ", paste(rownames(agObject[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
+  if(!all(m %in%  names(agObject[[1]][[1]][[1]]))) stop("Method(s) '", paste0(m[!m %in% names(agObject[[1]][[1]][[1]])], collapse = ", ' "),"' not found. Possible choices are: '", paste0(names(agObject[[1]][[1]][[1]]), collapse = "', '"),"'.")
   
-  zlist <- compileMatrix(agEval)
+  zlist <- compileMatrix(agObject)
   
   zlist_q2.5 <- round(zlist[["q2.5"]][[crit]][[m]][[d]],digits = 2)
   zlist_median <- round(zlist[["median"]][[crit]][[m]][[d]], digits = 2)
@@ -49,7 +49,7 @@ ztable <- function(agEval, d = 1, crit, m, sdist = F, f = NULL, LaTeX = T){
   footer[index_str] <- " "
   
   if(sdist){
-    G <- length(agEval[[1]][[1]])
+    G <- length(agObject[[1]][[1]])
     
     string <- paste0("zlist_q2.5[,",1:(G-1),"], zlist_median[,",1:(G-1),"], zlist_q97.5[,",1:(G-1),"], ")
     
