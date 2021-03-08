@@ -6,23 +6,43 @@
 #' on average the metric has a skewed distribution, and the median will better capture the essence of the data.
 #' 
 #' @param agObject \code{aggregate_pf}; A list object (result of \code{aggregate_pf()}) of aggregated performance metrics
-#' @param cptwise \code{logical}; Whether to display plots individually (histograms) or together as a density plot
+#' @param plotEach \code{logical}; Whether to display plots individually (histograms) or together as a density plot
 #' @param symmetric \code{logical}; TRUE = Display only symmetric metrics, FALSE = Display only asymmetric metrics, NULL = Display all metrics
-#' @param output \code{character}; "plots" (default) or "table".
+#' @param output \code{character}; "plot" (default) or "table".
 
-plotSkew <- function(agObject, cptwise=F, show_symmetric= NULL, output = "plots", metric = rownames(agObject[[1]][[1]][[1]][[1]])){
+plotSkew <- function(agObject, plotEach=TRUE, show_symmetric= NULL, output = "plot", metric = rownames(agObject[[1]][[1]][[1]][[1]])){
+
+  options(warn = -1)
+  
+  #####################
+  # LOGICAL CHECKS
+  #####################
+  
+  stopifnot((is.logical(plotEach) | is.logical(show_symmetric)))
+  
+  if(class(agObject) != "aggregate_pf"){ stop("'agObject' must be of class 'aggregate_pf'")}
+  
+  if(!output %in% c("plot", "table")){ stop("Argument 'output' must be either 'plot' or 'table'.")}
+  
+  if(output == "table" & plotEach){ message("Ignoring argument 'plotEach' if output = 'table'.")}
+  
+  if(!all(metric %in% rownames(agObject[[1]][[1]][[1]][[1]]))) stop(paste0("Metric(s) '",paste(metric[which(!metric %in% rownames(agObject[[1]][[1]][[1]][[1]]))], collapse = ","),"' must be one of ", paste(rownames(agObject[[1]][[1]][[1]][[1]]),collapse = ", "),"."))
+  
+  #######################
+  # Initializing indices
+  #######################
+  
   
   D <- length(agObject)
   P <- length(agObject[[1]])
   G <- length(agObject[[1]][[1]])
   M <- length(agObject[[1]][[1]][[1]])
-  C <- nrow(agObject[[1]][[1]][[1]][[1]][metric,])
+  C <- length(metric)
 
-  stopifnot((is.logical(cptwise) | is.logical(show_symmetric)), class(agObject) == "aggregate_pf")
   
-  skews <- matrix(ncol = D*P*G*M, nrow = nrow(agObject[[1]][[1]][[1]][[1]][metric,]))
-  q1s <- skews
-  q3s <- q1s
+  ########################
+  # Calculating skewness
+  ########################
   
   skew <- function(x, na.rm = TRUE){
     stopifnot(is.numeric(x))
@@ -38,6 +58,19 @@ plotSkew <- function(agObject, cptwise=F, show_symmetric= NULL, output = "plots"
     
     return(sk)
   }
+  
+    #############################
+    # initializing empty matrices
+    #############################
+  
+    skews <- matrix(ncol = D*P*G*M, nrow = C)
+    rownames(skews) <- metric
+    
+    q1s <- skews
+    q3s <- q1s
+    
+    
+    
   
   i <- 1
   
@@ -59,12 +92,9 @@ plotSkew <- function(agObject, cptwise=F, show_symmetric= NULL, output = "plots"
     }
   }
   
-  names <- rownames(agObject[[1]][[1]][[1]][[1]])
-  names <- names[which(names %in% metric)]
-  
-  rownames(skews) = names
-  rownames(q1s) = names
-  rownames(q3s) = names
+  rownames(skews) <- metric
+  rownames(q1s) <- metric
+  rownames(q3s) <- metric
   
   skews <- data.frame(t(skews))
   
@@ -73,33 +103,53 @@ plotSkew <- function(agObject, cptwise=F, show_symmetric= NULL, output = "plots"
   skewSkews <- data.frame(key = colnames(skews), value = apply(skews,2,skew))
   
   
-  gather <- gather(skews)
+  gather <- gather(skews) 
   
-  symmetric <- rownames(skewMeans[which(skewMeans$value >= -sd(skewMeans$value)/3 & skewMeans$value <= sd(skewMeans$value)/3),])
-  symmetricIn <-match(symmetric,rownames(skewMeans))
+  ##############################
+  # Determining which are skewed
+  ##############################
+  
+  condition <- which(skewMeans$value >= -sd(skewMeans$value)/3 & skewMeans$value <= sd(skewMeans$value)/3) # index of symmetric metric(s)
+  
+  if(length(condition) == 0){ 
+    message("There are no symmetric metrics in your selection.")
+    
+    symmetric = NULL
+    symmetricIn = NULL
+    
+  } else if(length(condition) > 0){
+  
+  symmetric <- rownames(skewMeans[condition,])
+  symmetricIn <- condition
+  
+  }
 
   skewCols <- data.frame(key = colnames(skews), value = rep("white",length(colnames(skews))))
   skewCols$value = as.character(skewCols$value)
-  skewCols[symmetricIn,]$value = c("grey63")
   
-  sym <- gather[gather$key %in% symmetric,]
+  
+  if(!is.null(symmetricIn)){
+    skewCols[symmetricIn,]$value = c("grey63")
+  }
+  
+  sym <- gather[gather$key %in% symmetric,] # something wrong here
   asym <- gather[!(gather$key %in% symmetric),]
   
   skewPlot <- list()
   
-  if(cptwise){
+  if(plotEach){
     if(is.null(show_symmetric)){
       Cc = c(1:C)
       my.data = gather
     }
     
     else if(show_symmetric){
-      Cc = c(1:C)[symmetricIn]
+      Cc = c(1:C)[symmetricIn] # index position(s) of symmetric metrics
       my.data = sym
     }
     
     else if(!show_symmetric){
-      Cc = c(1:C)[-symmetricIn]
+      Cc = c(1:C)[-symmetricIn] # index position(s) of asymmetric metrics
       my.data = asym
     }
     
@@ -132,35 +182,37 @@ plotSkew <- function(agObject, cptwise=F, show_symmetric= NULL, output = "plots"
   
   }
   
-  else if(!cptwise){
+  else if(!plotEach){
     if(!is.null(show_symmetric)){
       if(show_symmetric){
       thePlot <- ggplot(sym) + geom_density(aes(x = sym$value, color = sym$key), lwd = 0.25) + theme_light() + 
-        xlim(-5,5) + xlab("skewness") + labs(color = "metriceria") + 
+        xlim(-5,5) + xlab("skewness") + labs(color = "metric") + 
         scale_colour_manual(values = colorRampPalette(c("blue","pink","turquoise"))(length(symmetric))) #tidyr
       }
       else if(!show_symmetric){
       thePlot <- ggplot(asym) + geom_density(aes(x = asym$value, color = asym$key), lwd = 0.25) + theme_light() + 
-        xlim(-5,5) + xlab("skewness") + labs(color = "metriceria") + 
+        xlim(-5,5) + xlab("skewness") + labs(color = "metric") + 
         scale_colour_manual(values = colorRampPalette(c("blue","pink","turquoise"))(C-length(symmetric))) #tidyr
       }
     }
     
     else if(is.null(show_symmetric)){
       thePlot <- ggplot(gather) + geom_density(aes(x = gather$value, color = gather$key), lwd = 0.25) + theme_light() + 
-        xlim(-5,5) + xlab("skewness") + labs(color = "metriceria") + 
+        xlim(-5,5) + xlab("skewness") + labs(color = "metric") + 
         scale_colour_manual(values = colorRampPalette(c("blue","pink","turquoise"))(C)) #tidyr
     }
   }
 
     vals <- format(round(skewMeans$value,2),nsmall = 2)
     
-    vals[symmetricIn] <- paste0("\\textbf{", vals[symmetricIn], "}") # bold non-skewed metriceria
+    if(length(symmetricIn) != 0){
+      vals[symmetricIn] <- paste0("\\textbf{", vals[symmetricIn], "}") # bold non-skewed metrics
+    }
     
     theTable <- data.frame(rownames(skewMeans),vals)
-    colnames(theTable) <- c("metricerion","mean skewness")
+    colnames(theTable) <- c("metric","mean skewness")
     
-    if(output == "plots"){
+    if(output == "plot"){
       return(thePlot)
     }
     
