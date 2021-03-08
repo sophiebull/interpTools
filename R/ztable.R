@@ -2,12 +2,12 @@
 #' 
 #'  A function to produce tables of data compatible with LaTeX. \cr
 #'  
-#' @param agObject \code{aggregate}; An object containing the aggregated performance metrics (result of \code{aggregate()})
+#' @param agObject \code{aggregate_pf}; An object containing the aggregated performance metrics (result of \code{aggregate_pf()})
 #' @param d \code{numeric}; A single value to indicate the dataset of interest
 #' @param crit \code{character}; A single element describing the performance metric of interest
 #' @param m \code{character}; A single element describing the interpolation method of interest
 #' @param sdist \code{logical}; \code{TRUE} returns a table of the sampling distribution \code{(Q2.5, median, Q97.5)} of the chosen metric at every combination of \code{(p,g)}. \code{FALSE} returns a table of values corresponding to \code{f(p,g)}, where each data point is the chosen sample statistic at each \code{(p,g)}.
-#' @param f \code{character}; If \code{sdist = F}, the sample statistic of interest defining \code{f(p,g)}. Possible choices are listed in \code{?aggregate}.
+#' @param f \code{character}; If \code{sdist = F}, the sample statistic of interest defining \code{f(p,g)}. Possible choices are listed in \code{?aggregate_pf}.
 #' @param LaTeX \code{logical}; \code{TRUE} returns a table in LaTeX format. \code{FALSE} returns a table in raw matrix format.
 
 ztable <- function(agObject, d, crit, m, sdist = F, f = NULL, LaTeX = T){
@@ -21,7 +21,7 @@ ztable <- function(agObject, d, crit, m, sdist = F, f = NULL, LaTeX = T){
   if(is.null(f) && !sdist) stop("If 'sdist = F' then the user must specify the sample statistic of interest.")
   
   
-  if(class(agObject) != "aggregate") stop("'agObject' object must be of class 'aggregate'. Please use aggregate().")
+  if(class(agObject) != "aggregate_pf") stop("'agObject' object must be of class 'aggregate_pf'. Please use aggregate_pf().")
   if(length(d) != 1 | class(d) != "character") stop("Object 'd' must be of class 'character' and of length one.")
   if(length(m) != 1 | class(m) != "character") stop("Object 'm' must be of class 'character' and of length one.")
   if(!sdist && (length(f) != 1 | class(f) != "character")) stop("Object 'f' must be of class 'character' and of length one.")
