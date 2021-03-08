@@ -132,7 +132,7 @@ plotSkew <- function(agObject, plotEach=TRUE, show_symmetric= NULL, output = "pl
     skewCols[symmetricIn,]$value = c("grey63")
   }
   
-  sym <- gather[gather$key %in% symmetric,] # something wrong here
+  sym <- gather[gather$key %in% symmetric,] 
   asym <- gather[!(gather$key %in% symmetric),]
   
   skewPlot <- list()
