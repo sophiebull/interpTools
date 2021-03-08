@@ -26,13 +26,15 @@ plotSurface2 <- function(agObject,
                          d = names(agObject),
                          
                          toggle = "dataset",
+                         grid = FALSE,
+                         legend = TRUE,
                          
                          metric = "MSE",
                          f = "median",
                          
                          highlight = NULL,
-                         highlight_color = "yellow",
-                         colors = c("red","blue")){
+                         highlight_color = "#FF0000",
+                         colors = c("#FF8633","#FFAF33","#FFD133","#FFEC33","#D7FF33","#96FF33")){
   
   
   ##########################
@@ -118,16 +120,20 @@ plotSurface2 <- function(agObject,
     
     colorList <- colorRampPalette(colors)(D)
     
-    colorListMatch <- colorList[1:D]
-    names(colorListMatch) <- data_names
+    colorList <- colorList[1:D]
+    names(colorList) <- data_names
     
     if(!is.null(highlight)){
-      colorListMatch[[highlight]] <- highlight_color
+      colorList[[highlight]] <- highlight_color
     }
     
-    colorListMatch <- rep(colorListMatch, each = P*G)
+    colorListMatch <- rep(colorList, each = P*G)
     palette <- lapply(split(colorListMatch, names(colorListMatch)), unname)
     palette <- palette[data_names]
+    
+    nameSurface = data_names
+    bound = D
+    oth_bound = M
   }
   
   else if(toggle == "dataset"){
@@ -136,16 +142,21 @@ plotSurface2 <- function(agObject,
     
     colorList <- colorRampPalette(colors)(M)
     
-    colorListMatch <- colorList[1:M]
-    names(colorListMatch) <- method_names
+    colorList <- colorList[1:M]
+    names(colorList) <- method_names
     
     if(!is.null(highlight)){
-      colorListMatch[[highlight]] <- highlight_color
+      colorList[[highlight]] <- highlight_color
     }
     
-    colorListMatch <- rep(colorListMatch, each = P*G)
+    colorListMatch <- rep(colorList, each = P*G)
     palette <- lapply(split(colorListMatch, names(colorListMatch)), unname) # solid color palettes for each method
     palette <- palette[method_names]
+    
+    nameSurface = method_names
+    bound = M
+    oth_bound = D
+    
   }
   
   
@@ -193,7 +204,6 @@ plotSurface2 <- function(agObject,
       z_d[[vd]] <- z_m
       
     }
-    
     z <- paste(unlist(z_d), collapse = " %>% \n")
   }
   
@@ -333,6 +343,48 @@ plotSurface2 <- function(agObject,
   plot<- hide_colorbar(plot) 
   
   message(paste("Please make your ",toggle,"selection on the Viewer."))
+
+  #################
   
+  ######
+  # GRID
+  ######
+  
+  theLegend = NULL
+  
+  if(legend){
+    
+    manualLegend <- data.frame(color = as.character(colorList), 
+                               nameSurface = nameSurface, 
+                               y = rep(0.1,bound), 
+                               x = seq(0.4,0.6,length.out = bound), 
+                               textcol = rep("black",bound),
+                               stringsAsFactors = FALSE)
+    
+    ax <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE, range = c(0,1))
+    ay <- list(title = "", showgrid = FALSE, showticklabels = FALSE, zeroline = FALSE, range = c(0,1))
+    
+    theLegend <-plot_ly(data = manualLegend, showlegend = F) %>%
+      
+      layout(xaxis = ax, yaxis = ay) %>% 
+      
+      add_markers(x = manualLegend$x,
+                  y = manualLegend$y, 
+                  size = 50, 
+                  name = manualLegend$nameSurface,
+                  color = I(manualLegend$color)) %>%
+      
+      add_text(x = manualLegend$x,
+               y = manualLegend$y - 0.04,
+               text = manualLegend$nameSurface,
+               color = I(manualLegend$textcol)) 
+  
+    
+    
+  }
+  
+  # Something is buggy with plot_ly()...
+  #spl <- subplot(plot, theLegend, nrows = 2) 
+  #return(spl)
   return(plot)
 }
