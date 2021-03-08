@@ -5,7 +5,7 @@
 #' @param d \code{character}; A vector of the datasets of interest
 #' @param m \code{character}; A vector of the interpolation methods of interest 
 #' @param metric \code{character}; A character vector describing the performance metrics of interest
-#' @param agObject \code{list}; A list object (result of \code{aggregate()}) of aggregated performance metrics
+#' @param agObject \code{aggregate_pf}; A list object (result of \code{aggregate_pf()}) of aggregated performance metrics
 #' @param f \code{character}; "median" (default): which statistic will be represented by the gradient
  
 
@@ -15,7 +15,7 @@ gradient <- function(agObject, d=names(agObject),m=names(agObject[[1]][[1]][[1]]
   # LOGICAL CHECKS
   ########################
   
-  stopifnot(f %in% names(agObject[[1]][[1]][[1]][[1]])[1:11], class(agObject) == "aggregate",
+  stopifnot(f %in% names(agObject[[1]][[1]][[1]][[1]])[1:11], class(agObject) == "aggregate_pf",
             metric %in% rownames(agObject[[1]][[1]][[1]][[1]]),
             length(d) <= length(agObject), length(m) <= length(agObject[[1]][[1]][[1]]),
             all(d %in% names(agObject)))

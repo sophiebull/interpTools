@@ -1,6 +1,6 @@
 #' Aggregate the Performance Matrices of Multiple Interpolations
 #' 
-#' Function to aggregate the set of performance matrices, by criterion, using sample statistics of the sampling distribution across K. Resulting object is of class \code{'aggregate'}.
+#' Function to aggregate the set of performance matrices, by criterion, using sample statistics of the sampling distribution across K. Resulting object is of class \code{'aggregate_pf'}.
 #'  
 #' @param pf \code{pf}; A nested list of dimension D x M x P x G x K (result of \code{performance()}), where the terminal node is a performance matrix.
 #' @param custom \code{character}; A vector of names of user-defined functions used to perform aggregation with custom statistics (see details) 
@@ -53,7 +53,7 @@
 #'  aggregate(pf = pf, custom = c("my_stat1", "my_stat2"))
 #'      
 
-aggregate <- function(pf, custom = NULL){
+aggregate_pf <- function(pf, custom = NULL){
   
   if(class(pf) != "pf") stop("'pf' object must be of class 'pf'. Use performance() to generate such objects.")
   
@@ -235,7 +235,7 @@ aggregate <- function(pf, custom = NULL){
   }
   names(agObject) <- names(pf)
   
-  class(agObject) <- "aggregate"
+  class(agObject) <- "aggregate_pf"
     return(agObject)
 
   

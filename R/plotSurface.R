@@ -13,7 +13,7 @@
 #' @param metric \code{character}; An element describing the performance metric of interest
 #' @param agObject \code{agObject}; An object containing the aggregated performance metrics (result of \code{agObject()})
 #' @param layer_type \code{character}; How to layer the surfaces (by "method" or by "dataset") 
-#' @param f \code{character}; The statistic of interest defining the surface \code{f(p,g)}. Possible choices are listed in \code{?aggregate}.
+#' @param f \code{character}; The statistic of interest defining the surface \code{f(p,g)}. Possible choices are listed in \code{?aggregate_pf}.
 #' @param highlight \code{character/numeric}; A single method (if \code{layer_type = "method"}) or dataset (if \code{layer_type = "dataset"}) to highlight.
 #' @param highlight_color \code{character}; An HTML color of format \code{"#xxxxxx"} to apply to \code{highlight}
 #' @param colors \code{character}; A vector of the desired color palette, with entries in HTML format (\code{"#xxxxxx"}) 
@@ -48,7 +48,7 @@ plotSurface <- function( d=1:length(agObject),
   if(length(layer_type) != 1) stop("'layer_type' must contain only a single character element.")
   if(length(highlight_color) != 1) stop("'highlight_color' must contain only a single character element.")
   
-  if(class(agObject) != "aggregate") stop("'agObject' object must be of class 'aggregate'. Please use aggregate().")
+  if(class(agObject) != "aggregate_pf") stop("'agObject' object must be of class 'aggregate_pf'. Please use aggregate_pf().")
   
   if(!is.null(highlight)){
     if(length(highlight) != 1) stop("'highlight' must contain only a single character element.")

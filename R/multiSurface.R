@@ -10,9 +10,9 @@
 #' @param d \code{numeric}; A vector to indicate datasets of interest
 #' @param m \code{character}; A vector of interpolation methods of interest
 #' @param metric \code{character}; An element describing the performance metric of interest
-#' @param agObject \code{agObject}; An object containing the aggregated performance metrics (result of \code{aggregate()})
+#' @param agObject \code{aggregate_pf}; An object containing the aggregated performance metrics (result of \code{aggregate_pf()})
 #' @param layer_type \code{character}; How to layer the surfaces (by \code{"method"} or by \code{"dataset"}) 
-#' @param f \code{character}; The statistic of interest defining the surface \code{f(p,g)}. Possible choices are listed in \code{?aggregate}.
+#' @param f \code{character}; The statistic of interest defining the surface \code{f(p,g)}. Possible choices are listed in \code{?aggregate_pf}.
 #' @param highlight \code{character/numeric}; A single method (if \code{layer_type = "method"}) or dataset (if \code{layer_type = "dataset"}) to highlight.
 #' @param highlight_color \code{character}; An HTML color of format \code{"#xxxxxx"} to apply to \code{highlight}
 #' @param colors \code{character}; A vector of the desired color palette, with entries in HTML format (\code{"#xxxxxx"}) 
@@ -47,7 +47,7 @@ multiSurface <- function(d = 1:length(agObject),
   
   if(layer_type != "method" & layer_type != "dataset") stop("'layer_type' must equal either 'method' or 'dataset'.")
   
-  if(class(agObject) != "aggregate") stop("'agObject' object must be of class 'aggregate'. Please use aggregate().")
+  if(class(agObject) != "aggregate_pf") stop("'agObject' object must be of class 'aggregate_pf'. Please use aggregate_pf().")
   
   if(layer_type == "method" & !highlight %in% m) stop(paste0(c("'highlight' must be an element of 'm'. Choose one of: '", paste0(m, collapse = "', '"),"'."), collapse = ""))
   if(layer_type == "dataset" & !highlight %in% d) stop(paste0(c("'highlight' must be an element of 'd'. Choose one of: '", paste0(d, collapse = "', '"),"'."), collapse = ""))

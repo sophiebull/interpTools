@@ -5,7 +5,7 @@
 #' symmetric distribution.  Distributions of skewness values whose center is not in the neighbourhood of zero (-s/3 <= Xbar <= s/3) indicate that 
 #' on average the metric has a skewed distribution, and the median will better capture the essence of the data.
 #' 
-#' @param agObject \code{aggregate}; A list object (result of \code{aggregate.R}) of aggregated performance metrics
+#' @param agObject \code{aggregate_pf}; A list object (result of \code{aggregate_pf()}) of aggregated performance metrics
 #' @param cptwise \code{logical}; Whether to display plots individually (histograms) or together as a density plot
 #' @param symmetric \code{logical}; TRUE = Display only symmetric metrics, FALSE = Display only asymmetric metrics, NULL = Display all metrics
 #' @param output \code{character}; "plots" (default) or "table".
@@ -18,7 +18,7 @@ plotSkew <- function(agObject, cptwise=F, show_symmetric= NULL, output = "plots"
   M <- length(agObject[[1]][[1]][[1]])
   C <- nrow(agObject[[1]][[1]][[1]][[1]][metric,])
 
-  stopifnot((is.logical(cptwise) | is.logical(show_symmetric)), class(agObject) == "aggregate")
+  stopifnot((is.logical(cptwise) | is.logical(show_symmetric)), class(agObject) == "aggregate_pf")
   
   skews <- matrix(ncol = D*P*G*M, nrow = nrow(agObject[[1]][[1]][[1]][[1]][metric,]))
   q1s <- skews
