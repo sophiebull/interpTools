@@ -135,6 +135,12 @@ plotSkew <- function(agObject, plotEach=TRUE, show_symmetric= NULL, output = "pl
   sym <- gather[gather$key %in% symmetric,] 
   asym <- gather[!(gather$key %in% symmetric),]
   
+  
+  ######################
+  # Constructing plots
+  ######################
+  
+  
   skewPlot <- list()
   
   if(plotEach){
