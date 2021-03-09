@@ -41,8 +41,6 @@ plotSurface2 <- function(agObject,
   # LOGICAL CHECKS
   ##########################
   
-  ## LOGICAL CHECKS ############
-  
   if(sum(duplicated(d) != 0)) stop(paste0("'d' contains redundant elements at position(s): ", paste0(c(1:length(d))[duplicated(d)], collapse = ", ") ))
   if(sum(duplicated(m) != 0)) stop(paste0("'m' contains redundant elements at position(s): ", paste0(c(1:length(m))[duplicated(m)], collapse = ", ") ))
   
