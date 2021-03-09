@@ -22,8 +22,8 @@ plotMetrics <- function(agObject,
   # LOGICAL CHECKS
   ######################
   
-  prop_vec_names <- names(ag[[1]])
-  gap_vec_names <- names(ag[[1]][[1]])
+  prop_vec_names <- names(agObject[[1]])
+  gap_vec_names <- names(agObject[[1]][[1]])
   
   prop_vec <- as.numeric(gsub("p", "", prop_vec_names))
   gap_vec <- as.numeric(gsub("g", "", gap_vec_names))
@@ -100,8 +100,8 @@ plotMetrics <- function(agObject,
   
   metPlot <- metDF
   
-  the_props <- prop_vec_names[which(p %in% prop_vec)]
-  the_gaps <-  gap_vec_names[which(g %in% gap_vec)]
+  the_props <- prop_vec_names[which(prop_vec %in% p)]
+  the_gaps <-  gap_vec_names[which(gap_vec %in% g)]
     
     for(vd in 1:D){
       for(vp in 1:P){
