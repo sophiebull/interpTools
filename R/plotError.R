@@ -12,7 +12,7 @@
 #' @param output \code{character}; "plot" outputs a plot object, "numeric" outputs a numeric vector corresponding to the plot
 #' @param error_color \code{character}; A character element describing the color (HTML: "#XXXXXX") to use for the error ribbon
 #' @param alpha \code{numeric}; A numeric value describing the opacity of the error ribbon
-#' @param k \code{numeric}; Numeric element(s) describing individual time series interpolations to apply the averaging over
+#' @param k \code{numeric}; Numeric element(s) describing the index positions of individual interpolated time series
 #' 
 
 plotError <- function(OriginalData, IntData, GappyData, d, p, g, m, output = "plot", error_color = "black", k = NULL, alpha = 0.3){
