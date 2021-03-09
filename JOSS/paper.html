@@ -408,11 +408,11 @@ summary {
 <p>The <strong>mean</strong> component, <span class="math inline">\(m_t\)</span>, is comprised of a constant, non-varying mean element (a ‘grand mean’), <span class="math inline">\(\mu\)</span>, and a varying polynomial trend element, <span class="math inline">\(\mu_t\)</span>: <span class="math display">\[\begin{equation}
   m_t = \mu +\mu_t, \hspace{1cm}t=1,...,N.
 \end{equation}\]</span> The <code>simMt()</code> function in the <code>interpTools</code> package assumes a polynomial of the form: <span class="math display">\[\begin{equation}
- \mu_t = \sum_{i=1}^\phi a_i \left(\frac{t-c}{N}\right)^i
-\end{equation}\]</span> where <span class="math inline">\(\mu \sim U(\frac{-N}{100},\frac{N}{100})\)</span>, and <span class="math inline">\(\textbf{a} = \left[a_1,a_2,...,a_\phi\right]\)</span> with <span class="math inline">\(a_i \sim N(0,\frac{N}{20i})\)</span>, are randomly sampled. The value <span class="math inline">\(c\in1,...,N\)</span> is a centering parameter, and is fixed <span class="math inline">\(\forall i\)</span>.</p>
+ \mu_t = \sum_{i=1}^\phi a_i \left(\frac{t-c_i}{N}\right)^i
+\end{equation}\]</span> where <span class="math inline">\(\mu \sim U(\frac{-N}{100},\frac{N}{100})\)</span>, and <span class="math inline">\(\textbf{a} = \left[a_1,a_2,...,a_\phi\right]\)</span> with <span class="math inline">\(a_i \sim N(0,\frac{N}{20i})\)</span>, are randomly sampled (unless otherwise specified). The vector <span class="math inline">\(\textbf{c} = \left[c_1, c_2, c_3,...,c_\phi\right]\)</span> is a vector of centering parameters, and unless otherwise specified, is randomly sampled from <span class="math inline">\(1,...,N\)</span> and is fixed <span class="math inline">\(\forall i\in1,...,\phi\)</span>.</p>
 <p>The function is implemented via the following command:</p>
-<pre class="{r}"><code>simMt(N, numTrend)</code></pre>
-<p>where the user can specify the number of trends, i.e., the degree of the polynomial, <span class="math inline">\(\phi\)</span>, and the resolution, <span class="math inline">\(N\)</span>. A summary of the features of the mean component is shown in Table .</p>
+<pre class="{r}"><code>simMt(N, numTrend, a, center, mu)</code></pre>
+<p>where the user can specify the number of trends, i.e., the degree of the polynomial, <span class="math inline">\(\phi\)</span>, the corresponding polynomial coefficients and centering parameters, the grand mean, and the resolution, <span class="math inline">\(N\)</span>. A summary of the features of the mean component is shown in Table .</p>
 </div>
 <div id="the-trend-component-t_t" class="section level3">
 <h3>The trend component, <span class="math inline">\(t_t\)</span></h3>
@@ -423,7 +423,7 @@ summary {
 \end{equation}\]</span> Thus, the lowest possible frequency that could be sampled is <span class="math inline">\(f = \frac{\frac{2\pi}{N}}{2\pi} = \frac{1}{N}\)</span>, and the highest possible frequency is <span class="math inline">\(f = \frac{\pi}{2\pi} = \frac{1}{2}\)</span>.</p>
 <p>There is an additional parameter, <span class="math inline">\(\eta\)</span>, that defines a bandwidth of the order <span class="math inline">\(10^{-\eta}\)</span> from which to sample <span class="math inline">\(\omega\)</span> from <span class="math inline">\(\frac{\psi}{2}\)</span> random non-overlapping subintervals in the interval <span class="math inline">\(\left[\frac{2\pi}{N},\pi \right]\)</span>. For bandwidth-specified simulations, two <span class="math inline">\(\omega\)</span>’s are sampled from each subinterval, and so for this reason <span class="math inline">\(\psi\)</span> must be an even integer.</p>
 <p>The simulation of the trend component is facilitated using the <code>simTt()</code> function with the following command:</p>
-<pre class="{r}"><code>simTt(N, numFreq, bandwidth)</code></pre>
+<pre class="{r}"><code>simTt(N, numFreq, bandwidth, b)</code></pre>
 <p>Table  provides a summary of each parameter.</p>
 </div>
 <div id="the-noise-component-xi_t" class="section level3">
@@ -436,7 +436,8 @@ summary {
 <p>The <code>simWt()</code> function uses the functionality of <code>arima.sim()</code> from the <code>stats</code> R package to generate a noise sequence, via the command:</p>
 <pre class="{r}"><code>simWt(N, p, q, var)</code></pre>
 <p>where the user must specify the resolution, the autoregressive order, moving average order, and the variance of the process. Table  provides a description of each parameter.</p>
-<p>The components of <span class="math inline">\(x_t\)</span> can be simulated individually with <code>simMt()</code>, <code>simTt()</code>, and <code>simWt()</code>, and then added together according to Equation . Information about the features of each component, such as the polynomial equation of <span class="math inline">\(m_t\)</span>, or the exact frequencies contained in <span class="math inline">\(t_t\)</span>, are saved to memory in list objects of class <code>&quot;simList&quot;</code>.</p>
+<p>The components of <span class="math inline">\(x_t\)</span> can be simulated individually with <code>simMt()</code>, <code>simTt()</code>, and <code>simWt()</code>, and then added together according to Equation . Or, the <code>simXt()</code> wrapper function can be used. Information about the features of each component, such as the polynomial equation of <span class="math inline">\(m_t\)</span>, or the exact frequencies contained in <span class="math inline">\(t_t\)</span>, are saved to memory in list objects of class <code>&quot;simList&quot;</code>. The actual numeric observations defining <span class="math inline">\(x_t\)</span> can be accessed as follows:</p>
+<pre class="{r}"><code>Xt &lt;- simXt()$Xt</code></pre>
 </div>
 </div>
 <div id="imposing-a-gap-structure" class="section level2">
@@ -486,7 +487,7 @@ xt &lt;- mt + tt + wt</code></pre>
 g &lt;- c(1, 5, 10, 25)</code></pre>
 <p>where <span class="math inline">\(P = 6\)</span> and <span class="math inline">\(G = 4\)</span>.</p>
 <p>Parameterized by all <span class="math inline">\(P \times G = 24\)</span> combinations of <span class="math inline">\((p,g)\)</span>, each of the gap specifications are imposed <span class="math inline">\(K=10\)</span> times onto <code>xt</code> in the next step:</p>
-<pre class="{r}"><code>xt_g &lt;- simulateGaps(data = as.numeric(xt), 
+<pre class="{r}"><code>xt_g &lt;- simulateGaps(data = xt, 
                      prop_vec = p, gap_vec = g, 
                      K = 10)</code></pre>
 </div>
