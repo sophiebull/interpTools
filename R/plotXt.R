@@ -12,17 +12,12 @@
 #'                            
 #'                               
 plotXt <- function(simData, cptwise = T, axisLabels = F, plot.title = T, return = NULL){
-  require(ggplot2) 
-  require(gridExtra)
+    
+  stopifnot((is.null(return) | return == "Mt" | return == "Tt" | return == "freq" | return == "Wt"))
   
-stopifnot((is.null(return) | return == "Mt" | return == "Tt" | return == "freq" | return == "Wt"))
-
-#if(cptwise & is.null(return)) stop("Please specify if you wish to return ")
-  
-  
-if(cptwise & axisLabels & is.null(return)){
-  warning("axisLabels should be set to FALSE if the function is to return all cptwise plots")
-}
+  if(cptwise & axisLabels & is.null(return)){
+    warning("axisLabels should be set to FALSE if the function is to return all cptwise plots")
+  }
 
   t <- 0:(length(simData$Xt)-1)
   
