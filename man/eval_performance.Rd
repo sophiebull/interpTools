@@ -16,7 +16,7 @@ eval_performance(x, X, gappyx, custom = NULL)
 \item{custom}{\code{character}; A vector of names of user-defined functions used to calculate custom performance metrics (see details)}
 }
 \description{
-Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated. Subroutine of \code{performance()}.
+Subroutine of \code{performance()}. Function to define and store performance criteria for the comparison of a single interpolated series with its original. Vectors must be conforming in value, except at indices where missing observations have been interpolated.
 }
 \details{
 The following is a description of the list of base performance metrics included in the returned object: \cr
