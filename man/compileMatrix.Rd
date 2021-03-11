@@ -2,14 +2,14 @@
 % Please edit documentation in R/compileMatrix.R
 \name{compileMatrix}
 \alias{compileMatrix}
-\title{Compile 'aggregate' Objects into Matrices}
+\title{Compile 'aggregate_pf' Objects into Matrices of Z values}
 \usage{
 compileMatrix(agObject)
 }
 \arguments{
-\item{agObject}{A list object (result of \code{aggregate()}) of aggregated performance metrics}
+\item{agObject}{A list object (result of \code{aggregate_pf()}) of aggregated performance metrics}
 }
 \description{
-A function to compile objects of class \code{"aggregate"} (from \code{aggregate()}) into matrices of dimension PxG.\cr
- Elements of \code{aggregate} are arranged into this matrix corresponding to (p,g).
+A function to compile objects of class \code{"aggregate_pf"} (from \code{aggregate_pf()}) into matrices of dimension PxG.\cr
+ Elements of \code{agObject} are arranged into this matrix corresponding to (p,g).
 }
