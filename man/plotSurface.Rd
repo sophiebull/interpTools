@@ -5,10 +5,10 @@
 \title{Plot Performance Surfaces over a Discrete Mesh of Gap Structures}
 \usage{
 plotSurface(
-  d = 1:length(agEval),
-  m = names(agEval[[1]][[1]][[1]]),
-  crit,
-  agEval,
+  d = 1:length(agObject),
+  m = names(agObject[[1]][[1]][[1]]),
+  metric,
+  agObject,
   layer_type = "method",
   f = "median",
   highlight = NULL,
@@ -21,13 +21,13 @@ plotSurface(
 
 \item{m}{\code{character}; A vector of interpolation methods of interest (maximum of 5)}
 
-\item{crit}{\code{character}; An element describing the performance metric of interest}
+\item{metric}{\code{character}; An element describing the performance metric of interest}
 
-\item{agEval}{\code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})}
+\item{agObject}{\code{agObject}; An object containing the aggregated performance metrics (result of \code{agObject()})}
 
 \item{layer_type}{\code{character}; How to layer the surfaces (by "method" or by "dataset")}
 
-\item{f}{\code{character}; The statistic of interest defining the surface \code{f(p,g)}. Possible choices are listed in \code{?agEvaluate}.}
+\item{f}{\code{character}; The statistic of interest defining the surface \code{f(p,g)}. Possible choices are listed in \code{?aggregate_pf}.}
 
 \item{highlight}{\code{character/numeric}; A single method (if \code{layer_type = "method"}) or dataset (if \code{layer_type = "dataset"}) to highlight.}
 
@@ -36,7 +36,7 @@ plotSurface(
 \item{colors}{\code{character}; A vector of the desired color palette, with entries in HTML format (\code{"#xxxxxx"})}
 }
 \description{
-Function to generate surface plots (using the \code{plotly} package) to visualize changes in the performance metrics of interest
+Subroutine of \code{multiSurface()}. Function to generate surface plots (using the \code{plotly} package) to visualize changes in the performance metrics of interest
 as gap structure changes. 
 \itemize{
 \item The x-axis represents \code{p}, the \strong{proportion of missing data}.\cr 
