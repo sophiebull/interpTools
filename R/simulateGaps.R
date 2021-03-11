@@ -101,7 +101,7 @@ simulateGaps <- function(OriginalData, p, g, K){
   GappyData <- list()
   samples <- list()
   
-  data_vec_names <- paste0("D", 1:length(OriginalData))
+  data_vec_names <- names(OriginalData)
   prop_vec_names <- paste0("p", p)
   gap_vec_names <- paste0("g", g)
   
