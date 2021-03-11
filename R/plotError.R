@@ -59,6 +59,9 @@ plotError <- function(OriginalData, IntData, GappyData, d, p, g, m, output = "pl
   avInt <- list()
   sdInt <- list()
   
+  P <- length(prop_vec)
+  G <- length(gap_vec)
+  
   # Initializing names
   gap__names <- numeric(G)
   prop_names <- numeric(P)
