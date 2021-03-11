@@ -16,5 +16,5 @@ simWt(N = 1000, p = 0, q = 0, var = 1)
 \item{var}{\code{numeric}; The variance of the stochastic process}
 }
 \description{
-Function to simulate W_t: the noise component of X_t. Defaults to white noise.
+Subroutine of \code{simXt()}. Function to simulate \eqn{W_t}: the noise component of \eqn{X_t}. Defaults to white noise (\code{p = 0, q = 0}).
 }
