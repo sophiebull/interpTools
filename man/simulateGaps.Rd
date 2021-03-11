@@ -4,14 +4,14 @@
 \alias{simulateGaps}
 \title{Simulate Gappy Data}
 \usage{
-simulateGaps(OriginalData, prop_vec, gap_vec, K)
+simulateGaps(OriginalData, p, g, K)
 }
 \arguments{
 \item{OriginalData}{\code{list}; List object containing the complete original time series vectors (as separate elements)}
 
-\item{prop_vec}{\code{numeric}; Vector of unique proportions representing the different 'proportion-of-data missing' (*p*) scenarios to simulate}
+\item{p}{\code{numeric}; Vector of unique proportions representing the different 'proportion-of-data missing' (*p*) scenarios to simulate}
 
-\item{gap_vec}{\code{integer}; Vector of unique integer values representing the different 'gap length' scenarios (*g*) to simulate}
+\item{g}{\code{integer}; Vector of unique integer values representing the different 'gap length' scenarios (*g*) to simulate}
 
 \item{K}{\code{integer}; Number of gappy series to simulate for each (*p,g*) gap specification}
 }
@@ -21,11 +21,22 @@ Function to simulate the MCAR gappy data for a list of complete original time se
 \examples{
  
 
-prop_vec = c(0.05,0.10,0.15,0.20)
-gap_vec = c(1,5,10)
+# Subroutine removes p*n points where the number of consecutive missing
+# observations (gaps) is a multiple of gap_width. For example, in a time
+# series of length n = 100:
+
+ p = 0.30, g = 2
+
+# will generate 30 missing points, with <15 holes.
+
+# Usage in simulateGaps():
+
+p = c(0.05,0.10,0.15,0.20)
+g = c(1,5,10)
 K = 10 # number of gappy series to simulate under each p,g specification
 
-GappyData <- simulateGaps(OriginalData = OriginalData, prop_vec = prop_vec, gap_vec = gap_vec, K = K)
+GappyData <- simulateGaps(OriginalData = OriginalData, p = p, g = g, K = K)
 
 # dimension (d, p, g, k) 
+
 }
