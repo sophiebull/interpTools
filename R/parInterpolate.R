@@ -215,7 +215,7 @@ parInterpolate <- function(GappyData, methods = NULL, FUN_CALL = NULL, numCores 
   fun_names <- c(methods,user_fun)
   method_index <- match(fun_names,algorithm_names)
   
-  D <- length(OriginalData)
+  D <- length(GappyData)
   M <- length(fun_names)
   P <- length(GappyData[[1]])
   G <- length(GappyData[[1]][[1]])
