@@ -18,5 +18,5 @@ simMt(N = 1000, numTrend = 0, a = NULL, mu = NULL, center = NULL)
 \item{center}{\code{numeric}; If specified, a vector of custom centering parameters for each term in the polynomial.}
 }
 \description{
-Function to simulate \eqn{M_t}: the mean component of \eqn{X_t}. Subroutine of \code{simXt()}.
+Subroutine of \code{simXt()}. Function to simulate \eqn{M_t}: the mean component of \eqn{X_t}.
 }

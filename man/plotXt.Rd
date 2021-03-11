@@ -9,7 +9,7 @@ plotXt(simData, cptwise = T, axisLabels = F, plot.title = T, return = NULL)
 \arguments{
 \item{simData}{\code{simList}; An object containing the information about the original data}
 
-\item{cptwise}{\code{logical}; Whether to display Xt componentwise, or not}
+\item{cptwise}{\code{logical}; Whether to display \eqn{X_t} componentwise, or not}
 
 \item{axisLabels}{\code{logical}; Set to \code{TRUE} if returning a single plot (i.e. \code{cptwise = TRUE} and \code{return != NULL}), and \code{FALSE} otherwise.}
 
