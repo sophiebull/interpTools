@@ -5,23 +5,23 @@
 \title{Approximate the Gradient}
 \usage{
 gradient(
-  d = 1:length(agEval),
-  m = names(agEval[[1]][[1]][[1]]),
-  crit,
-  agEval,
+  agObject,
+  d = names(agObject),
+  m = names(agObject[[1]][[1]][[1]]),
+  metric,
   f = "median"
 )
 }
 \arguments{
-\item{d}{A vector of the indexes of the datasets of interest}
+\item{agObject}{\code{aggregate_pf}; A list object (result of \code{aggregate_pf()}) of aggregated performance metrics}
 
-\item{m}{A vector of the interpolation methods of interest}
+\item{d}{\code{character}; A vector of the datasets of interest}
 
-\item{crit}{A character vector describing the performance metrics of interest}
+\item{m}{\code{character}; A vector of the interpolation methods of interest}
 
-\item{agEval}{A list object (result of agEval.R) of aggregated performance metrics}
+\item{metric}{\code{character}; A character vector describing the performance metrics of interest}
 
-\item{f}{"median" (default): which statistic will be represented by the gradient}
+\item{f}{\code{character}; "median" (default): which statistic will be represented by the gradient}
 }
 \description{
 A function that will calculate the slope between every combination of adjacent points in a grid.
