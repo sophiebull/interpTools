@@ -4,23 +4,43 @@
 \alias{plotError}
 \title{Plot Interpolation Error}
 \usage{
-plotError(OriginalData, IntData, d, p, g, m, output = "plot")
+plotError(
+  OriginalData,
+  IntData,
+  GappyData,
+  d,
+  p,
+  g,
+  m,
+  output = "plot",
+  error_color = "black",
+  k = NULL,
+  alpha = 0.3
+)
 }
 \arguments{
-\item{OriginalData}{A list containing the original time series}
+\item{OriginalData}{\code{list}; A list containing the original time series}
 
-\item{IntData}{A list containing the interpolated time series}
+\item{IntData}{\code{list}; A list containing the interpolated time series}
 
-\item{d}{A vector of datasets of interest}
+\item{GappyData}{\code{list}; A list containing the gappy time series}
 
-\item{p}{A vector of 'proportion missings' of interest}
+\item{d}{\code{character}; A single character element describing the dataset of interest}
 
-\item{g}{A vector of 'gap length' of interest}
+\item{p}{\code{numeric}; A single numeric element describing the of 'proportion missing' of interest}
 
-\item{m}{A vector of interpolation methods of interest}
+\item{g}{\code{numeric}; A single numeric element describing the 'gap length' of interest}
 
-\item{output}{A character variable; "plot" outputs a list of plots to be called, "numeric" outputs a list of numeric vectors corresponding to each plot}
+\item{m}{\code{character}; A single character element describing the interpolation method of interest}
+
+\item{output}{\code{character}; "plot" outputs a plot object, "numeric" outputs a numeric vector corresponding to the plot}
+
+\item{error_color}{\code{character}; A character element describing the color (HTML: "#XXXXXX") to use for the error ribbon}
+
+\item{k}{\code{numeric}; Numeric element(s) describing the index positions of individual interpolated time series}
+
+\item{alpha}{\code{numeric}; A numeric value describing the opacity of the error ribbon}
 }
 \description{
-Function to generate a nested list of plots to visualize the error between the original time series and the average (across k simulations) interpolated time series under particular missingness scenarios.
+Function to generate a plot to visualize the absolute difference between the original time series and the interpolated time series under a specific gap structure.  If more than one value of \code{k} is selected, the resulting plot represents the average interpolation.
 }

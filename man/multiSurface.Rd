@@ -5,10 +5,10 @@
 \title{Arrange Multiple Surface Plots on a Grid}
 \usage{
 multiSurface(
-  d = 1:length(agEval),
-  m = names(agEval[[1]][[1]][[1]]),
-  crit,
-  agEval,
+  d = 1:length(agObject),
+  m = names(agObject[[1]][[1]][[1]]),
+  metric,
+  agObject,
   layer_type = "method",
   f = "median",
   highlight = "HWI",
@@ -21,13 +21,13 @@ multiSurface(
 
 \item{m}{\code{character}; A vector of interpolation methods of interest}
 
-\item{crit}{\code{character}; An element describing the performance metric of interest}
+\item{metric}{\code{character}; An element describing the performance metric of interest}
 
-\item{agEval}{\code{agEvaluate}; An object containing the aggregated performance metrics (result of \code{agEvaluate()})}
+\item{agObject}{\code{aggregate_pf}; An object containing the aggregated performance metrics (result of \code{aggregate_pf()})}
 
-\item{layer_type}{\code{character}; How to layer the surfaces (by "method" or by "dataset")}
+\item{layer_type}{\code{character}; How to layer the surfaces (by \code{"method"} or by \code{"dataset"})}
 
-\item{f}{\code{character}; The statistic of interest defining the surface \code{f(p,g)}. Possible choices are listed in \code{?agEvaluate}.}
+\item{f}{\code{character}; The statistic of interest defining the surface \code{f(p,g)}. Possible choices are listed in \code{?aggregate_pf}.}
 
 \item{highlight}{\code{character/numeric}; A single method (if \code{layer_type = "method"}) or dataset (if \code{layer_type = "dataset"}) to highlight.}
 

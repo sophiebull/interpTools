@@ -5,25 +5,25 @@
 \title{Aggregate and plot the skewness statistics over all simulations}
 \usage{
 plotSkew(
-  agEval,
-  cptwise = F,
-  symmetric = NULL,
-  output = "plots",
-  crit = rownames(agEval[[1]][[1]][[1]][[1]])
+  agObject,
+  plotEach = TRUE,
+  show_symmetric = NULL,
+  output = "plot",
+  metric = rownames(agObject[[1]][[1]][[1]][[1]])
 )
 }
 \arguments{
-\item{agEval}{A list object (result of agEval.R) of aggregated performance metrics}
+\item{agObject}{\code{aggregate_pf}; A list object (result of \code{aggregate_pf()}) of aggregated performance metrics}
 
-\item{cptwise}{logical; Whether to display plots individually (histograms) or together as a density plot}
+\item{plotEach}{\code{logical}; Whether to display plots individually (histograms) or together as a density plot}
 
-\item{symmetric}{logical; TRUE = Display only symmetric criteria, FALSE = Display only asymmetric criteria, NULL = Display all criteria}
+\item{output}{\code{character}; "plot" (default) or "table".}
 
-\item{output}{character; "plots" (default) or "table".}
+\item{symmetric}{\code{logical}; TRUE = Display only symmetric metrics, FALSE = Display only asymmetric metrics, NULL = Display all metrics}
 }
 \description{
-Function to display the sampling distributions of the skewness statistics for each criterion across all simulations. 
-Sampling distributions with a sample mean roughly centered at zero indicate that on average the criterion has a reliably 
+Function to display the sampling distributions of the skewness statistics for each metric across all simulations. 
+Sampling distributions with a sample mean roughly centered at zero indicate that on average the metric has a reliably 
 symmetric distribution.  Distributions of skewness values whose center is not in the neighbourhood of zero (-s/3 <= Xbar <= s/3) indicate that 
-on average the criterion has a skewed distribution, and the median will better capture the essence of the data.
+on average the metric has a skewed distribution, and the median will better capture the essence of the data.
 }

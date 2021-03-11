@@ -5,26 +5,27 @@
 \title{Plot Grid of Performance Metrics}
 \usage{
 plotMetrics(
-  agEval,
-  d = 1:length(agEval),
-  p = 1:length(agEval[[1]]),
-  m = 1:length(agEval[[1]][[1]][[1]]),
-  g = 1:length(agEval[[1]][[1]]),
-  crit
+  agObject,
+  d = names(agObject),
+  p,
+  g,
+  m = names(agObject[[1]][[1]][[1]]),
+  metric,
+  highlight_color = "mistyrose2"
 )
 }
 \arguments{
-\item{agEval}{A list containing the aggregated performance metrics (result of agEval.R)}
+\item{agObject}{\code{aggregate_pf}; A list containing the aggregated performance metrics (result of \code{aggregate_pf()})}
 
-\item{d}{A vector of datasets of interest (must be a subset of agEval)}
+\item{d}{\code{character}; A vector of datasets of interest}
 
-\item{p}{A vector of 'proportion missings' of interest (must be a subset of agEval)}
+\item{p}{\code{numeric}; A vector of 'proportion missings' of interest}
 
-\item{m}{A vector of interpolation methods of interest (must be a subset of agEval)}
+\item{g}{\code{numeric}; A vector of 'gap length' of interest}
 
-\item{g}{A vector of 'gap length' of interest (must be a subset of agEval)}
+\item{m}{\code{character}; A vector of interpolation methods of interest}
 
-\item{crit}{A character vector of performance metrics of interest}
+\item{metric}{\code{character}; A character vector of performance metrics of interest}
 }
 \description{
 Function to generate a grid of plots for visualizing a selection of performance metrics (median).
