@@ -2,7 +2,7 @@ Package: interpTools
 Version: 0.1.0
 Type: Package
 Title: Tools for the Systematic Testing of Interpolation Algorithms
-Author: [aut, cre] Sophie Castel, [aut] Wesley S. Burr, [aut] Melissa Van Bussel
+Author: [aut, cre] Sophie Castel, [aut] Wesley S. Burr, [aut] Melissa L. Van Bussel
 Maintainer: The package maintainer <stmcastel@gmail.com>
 Description: interpTools provides a framework for performing comprehensive analysis
                 on the statistical performance of time series interpolators in a test-environment.
