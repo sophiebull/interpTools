@@ -61,8 +61,8 @@ plotSurface2 <- function(agObject,
   
   if(!is.null(highlight)){
     if(length(highlight) != 1) stop("'highlight' must contain only a single character element.")
-    if(toggle == "method" & !highlight %in% d) stop(paste0(c("'highlight' must be an element of 'd'. Choose one of: '", paste0(d, collapse = "', '"),"'."), collapse = ""))
-    if(toggle == "dataset" & !highlight %in% m) stop(paste0(c("'highlight' must be an element of 'm'. Choose one of: '", paste0(m, collapse = "', '"),"'."), collapse = ""))
+    if(toggle == "dataset" & !highlight %in% d) stop(paste0(c("'highlight' must be an element of 'd'. Choose one of: '", paste0(d, collapse = "', '"),"'."), collapse = ""))
+    if(toggle == "method" & !highlight %in% m) stop(paste0(c("'highlight' must be an element of 'm'. Choose one of: '", paste0(m, collapse = "', '"),"'."), collapse = ""))
   }
   
   if(toggle == "method" & length(m) > 1 & length(colors) == 1) warning(paste0("'colors' should contain at least ", length(m), " elements (each in HTML format: '#xxxxxx') if layering more than one dataset."))
