@@ -433,7 +433,7 @@ The aggregated performance matrices are computed via the `agEvaluate()` function
 
 ```{r agEvaluate, cache = TRUE}
 # Aggregating the performance matrices
-ag_pf <- agggregate_pf(pf = pf)
+ag_pf <- aggregate_pf(pf = pf)
 ```
 
 The result is an object of class `aggregate_pf`, and is saved as `~/toyData/toy_ag_pf.rda`. This is the object that will be piped into all of the functions used to conduct the analyses, to follow.
